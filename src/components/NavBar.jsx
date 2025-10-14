@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const { cartItems } = useCart();
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin} = useAuth();
     const navigate = useNavigate();
 
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -30,9 +30,13 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className="nav-link" to="/products">Productos</Link>
                         </li>
+
+                         {isAdmin && (
+
                         <li className="nav-item">
                             <Link className="nav-link fw-bold text-success" to="/admin/categories">Panel Admin</Link>
                         </li>
+                         )}
                     </ul>
                 </div>
 
