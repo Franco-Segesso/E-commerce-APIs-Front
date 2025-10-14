@@ -1,64 +1,86 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar from '../components/FilterSidebar.jsx';
+import SearchBar from '../components/SearchBar.jsx';
 
 const ProductsPage = () => {
-    const [products, setProducts] = useState([]);
+    // Estado para la lista COMPLETA de productos
+    const [allProducts, setAllProducts] = useState([]);
+    // Estado para la lista de productos que se MUESTRAN (ya filtrados)
+    const [displayedProducts, setDisplayedProducts] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Estado para manejar los filtros activos
+    // Estado unificado para todos los filtros
     const [filters, setFilters] = useState({
         category: null,
-        price_min: null,
-        price_max: null,
-        sort: 'asc'
+        price_min: '',
+        price_max: '',
+        sort: 'asc',
+        searchQuery: ''
     });
 
-    // Usamos useCallback para que la función no se recree en cada render
-    const fetchProducts = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        
-        // Construimos la URL dinámicamente según los filtros
-        let url = new URL('http://localhost:4002/products');
-
-        if (filters.category) {
-            url = new URL(`http://localhost:4002/categories/${filters.category}/products`);
-        } else if (filters.price_min && filters.price_max) {
-            url = new URL('http://localhost:4002/products/by-price');
-            url.searchParams.append('minPrice', filters.price_min);
-            url.searchParams.append('maxPrice', filters.price_max);
-        } else {
-             url = new URL('http://localhost:4002/products/sorted-by-price');
-             url.searchParams.append('order', filters.sort);
-        }
-
-        try {
-            const response = await fetch(url.toString());
-            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
-            const data = await response.json();
-            setProducts(data.content || []);
-        } catch (error) {
-            setError(error.message);
-            setProducts([]); // Limpiamos los productos si hay un error
-        } finally {
-            setLoading(false);
-        }
-    }, [filters]); // La función se actualiza si los filtros cambian
-
-    // useEffect para llamar a fetchProducts cuando los filtros cambien
+    // 1. Cargar TODOS los productos del backend UNA SOLA VEZ
     useEffect(() => {
-        fetchProducts();
-    }, [fetchProducts]);
+        const fetchAllProducts = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('http://localhost:4002/products');
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                
+                const data = await response.json();
+                setAllProducts(data.content || []);
+                setDisplayedProducts(data.content || []); // Al inicio, mostramos todos
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        fetchAllProducts();
+    }, []); // El array vacío asegura que esto se ejecute solo una vez
+
+    // 2. Aplicar filtros y búsqueda CADA VEZ que cambien los filtros o la lista de productos
+    useEffect(() => {
+        let filteredProducts = [...allProducts];
+
+        // Aplicar filtro de categoría
+        if (filters.category) {
+            filteredProducts = filteredProducts.filter(p => p.category.id === filters.category);
+        }
+
+        // Aplicar filtro de precio
+        if (filters.price_min && filters.price_max) {
+            filteredProducts = filteredProducts.filter(p => {
+                const finalPrice = p.discount > 0 ? p.price * (1 - p.discount) : p.price;
+                return finalPrice >= parseFloat(filters.price_min) && finalPrice <= parseFloat(filters.price_max);
+            });
+        }
+
+        // Aplicar filtro de búsqueda por nombre
+        if (filters.searchQuery) {
+            filteredProducts = filteredProducts.filter(p =>
+                p.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
+            );
+        }
+
+        // Aplicar ordenamiento
+        filteredProducts.sort((a, b) => {
+            const priceA = a.discount > 0 ? a.price * (1 - a.discount) : a.price;
+            const priceB = b.discount > 0 ? b.price * (1 - b.discount) : b.price;
+            return filters.sort === 'asc' ? priceA - priceB : priceB - priceA;
+        });
+
+        setDisplayedProducts(filteredProducts);
+
+    }, [filters, allProducts]);
+
+    // Handler para actualizar cualquier filtro
     const handleFilterChange = (newFilters) => {
         setFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
-    };
-
-    const handleSortChange = (e) => {
-        handleFilterChange({ sort: e.target.value });
     };
 
     return (
@@ -71,13 +93,21 @@ const ProductsPage = () => {
 
                 {/* Columna de Productos */}
                 <div className="col-lg-9">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2 className="fw-bolder">Nuestro Catálogo</h2>
+                    <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
+                        {/* Barra de búsqueda ahora ocupa el espacio principal */}
+                        <div className="flex-grow-1">
+                            <SearchBar onSearch={(query) => handleFilterChange({ searchQuery: query })} />
+                        </div>
+                        
                         {/* Control para ordenar */}
-                        <div className="col-md-3">
-                            <select className="form-select" value={filters.sort} onChange={handleSortChange}>
-                                <option value="asc">Precio: Menor a Mayor</option>
-                                <option value="desc">Precio: Mayor a Menor</option>
+                        <div>
+                            <select 
+                                className="form-select" 
+                                value={filters.sort} 
+                                onChange={(e) => handleFilterChange({ sort: e.target.value })}
+                            >
+                                <option value="asc">Menor a Mayor Precio</option>
+                                <option value="desc">Mayor a Menor Precio</option>
                             </select>
                         </div>
                     </div>
@@ -87,12 +117,12 @@ const ProductsPage = () => {
                     
                     {!loading && !error && (
                         <div className="row gx-4 gx-lg-5 row-cols-2 row-cols-md-2 row-cols-xl-3 justify-content-center">
-                            {products.length > 0 ? (
-                                products.map(product => (
+                            {displayedProducts.length > 0 ? (
+                                displayedProducts.map(product => (
                                     <ProductCard key={product.id} product={product} />
                                 ))
                             ) : (
-                                <p>No se encontraron productos que coincidan con los filtros.</p>
+                                <p>No se encontraron productos que coincidan con tu búsqueda o filtros.</p>
                             )}
                         </div>
                     )}
