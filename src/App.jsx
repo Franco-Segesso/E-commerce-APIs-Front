@@ -10,6 +10,9 @@ import CartPage from './views/CartPage.jsx';
 import LoginPage from './views/LoginPage.jsx';
 import RegisterPage from './views/RegisterPage.jsx';
 import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva página
+import AdminCategoriesPage from './views/AdminCategoriesPage.jsx';
+import AdminRoute from './components/AdminRoute.jsx'; // Importamos el componente de ruta admin
+
 
 const HomePage = () => (
     <div className="container text-center">
@@ -44,6 +47,15 @@ function App() {
                                     <CheckoutPage />
                                 </ProtectedRoute>
                             } 
+                        />
+
+                        <Route 
+                            path="/admin/categories"
+                            element={
+                                <AdminRoute>
+                                    <AdminCategoriesPage />
+                                </AdminRoute>
+                            }
                         />
                     </Routes>
                 </main>
