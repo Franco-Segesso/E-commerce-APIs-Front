@@ -1,86 +1,88 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar from '../components/FilterSidebar.jsx';
-import SearchBar from '../components/SearchBar.jsx';
+import SearchBar from '../components/SearchBar.jsx'; // Mantenemos el searchbar aquí
 
 const ProductsPage = () => {
-    // Estado para la lista COMPLETA de productos
-    const [allProducts, setAllProducts] = useState([]);
-    // Estado para la lista de productos que se MUESTRAN (ya filtrados)
-    const [displayedProducts, setDisplayedProducts] = useState([]);
-
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Estado unificado para todos los filtros
+    // Estado para manejar los filtros activos
     const [filters, setFilters] = useState({
         category: null,
-        price_min: '',
-        price_max: '',
+        price_min: null,
+        price_max: null,
         sort: 'asc',
         searchQuery: ''
     });
 
-    // 1. Cargar TODOS los productos del backend UNA SOLA VEZ
-    useEffect(() => {
-        const fetchAllProducts = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch('http://localhost:4002/products');
+    // Usamos useCallback para que la función no se recree en cada render
+    const fetchProducts = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        
+        // Construimos la URL dinámicamente según la prioridad de los filtros
+        let url;
+
+        if (filters.searchQuery) {
+            // Nota: Este endpoint no existe aún en tu backend.
+            // Por ahora, la búsqueda se hará en el frontend sobre la lista actual.
+            // Lo ideal sería agregar el endpoint `/products/search?name=...` al backend.
+            console.log("Búsqueda por frontend (temporal):", filters.searchQuery);
+        } else if (filters.category) {
+            url = new URL(`http://localhost:4002/categories/${filters.category}/products`);
+        } else if (filters.price_min && filters.price_max) {
+            url = new URL('http://localhost:4002/products/by-price');
+            url.searchParams.append('minPrice', filters.price_min);
+            url.searchParams.append('maxPrice', filters.price_max);
+        } else {
+             // Vista por defecto: productos ordenados por precio
+             url = new URL('http://localhost:4002/products/sorted-by-price');
+             url.searchParams.append('order', filters.sort);
+        }
+
+        try {
+            if (url) { // Solo hacemos fetch si se construyó una URL para el backend
+                const response = await fetch(url.toString());
                 if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
                 
                 const data = await response.json();
-                setAllProducts(data.content || []);
-                setDisplayedProducts(data.content || []); // Al inicio, mostramos todos
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
+                setProducts(data.content || []);
             }
-        };
+        } catch (error) {
+            setError(error.message);
+            setProducts([]); // Limpiamos los productos si hay un error
+        } finally {
+            setLoading(false);
+        }
+    }, [filters.category, filters.price_min, filters.price_max, filters.sort]); // Dependencias para el fetch
 
-        fetchAllProducts();
-    }, []); // El array vacío asegura que esto se ejecute solo una vez
-
-    // 2. Aplicar filtros y búsqueda CADA VEZ que cambien los filtros o la lista de productos
     useEffect(() => {
-        let filteredProducts = [...allProducts];
+        fetchProducts();
+    }, [fetchProducts]);
 
-        // Aplicar filtro de categoría
-        if (filters.category) {
-            filteredProducts = filteredProducts.filter(p => p.category.id === filters.category);
-        }
-
-        // Aplicar filtro de precio
-        if (filters.price_min && filters.price_max) {
-            filteredProducts = filteredProducts.filter(p => {
-                const finalPrice = p.discount > 0 ? p.price * (1 - p.discount) : p.price;
-                return finalPrice >= parseFloat(filters.price_min) && finalPrice <= parseFloat(filters.price_max);
-            });
-        }
-
-        // Aplicar filtro de búsqueda por nombre
+    // Lógica de filtrado y búsqueda en el frontend
+    const displayedProducts = products.filter(product => {
         if (filters.searchQuery) {
-            filteredProducts = filteredProducts.filter(p =>
-                p.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
-            );
+            return product.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
         }
+        return true; // Si no hay búsqueda, no filtramos por nombre
+    });
 
-        // Aplicar ordenamiento
-        filteredProducts.sort((a, b) => {
-            const priceA = a.discount > 0 ? a.price * (1 - a.discount) : a.price;
-            const priceB = b.discount > 0 ? b.price * (1 - b.discount) : b.price;
-            return filters.sort === 'asc' ? priceA - priceB : priceB - priceA;
-        });
-
-        setDisplayedProducts(filteredProducts);
-
-    }, [filters, allProducts]);
-
-    // Handler para actualizar cualquier filtro
     const handleFilterChange = (newFilters) => {
         setFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
+    };
+
+    const handleSearch = (query) => {
+        setFilters(prev => ({
+            ...prev,
+            searchQuery: query,
+            // Cuando buscamos, reseteamos los otros filtros para evitar conflictos
+            category: null,
+            price_min: null,
+            price_max: null
+        }));
     };
 
     return (
@@ -94,12 +96,10 @@ const ProductsPage = () => {
                 {/* Columna de Productos */}
                 <div className="col-lg-9">
                     <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
-                        {/* Barra de búsqueda ahora ocupa el espacio principal */}
                         <div className="flex-grow-1">
-                            <SearchBar onSearch={(query) => handleFilterChange({ searchQuery: query })} />
+                            <SearchBar onSearch={handleSearch} />
                         </div>
                         
-                        {/* Control para ordenar */}
                         <div>
                             <select 
                                 className="form-select" 
@@ -116,13 +116,13 @@ const ProductsPage = () => {
                     {error && <div className="alert alert-danger">Error: {error}</div>}
                     
                     {!loading && !error && (
-                        <div className="row gx-4 gx-lg-5 row-cols-2 row-cols-md-2 row-cols-xl-3 justify-content-center">
+                        <div className="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-xl-3">
                             {displayedProducts.length > 0 ? (
                                 displayedProducts.map(product => (
                                     <ProductCard key={product.id} product={product} />
                                 ))
                             ) : (
-                                <p>No se encontraron productos que coincidan con tu búsqueda o filtros.</p>
+                                <p className="text-center">No se encontraron productos que coincidan con los filtros.</p>
                             )}
                         </div>
                     )}

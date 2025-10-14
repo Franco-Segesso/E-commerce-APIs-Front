@@ -4,9 +4,8 @@ const FilterSidebar = ({ onFilterChange }) => {
     const [categories, setCategories] = useState([]);
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
-    const [error, setError] = useState('');
 
-    // Efecto para cargar las categorías desde el backend
+    // Efecto para cargar las categorías desde el backend al montar el componente
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -22,43 +21,25 @@ const FilterSidebar = ({ onFilterChange }) => {
         fetchCategories();
     }, []);
 
-    const handleApplyPriceFilter = () => {
-        // --- VALIDACIÓN CLAVE AQUÍ ---
-        // Solo aplicamos el filtro si ambos campos tienen un valor
-        if (minPrice && maxPrice) {
-            if (parseFloat(minPrice) > parseFloat(maxPrice)) {
-                setError('El precio mínimo no puede ser mayor que el máximo.');
-                return;
-            }
-            setError('');
-            onFilterChange({
-                price_min: minPrice,
-                price_max: maxPrice,
-                category: null // Limpiamos el filtro de categoría para no mezclarlos
-            });
-        } else {
-            setError('Por favor, complete ambos campos de precio.');
-        }
+    const handleApplyFilters = () => {
+        onFilterChange({
+            price_min: minPrice,
+            price_max: maxPrice,
+        });
     };
     
     const handleCategoryClick = (categoryId) => {
-        setError('');
-        onFilterChange({ 
-            category: categoryId,
-            price_min: null, // Limpiamos los otros filtros
-            price_max: null
-        });
+        onFilterChange({ category: categoryId });
     };
 
     const handleClearFilters = () => {
         setMinPrice('');
         setMaxPrice('');
-        setError('');
         onFilterChange({
             category: null,
             price_min: null,
             price_max: null,
-            sort: 'asc'
+            sort: 'asc' // Volvemos al orden por defecto
         });
     };
 
@@ -67,12 +48,13 @@ const FilterSidebar = ({ onFilterChange }) => {
             <h4>Filtros</h4>
             <hr />
 
+            {/* Filtro por Categoría */}
             <h5>Categorías</h5>
-            <ul className="list-group list-group-flush mb-3">
+            <ul className="list-group list-group-flush">
                 <li 
                     className="list-group-item list-group-item-action"
                     style={{cursor: 'pointer'}}
-                    onClick={() => handleCategoryClick(null)}
+                    onClick={() => onFilterChange({ category: null })}
                 >
                     Todas
                 </li>
@@ -90,6 +72,7 @@ const FilterSidebar = ({ onFilterChange }) => {
 
             <hr />
 
+            {/* Filtro por Precio */}
             <h5 className="mt-3">Precio</h5>
             <div className="input-group mb-2">
                 <span className="input-group-text">$</span>
@@ -99,7 +82,6 @@ const FilterSidebar = ({ onFilterChange }) => {
                     placeholder="Mínimo" 
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    min="0"
                 />
             </div>
             <div className="input-group mb-3">
@@ -110,16 +92,15 @@ const FilterSidebar = ({ onFilterChange }) => {
                     placeholder="Máximo"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    min="0"
                 />
             </div>
-            {error && <small className="text-danger d-block mb-2">{error}</small>}
-            <button className="btn btn-primary w-100" onClick={handleApplyPriceFilter}>
+            <button className="btn btn-primary w-100" onClick={handleApplyFilters}>
                 Aplicar Precio
             </button>
 
             <hr />
 
+            {/* Botón para limpiar filtros */}
             <button className="btn btn-outline-secondary w-100 mt-2" onClick={handleClearFilters}>
                 Limpiar Filtros
             </button>
