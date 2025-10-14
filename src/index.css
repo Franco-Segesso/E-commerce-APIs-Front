@@ -1,0 +1,13 @@
+/* Hacemos que la base de la página (html, body y el div#root de React) 
+   ocupe el 100% de la altura de la pantalla. Esto es CRUCIAL. */
+html, body, #root {
+  height: 100%;
+}
+
+/* Convertimos el div#root en un contenedor flex que organiza 
+   su contenido en una columna. Esto es necesario para que 
+   el <main> pueda crecer. */
+#root {
+  display: flex;
+  flex-direction: column;
+}
