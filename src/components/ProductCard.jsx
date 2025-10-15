@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-    // Tu backend ahora envía la imagen en Base64, así que la decodificamos.
-    const imageUrl = product.imageBase64 ? `data:image/jpeg;base64,${product.imageBase64}` : 'https://via.placeholder.com/400x300';
+
 
     const hasDiscount = product.discount && product.discount > 0;
     const finalPrice = hasDiscount 
@@ -43,7 +42,7 @@ const ProductCard = ({ product }) => {
                 
                 <div className="card-footer p-4 pt-0 border-top-0 bg-transparent">
                     <div className="text-center">
-                        <Link className="btn btn-outline-dark mt-auto" to={`/product/${product.id}`}>
+                        <Link className="btn btn-outline-dark mt-auto" to={`/products/${product.id}`}>
                             Ver detalles
                         </Link>
                     </div>

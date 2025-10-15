@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const { cartItems } = useCart();
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin} = useAuth();
     const navigate = useNavigate();
 
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -34,6 +34,20 @@ const Navbar = () => {
                             <Link className="nav-link" to="/about">Sobre Nosotros</Link>
                         </li>
 
+
+                         {isAdmin && (
+
+                         <li className="nav-item dropdown">
+                            <a className="nav-link dropdown-toggle fw-bold text-success" href="#" role="button" data-bs-toggle="dropdown">
+                                Panel Admin
+                            </a>
+                            <ul className="dropdown-menu">
+                                <li><Link className="dropdown-item" to="/admin/categories">Gestionar Categorías</Link></li>
+                                <li><Link className="dropdown-item" to="/admin/products">Gestionar Productos</Link></li>
+                            </ul>
+                        </li>
+                        
+                         )}
                     </ul>
                 </div>
 

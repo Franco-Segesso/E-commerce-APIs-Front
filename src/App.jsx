@@ -10,6 +10,10 @@ import CartPage from './views/CartPage.jsx';
 import LoginPage from './views/LoginPage.jsx';
 import RegisterPage from './views/RegisterPage.jsx';
 import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva página
+import AdminCategoriesPage from './views/AdminCategoriesPage.jsx';
+import AdminRoute from './components/AdminRoute.jsx'; // Importamos el componente de ruta admin
+import AdminProductsPage from './views/AdminProductsPage.jsx';
+
 import HomePage from './views/HomePage.jsx';
 import AboutUsPage from './views/AboutUsPage.jsx';
 
@@ -37,6 +41,24 @@ function App() {
                                     <CheckoutPage />
                                 </ProtectedRoute>
                             } 
+                        />
+
+                        <Route 
+                            path="/admin/categories"
+                            element={
+                                <AdminRoute>
+                                    <AdminCategoriesPage />
+                                </AdminRoute>
+                            }
+                        />
+
+                        <Route 
+                            path="/admin/products"
+                            element={
+                                <AdminRoute>
+                                    <AdminProductsPage />
+                                </AdminRoute>
+                            }
                         />
                     </Routes>
                 </main>

@@ -9,15 +9,23 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [authToken, setAuthToken] = useState(() => localStorage.getItem('token'));
-    const [user, setUser] = useState(null);
-
+    const [user, setUser] = useState(null); // El estado 'user' guardará el email y los roles
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (authToken) {
             try {
                 const decodedToken = jwtDecode(authToken);
-                setUser({ email: decodedToken.sub });
+                
+                console.log("Token decodificado:", decodedToken);
+                // Ahora guardamos tanto el email (sub) como los roles (authorities)
+                setUser({ 
+                    email: decodedToken.sub,
+                    roles: decodedToken.authorities || [] // 'authorities' es donde Spring Security pone los roles en el token
+                });
+                
                 localStorage.setItem('token', authToken);
             } catch (error) {
+                console.error("Token inválido o expirado:", error);
                 setUser(null);
                 localStorage.removeItem('token');
             }
@@ -25,6 +33,7 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
             localStorage.removeItem('token');
         }
+        setLoading(false);
     }, [authToken]);
 
     const login = (token) => {
@@ -35,7 +44,11 @@ export const AuthProvider = ({ children }) => {
         setAuthToken(null);
     };
     
-    const value = { authToken, user, login, logout };
+    // Esta función ahora funcionará correctamente porque 'user.roles' ya existe
+    const isAdmin = user && user.roles.includes('ROLE_ADMIN');
+
+    // Nos aseguramos de pasar 'isAdmin' al resto de la aplicación
+    const value = { authToken, user, loading, login, logout, isAdmin };
 
     return (
         <AuthContext.Provider value={value}>
