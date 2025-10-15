@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard.jsx";
 import { useEffect, useState } from "react";
+import HomeCarousel from '../components/HomeCarousel';
 
 const heroBg = "https://images.unsplash.com/photo-1512295767273-ac109ac3acfa?q=80&w=1600&auto=format&fit=crop";
 
@@ -94,30 +95,7 @@ const HomePage = () => {
   return (
     <div className="homepage">
 
-      {/* HERO*/}
-      <section className="position-relative w-100 min-vh-50 d-flex align-items-center">
-        {/* imagen de fondo */}
-        <img
-          src={heroBg}
-          alt="Hero"
-          className="position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
-        />
-        {/* overlay oscuro */}
-        <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" />
-        {/* contenido */}
-        <div className="container position-relative text-white py-5">
-          <div className="col-12 col-md-8 col-lg-6">
-            <h1 className="display-5 fw-bold">Todo lo que querés, sin vueltas</h1>
-            <p className="lead mb-4">
-              Ofertas relámpago, lanzamientos frescos y envíos rápidos. El carrito no muerde.
-            </p>
-            <div className="d-flex gap-3 flex-wrap">
-              <Link to="/products" className="btn btn-success btn-lg">Ver productos</Link>
-              <Link to="/login" className="btn btn-outline-light btn-lg">Iniciar sesión</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeCarousel />
 
       {/* HOT SALE */}
         <section className="py-5">
