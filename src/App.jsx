@@ -11,6 +11,7 @@ import LoginPage from './views/LoginPage.jsx';
 import RegisterPage from './views/RegisterPage.jsx';
 import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva página
 import HomePage from './views/HomePage.jsx';
+import AboutUsPage from './views/AboutUsPage.jsx';
 
 function App() {
     return (
