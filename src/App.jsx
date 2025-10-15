@@ -4,7 +4,7 @@ import Navbar from './components/NavBar.jsx';
 import Footer from './components/Footer.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // Importamos el guardia
 
-import ProductPage from './views/ProductPage.jsx';
+import ProductsPage from './views/ProductPage.jsx';
 import ProductDetailPage from './views/ProductDetailPage.jsx';
 import CartPage from './views/CartPage.jsx';
 import LoginPage from './views/LoginPage.jsx';
@@ -21,11 +21,12 @@ function App() {
                     <Routes>
                         {/* Rutas Públicas */}
                         <Route path="/" element={<HomePage />} />
-                        <Route path="/products" element={<ProductPage />} />
+                        <Route path="/products" element={<ProductsPage />} />
                         <Route path="/product/:productId" element={<ProductDetailPage />} />
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/about" element={<AboutUsPage />} />
                         
                         {/* Ruta Protegida */}
                         <Route 
