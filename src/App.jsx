@@ -10,23 +10,14 @@ import CartPage from './views/CartPage.jsx';
 import LoginPage from './views/LoginPage.jsx';
 import RegisterPage from './views/RegisterPage.jsx';
 import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva página
-
-const HomePage = () => (
-    <div className="container text-center">
-        <div className="p-5 mb-4 bg-light rounded-3">
-            <h1 className="display-5 fw-bold">¡Bienvenido a MiTienda!</h1>
-            <p className="col-md-8 fs-4 mx-auto">Los mejores productos, a un clic de distancia.</p>
-            <a className="btn btn-success btn-lg" href="/products">Ver Productos</a>
-        </div>
-    </div>
-);
+import HomePage from './views/HomePage.jsx';
 
 function App() {
     return (
         <BrowserRouter>
             <div className="d-flex flex-column min-vh-100">
                 <Navbar />
-                <main className="d-flex flex-grow-1 align-items-center justify-content-center py-4">
+                <main className="flex-grow-1 py-4 w-100">
                     <Routes>
                         {/* Rutas Públicas */}
                         <Route path="/" element={<HomePage />} />
