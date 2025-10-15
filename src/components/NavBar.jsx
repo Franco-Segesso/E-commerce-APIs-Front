@@ -33,9 +33,16 @@ const Navbar = () => {
 
                          {isAdmin && (
 
-                        <li className="nav-item">
-                            <Link className="nav-link fw-bold text-success" to="/admin/categories">Panel Admin</Link>
+                         <li className="nav-item dropdown">
+                            <a className="nav-link dropdown-toggle fw-bold text-success" href="#" role="button" data-bs-toggle="dropdown">
+                                Panel Admin
+                            </a>
+                            <ul className="dropdown-menu">
+                                <li><Link className="dropdown-item" to="/admin/categories">Gestionar Categorías</Link></li>
+                                <li><Link className="dropdown-item" to="/admin/products">Gestionar Productos</Link></li>
+                            </ul>
                         </li>
+                        
                          )}
                     </ul>
                 </div>

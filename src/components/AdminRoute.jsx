@@ -3,7 +3,18 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const AdminRoute = ({ children }) => {
-    const { authToken, isAdmin } = useAuth();
+    const { authToken, isAdmin, loading } = useAuth();
+
+    if (loading) {
+        //returnea un spinner indicando que está cargando
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        );
+    }
 
     if (!authToken) {
         // Si no está logueado, lo mandamos al login

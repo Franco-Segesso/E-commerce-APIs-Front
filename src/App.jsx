@@ -12,6 +12,7 @@ import RegisterPage from './views/RegisterPage.jsx';
 import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva página
 import AdminCategoriesPage from './views/AdminCategoriesPage.jsx';
 import AdminRoute from './components/AdminRoute.jsx'; // Importamos el componente de ruta admin
+import AdminProductsPage from './views/AdminProductsPage.jsx';
 
 
 const HomePage = () => (
@@ -54,6 +55,15 @@ function App() {
                             element={
                                 <AdminRoute>
                                     <AdminCategoriesPage />
+                                </AdminRoute>
+                            }
+                        />
+
+                        <Route 
+                            path="/admin/products"
+                            element={
+                                <AdminRoute>
+                                    <AdminProductsPage />
                                 </AdminRoute>
                             }
                         />
