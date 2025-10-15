@@ -4,16 +4,6 @@ import ProductCard from "../components/ProductCard.jsx";
 import { useEffect, useState } from "react";
 
 const heroBg = "https://images.unsplash.com/photo-1512295767273-ac109ac3acfa?q=80&w=1600&auto=format&fit=crop";
-  
-
-
-
-const newProducts = [
-  { id: 5, name: "Cámara Action 4K", price: 219.99, discount: 0, imageBase64: "" },
-  { id: 6, name: "Barra de Sonido", price: 149.99, discount: 0, imageBase64: "" },
-  { id: 7, name: "Router Wi-Fi 6", price: 119.99, discount: 0, imageBase64: "" },
-  { id: 8, name: "Monitor 27'' 144Hz", price: 299.99, discount: 0.1, imageBase64: "" },
-];
 
 const categories = [
   {
@@ -30,19 +20,42 @@ const categories = [
   },
 ];
 
-async function productos_con_descuento(params) {
-    const res = await fetch("http://localhost:4002/products/discounted");
-    if (!res.ok) throw new Error("Error al cargar productos en oferta");
-    const data = await res.json();
-    return data.content;
+async function productos_con_descuento() {
+  const res = await fetch("http://localhost:4002/products/discounted");
+  if (!res.ok) throw new Error("Error al cargar productos en oferta");
+  const data = await res.json();
+
+  // Asegura compatibilidad con respuesta paginada o lista directa
+  const list = Array.isArray(data) ? data : data.content ?? [];
+
+  // Devolvemos solo los primeros 4 productos
+  return list.slice(0, 4);
 }
 
 
+async function nuevos_ingresos() {
+  // Ajustá query params si tu backend soporta ordenamiento/paginación (ej: ?sort=createdAt,desc&size=8)
+  const res = await fetch(`http://localhost:4002/products`);
+  if (!res.ok) throw new Error("Error al cargar nuevos ingresos");
+  const data = await res.json();
+  // Tomamos los primeros 8 como “nuevos” si no hay endpoint específico.
+  const list = Array.isArray(data) ? data : data.content ?? [];
+  // Heurística simple: ordenar por id desc si existe id numérico
+  const sorted = [...list].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+  return sorted.slice(0, 4);
+}
 
 const HomePage = () => {
-    const [hotSale, setHotSale] = useState([]);
-    const [loadingHot, setLoadingHot] = useState(true);
-    const [errorHot, setErrorHot] = useState(null);
+  // HOT SALE
+  const [hotSale, setHotSale] = useState([]);
+  const [loadingHot, setLoadingHot] = useState(true);
+  const [errorHot, setErrorHot] = useState(null);
+
+  // NUEVOS INGRESOS
+  const [newProducts, setNewProducts] = useState([]);
+  const [loadingNew, setLoadingNew] = useState(true);
+  const [errorNew, setErrorNew] = useState(null);
+
 
     useEffect(() => {
         async function fetchHotSale() {
@@ -60,6 +73,22 @@ const HomePage = () => {
 
         fetchHotSale();
     }, []);
+
+
+     useEffect(() => {
+    (async () => {
+      try {
+        setLoadingNew(true);
+        setErrorNew(null);
+        const data = await nuevos_ingresos();
+        setNewProducts(data);
+      } catch (err) {
+        setErrorNew(err.message || "Error desconocido");
+      } finally {
+        setLoadingNew(false);
+      }
+    })();
+  }, []);
 
 
   return (
@@ -151,9 +180,31 @@ const HomePage = () => {
             <h2 className="h3 m-0">🆕 Nuevos ingresos</h2>
             <Link to="/products" className="link-secondary">Ver todo</Link>
           </div>
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            {newProducts.map(p => (<ProductCard key={p.id} product={p} />))}
-          </div>
+
+          {loadingNew && (
+            <div className="text-center py-5 w-100">
+              <div className="spinner-border text-success mb-3" role="status"></div>
+              <p className="text-muted">Cargando nuevos ingresos...</p>
+            </div>
+          )}
+
+          {!loadingNew && errorNew && (
+            <div className="alert alert-danger" role="alert">
+              {errorNew}
+            </div>
+          )}
+
+          {!loadingNew && !errorNew && (
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+              {newProducts.length > 0 ? (
+                newProducts.map((p) => <ProductCard key={p.id} product={p} />)
+              ) : (
+                <p className="text-center text-muted w-100">
+                  No hay nuevos ingresos por el momento.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
