@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-
+    const imageUrl = product.imageUrl || 'https://via.placeholder.com/300x200';
 
     const hasDiscount = product.discount && product.discount > 0;
     const finalPrice = hasDiscount 
@@ -18,7 +18,7 @@ const ProductCard = ({ product }) => {
 
                 <img 
                     className="card-img-top rounded-top-3" 
-                    src={imageUrl} 
+                    src={`data:image/jpeg;base64,${product.imageBase64}`} 
                     alt={product.name}
                     // Estilo para que todas las imágenes tengan la misma altura
                     style={{ height: '200px', objectFit: 'cover' }}
