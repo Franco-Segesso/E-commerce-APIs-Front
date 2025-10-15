@@ -86,28 +86,30 @@ const ProductsPage = () => {
     };
 
     return (
-        <div className="container my-5">
+        <div className="container my-5 py-5">
+            {/* --- SECCIÓN DE TÍTULO MEJORADA --- */}
+            <div className="text-center mb-5">
+                <h1 className="display-4 fw-bolder">Explorá Nuestros Productos</h1>
+                <p className="lead text-muted">Encontrá la opción perfecta para tu estilo de vida.</p>
+            </div>
+
             <div className="row">
-                {/* Columna de Filtros */}
                 <div className="col-lg-3">
                     <FilterSidebar onFilterChange={handleFilterChange} />
                 </div>
-
-                {/* Columna de Productos */}
                 <div className="col-lg-9">
                     <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
                         <div className="flex-grow-1">
-                            <SearchBar onSearch={handleSearch} />
+                            <SearchBar onSearch={(query) => handleFilterChange({ searchQuery: query })} />
                         </div>
-                        
                         <div>
                             <select 
                                 className="form-select" 
                                 value={filters.sort} 
                                 onChange={(e) => handleFilterChange({ sort: e.target.value })}
                             >
-                                <option value="asc">Menor a Mayor Precio</option>
-                                <option value="desc">Mayor a Menor Precio</option>
+                                <option value="asc">Ordenar por Precio (Menor)</option>
+                                <option value="desc">Ordenar por Precio (Mayor)</option>
                             </select>
                         </div>
                     </div>
@@ -116,13 +118,13 @@ const ProductsPage = () => {
                     {error && <div className="alert alert-danger">Error: {error}</div>}
                     
                     {!loading && !error && (
-                        <div className="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-xl-3">
+                        <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
                             {displayedProducts.length > 0 ? (
                                 displayedProducts.map(product => (
                                     <ProductCard key={product.id} product={product} />
                                 ))
                             ) : (
-                                <p className="text-center">No se encontraron productos que coincidan con los filtros.</p>
+                                <p className="text-center text-muted col-12">No se encontraron productos que coincidan con los filtros.</p>
                             )}
                         </div>
                     )}

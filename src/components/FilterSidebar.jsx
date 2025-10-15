@@ -4,8 +4,8 @@ const FilterSidebar = ({ onFilterChange }) => {
     const [categories, setCategories] = useState([]);
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
+    const [error, setError] = useState('');
 
-    // Efecto para cargar las categorías desde el backend al montar el componente
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -21,47 +21,51 @@ const FilterSidebar = ({ onFilterChange }) => {
         fetchCategories();
     }, []);
 
-    const handleApplyFilters = () => {
-        onFilterChange({
-            price_min: minPrice,
-            price_max: maxPrice,
-        });
+    const handleApplyPriceFilter = () => {
+        if (minPrice && maxPrice) {
+            if (parseFloat(minPrice) > parseFloat(maxPrice)) {
+                setError('El precio mínimo no puede ser mayor que el máximo.');
+                return;
+            }
+            setError('');
+            onFilterChange({ price_min: minPrice, price_max: maxPrice });
+        } else {
+            setError('Por favor, complete ambos campos de precio.');
+        }
     };
     
     const handleCategoryClick = (categoryId) => {
+        setError('');
         onFilterChange({ category: categoryId });
     };
 
     const handleClearFilters = () => {
         setMinPrice('');
         setMaxPrice('');
-        onFilterChange({
-            category: null,
-            price_min: null,
-            price_max: null,
-            sort: 'asc' // Volvemos al orden por defecto
-        });
+        setError('');
+        onFilterChange({ category: null, price_min: '', price_max: '', sort: 'asc' });
     };
 
     return (
-        <div className="p-3 border rounded-3 bg-light">
-            <h4>Filtros</h4>
+        // Quitamos el fondo y el borde para un look más integrado
+        <div className="p-3">
+            <h4 className="fw-bolder">Filtros</h4>
             <hr />
 
-            {/* Filtro por Categoría */}
             <h5>Categorías</h5>
-            <ul className="list-group list-group-flush">
+            {/* Usamos list-group-flush y border-0 para un estilo más limpio */}
+            <ul className="list-group list-group-flush mb-3">
                 <li 
-                    className="list-group-item list-group-item-action"
+                    className="list-group-item list-group-item-action border-0"
                     style={{cursor: 'pointer'}}
-                    onClick={() => onFilterChange({ category: null })}
+                    onClick={() => handleCategoryClick(null)}
                 >
                     Todas
                 </li>
                 {categories.map(category => (
                     <li 
                         key={category.id} 
-                        className="list-group-item list-group-item-action"
+                        className="list-group-item list-group-item-action border-0"
                         style={{cursor: 'pointer'}}
                         onClick={() => handleCategoryClick(category.id)}
                     >
@@ -72,35 +76,21 @@ const FilterSidebar = ({ onFilterChange }) => {
 
             <hr />
 
-            {/* Filtro por Precio */}
             <h5 className="mt-3">Precio</h5>
             <div className="input-group mb-2">
-                <span className="input-group-text">$</span>
-                <input 
-                    type="number" 
-                    className="form-control" 
-                    placeholder="Mínimo" 
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                />
+                <input type="number" className="form-control" placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min="0"/>
             </div>
             <div className="input-group mb-3">
-                <span className="input-group-text">$</span>
-                <input 
-                    type="number" 
-                    className="form-control" 
-                    placeholder="Máximo"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                />
+                <input type="number" className="form-control" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min="0"/>
             </div>
-            <button className="btn btn-primary w-100" onClick={handleApplyFilters}>
-                Aplicar Precio
+            {error && <small className="text-danger d-block mb-2">{error}</small>}
+            {/* Botón verde para coincidir con el estilo del ejemplo */}
+            <button className="btn btn-success w-100" onClick={handleApplyPriceFilter}>
+                Aplicar
             </button>
 
             <hr />
 
-            {/* Botón para limpiar filtros */}
             <button className="btn btn-outline-secondary w-100 mt-2" onClick={handleClearFilters}>
                 Limpiar Filtros
             </button>
