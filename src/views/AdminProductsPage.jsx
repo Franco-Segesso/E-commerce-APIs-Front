@@ -18,7 +18,7 @@ const AdminProductsPage = () => {
         setLoading(true);
         setError('');
         Promise.all([
-            fetch('http://localhost:4002/products'),
+            fetch('http://localhost:4002/products/all'),
             fetch('http://localhost:4002/categories')
         ])
         .then(([productsRes, categoriesRes]) => {
@@ -43,6 +43,11 @@ const AdminProductsPage = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+
+    // Separamos los productos en activos e inactivos
+    const activeProducts = products.filter(p => p.active);
+    const inactiveProducts = products.filter(p => !p.active);
 
     // Se crea un "diccionario" para buscar nombres de categoría por ID
     const categoryMap = new Map(categories.map(cat => [cat.id, cat.description]));
@@ -102,6 +107,51 @@ const AdminProductsPage = () => {
         });
     };
 
+    const handleReactivate = (product) => {
+        if (!window.confirm(`¿Seguro que quieres reactivar el producto "${product.name}"?`)) return;
+        setError('');
+
+        // Preparamos los datos para la actualización. 
+        // NO necesitamos enviar imagen si solo queremos reactivar.
+        // Creamos un objeto simple con los datos necesarios para el backend.
+        const productData = {
+            name: product.name,
+            description: product.description,
+            categoryId: product.categoryId,
+            price: product.price,
+            stock: product.stock,
+            discount: product.discount,
+            active: true
+        };
+        const formData = new FormData();
+        formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
+        
+        fetch(`http://localhost:4002/products/${product.id}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${authToken}` },
+            body: formData
+        })
+        .then (response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.message || "Error al reactivar el producto.");
+                });
+            }
+            return response.json();
+        })
+        .then((responseData) => {
+            alert(responseData.message || "Producto reactivado con éxito.");
+            fetchData(); // Recargamos la lista de productos
+        })
+        .catch(err => {
+            setError(err.message);
+        })
+        .finally(() => {
+            setLoading(false); // Aseguramos que el estado de carga se actualice
+        });
+    };        
+
+
     // Función para abrir el modal (para crear o editar)
     const openModal = (product = null) => {
         setEditingProduct(product);
@@ -117,6 +167,9 @@ const AdminProductsPage = () => {
 
             {error && <div className="alert alert-danger">{error}</div>}
 
+
+            {/* Tabla de Productos Activos */}
+            <h4 classname="mt-4">Productos Activos ({activeProducts.length})</h4>
             <table className="table table-striped">
                 <thead>
                     <tr>
@@ -132,7 +185,7 @@ const AdminProductsPage = () => {
                     {loading ? (
                         <tr><td colSpan="6" className="text-center">Cargando...</td></tr>
                     ) : (
-                        products.map(p => (
+                        activeProducts.map(p => (
                             <tr key={p.id}>
                                 <td>{p.id}</td>
                                 <td>{p.name}</td>
@@ -147,9 +200,57 @@ const AdminProductsPage = () => {
                             </tr>
                         ))
                     )}
+                    { !loading && activeProducts.length === 0 && !error && (
+                        <tr><td colSpan="6" className="text-center">No hay productos activos.</td></tr>
+                    )}
                 </tbody>
             </table>
-
+            
+            {/* Acordeón para Productos Inactivos */}
+            <div className="accordion mt-5" id="inactiveProductsAccordion">
+                <div className="accordion-item">
+                    <h2 className="accordion-header" id="headingOne">
+                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        Productos Eliminados ({inactiveProducts.length})
+                    </button>
+                    </h2>
+                    <div id="collapseOne" className="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#inactiveProductsAccordion">
+                        <div className="accordion-body">
+                             {loading ? <p>Cargando...</p> : (
+                                inactiveProducts.length > 0 ? (
+                                    <table className="table table-sm table-hover"> {/* Usamos table-sm para que sea más compacta */}
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Categoría</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {inactiveProducts.map(p => (
+                                                <tr key={p.id}>
+                                                    <td>{p.id}</td>
+                                                    <td>{p.name}</td>
+                                                    <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
+                                                    <td>
+                                                        {/* Botón que llama a handleReactivate */}
+                                                        <button className="btn btn-outline-success btn-sm" onClick={() => handleReactivate(p)} disabled={loading}>
+                                                            Reactivar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                ) : (
+                                    <p>No hay productos eliminados.</p>
+                                )
+                             )}
+                        </div>
+                    </div>
+                </div>
+            </div>
             {showModal && <ProductForm product={editingProduct} onSave={handleSave} onHide={() => setShowModal(false)} />}
         </div>
     );
