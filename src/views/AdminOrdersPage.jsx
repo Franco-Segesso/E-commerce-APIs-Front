@@ -4,27 +4,37 @@ import { Accordion } from 'react-bootstrap'; // Usamos un componente de React-Bo
 
 const AdminOrdersPage = () => {
     const [orders, setOrders] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const { authToken } = useAuth();
 
-    useEffect(() => {
-        const fetchOrders = async () => {
+useEffect(() => {
+        const fetchInitialData = async () => {
             setLoading(true);
             setError('');
             try {
-                const response = await fetch('http://localhost:4002/orders', {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('No tienes permiso para ver las órdenes o hubo un error en el servidor.');
-                }
-                const data = await response.json();
-                // Ordenamos las órdenes de la más reciente a la más antigua
-                const sortedOrders = (data.content || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+                // Hacemos las peticiones para órdenes y usuarios
+                const [ordersRes, usersRes] = await Promise.all([
+                    fetch('http://localhost:4002/orders', {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    fetch('http://localhost:4002/users', { 
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }) 
+                ]);
+
+                if (!ordersRes.ok) throw new Error('No se pudieron cargar las órdenes.');
+                if (!usersRes.ok) throw new Error('No se pudieron cargar los usuarios.');
+                
+                const ordersData = await ordersRes.json();
+                const usersData = await usersRes.json(); // Asumimos que devuelve una lista o un objeto con 'content'
+
+                // Ordenamos las órdenes de más reciente a más antigua
+                const sortedOrders = (ordersData.content || ordersData || []).sort((a, b) => b.id - a.id);
                 setOrders(sortedOrders);
+                setUsers(usersData.content || usersData || []); // Guardamos la lista de usuarios
+
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -32,8 +42,15 @@ const AdminOrdersPage = () => {
             }
         };
 
-        fetchOrders();
+        if (authToken) {
+            fetchInitialData();
+        } else {
+             setLoading(false);
+             setError("Necesitas iniciar sesión como administrador.");
+        }
     }, [authToken]);
+
+    const userMap = new Map(users.map(user => [user.id, user.email]));
 
     if (loading) {
         return <div className="text-center p-5"><h4>Cargando órdenes...</h4></div>;
@@ -59,7 +76,7 @@ const AdminOrdersPage = () => {
                                     <span>{new Date(order.date).toLocaleDateString()}</span>
                                     {/* --- CÓDIGO SEGURO --- */}
                                     {/* Accede al email del usuario de forma segura */}
-                                    <span className="text-muted">{order.userId || 'Usuario no disponible'}</span>
+                                    <span className="text-muted">{userMap.get(order.userId) || 'Usuario no disponible'}</span>
                                     <span className="badge bg-success">${(order.totalPrice || 0).toFixed(2)}</span>
                                 </div>
                             </Accordion.Header>
