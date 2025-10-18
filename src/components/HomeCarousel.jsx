@@ -29,7 +29,7 @@ function HomeCarousel() {
         </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
-         <Image
+        <Image
           src="src/assets/carouselImage3.avif"
           alt="Suplementos deportivos"
           className="d-block w-100"

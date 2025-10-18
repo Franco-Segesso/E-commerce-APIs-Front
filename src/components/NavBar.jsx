@@ -2,6 +2,8 @@ import React from 'react';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assets/lunchy.png';
+
 
 const Navbar = () => {
     const { cartItems } = useCart();
@@ -18,10 +20,21 @@ const Navbar = () => {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
             <div className="container-fluid">
-                <Link className="navbar-brand fw-bold" to="/">MiTienda</Link>
+                
+                <Link
+                    className="navbar-brand p-0 me-3 d-flex align-items-center"
+                    to="/"
+                    aria-label="Lunchy"
+                >
+                    <img src={logo} alt="" style={{ height: 36, width: 'auto' }} />
+                </Link>
+
+
+
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span className="navbar-toggler-icon"></span>
                 </button>
+
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <li className="nav-item">

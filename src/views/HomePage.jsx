@@ -1,10 +1,14 @@
 // src/views/HomePage.jsx
+import newsletterLogo from "../assets/lunchy-logo.png";
+
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard.jsx";
 import { useEffect, useState } from "react";
-import HomeCarousel from '../components/HomeCarousel';
+import HomeCarousel from "../components/HomeCarousel";
 
-const heroBg = "https://images.unsplash.com/photo-1512295767273-ac109ac3acfa?q=80&w=1600&auto=format&fit=crop";
+// Importá el logo (asegurate que el archivo exista en src/assets)
+
+
 
 const categories = [
   {
@@ -21,62 +25,51 @@ const categories = [
   },
 ];
 
+// --- Funciones para traer productos ---
 async function productos_con_descuento() {
   const res = await fetch("http://localhost:4002/products/discounted");
   if (!res.ok) throw new Error("Error al cargar productos en oferta");
   const data = await res.json();
-
-  // Asegura compatibilidad con respuesta paginada o lista directa
   const list = Array.isArray(data) ? data : data.content ?? [];
-
-  // Devolvemos solo los primeros 4 productos
   return list.slice(0, 4);
 }
 
-
 async function nuevos_ingresos() {
-  // Ajustá query params si tu backend soporta ordenamiento/paginación (ej: ?sort=createdAt,desc&size=8)
-  const res = await fetch(`http://localhost:4002/products`);
+  const res = await fetch("http://localhost:4002/products");
   if (!res.ok) throw new Error("Error al cargar nuevos ingresos");
   const data = await res.json();
-  // Tomamos los primeros 8 como “nuevos” si no hay endpoint específico.
   const list = Array.isArray(data) ? data : data.content ?? [];
-  // Heurística simple: ordenar por id desc si existe id numérico
   const sorted = [...list].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
   return sorted.slice(0, 4);
 }
 
+// --- Componente principal ---
 const HomePage = () => {
-  // HOT SALE
   const [hotSale, setHotSale] = useState([]);
   const [loadingHot, setLoadingHot] = useState(true);
   const [errorHot, setErrorHot] = useState(null);
 
-  // NUEVOS INGRESOS
   const [newProducts, setNewProducts] = useState([]);
   const [loadingNew, setLoadingNew] = useState(true);
   const [errorNew, setErrorNew] = useState(null);
 
+  useEffect(() => {
+    async function fetchHotSale() {
+      try {
+        setLoadingHot(true);
+        setErrorHot(null);
+        const data = await productos_con_descuento();
+        setHotSale(data);
+      } catch (error) {
+        setErrorHot(error.message);
+      } finally {
+        setLoadingHot(false);
+      }
+    }
+    fetchHotSale();
+  }, []);
 
-    useEffect(() => {
-        async function fetchHotSale() {
-            try {
-                setLoadingHot(true);
-                setErrorHot(null);
-                const data = await productos_con_descuento();
-                setHotSale(data);
-            } catch (error) {
-                setErrorHot(error.message);
-            } finally {
-                setLoadingHot(false);
-            }
-        }
-
-        fetchHotSale();
-    }, []);
-
-
-     useEffect(() => {
+  useEffect(() => {
     (async () => {
       try {
         setLoadingNew(true);
@@ -91,50 +84,47 @@ const HomePage = () => {
     })();
   }, []);
 
-
   return (
     <div className="homepage">
-
+      {/* Carrusel principal */}
       <HomeCarousel />
 
       {/* HOT SALE */}
-        <section className="py-5">
+      <section className="py-5">
         <div className="container-fluid px-4">
-            <div className="d-flex align-items-end justify-content-between mb-3">
+          <div className="d-flex align-items-end justify-content-between mb-3">
             <h2 className="h3 m-0">🔥 Hot Sale</h2>
             <Link to="/products" className="link-secondary">Ver todo</Link>
-            </div>
+          </div>
 
-            {/* ESTADO: Cargando */}
-            {loadingHot && (
+          {loadingHot && (
             <div className="text-center py-5 w-100">
-                <div className="spinner-border text-success mb-3" role="status"></div>
-                <p className="text-muted">Cargando productos en oferta...</p>
+              <div className="spinner-border text-success mb-3" role="status"></div>
+              <p className="text-muted">Cargando productos en oferta...</p>
             </div>
-            )}
+          )}
 
-            {/* ESTADO: Error */}
-            {!loadingHot && errorHot && (
+          {!loadingHot && errorHot && (
             <div className="alert alert-danger" role="alert">
-                {errorHot}
+              {errorHot}
             </div>
-            )}
+          )}
 
-            {/* ESTADO: Éxito */}
-            {!loadingHot && !errorHot && (
+          {!loadingHot && !errorHot && (
             <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                {hotSale.length > 0 ? (
-                hotSale.map(p => <ProductCard key={p.id} product={p} />)
-                ) : (
-                <p className="text-center text-muted w-100">No hay productos en oferta por el momento.</p>
-                )}
+              {hotSale.length > 0 ? (
+                hotSale.map((p) => <ProductCard key={p.id} product={p} />)
+              ) : (
+                <p className="text-center text-muted w-100">
+                  No hay productos en oferta por el momento.
+                </p>
+              )}
             </div>
-            )}
+          )}
         </div>
-        </section>
+      </section>
 
-
-      {/* BANNER (sin gradientes, usando colores utilitarios) */}
+      {/* Banner simple */}
       <section className="py-4">
         <div className="container-fluid px-4">
           <div className="p-4 p-md-5 rounded-3 text-center text-md-start bg-warning-subtle">
@@ -200,7 +190,7 @@ const HomePage = () => {
                   <div className="card-body">
                     <h5 className="card-title mb-1">{c.title}</h5>
                     <p className="card-text text-muted">
-                      Lo mejor curado para vos. Explorá la categoría.
+                      Explorá la categoría.
                     </p>
                     <Link to="/products" className="btn btn-outline-dark btn-sm">Ver productos</Link>
                   </div>
@@ -211,18 +201,34 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* NEWSLETTER */}
+      {/* NEWSLETTER con imagen a la izquierda */}
       <section className="py-5">
         <div className="container-fluid px-4">
-          <div className="rounded-3 p-4 p-md-5 bg-dark text-white">
-            <div className="row g-3 align-items-center">
-              <div className="col-lg-6">
-                <h3 className="h4">Suscribite y recibí ofertas secretas</h3>
+          <div className="rounded-4 p-4 p-md-5 bg-dark text-white">
+            <div className="row g-4 align-items-center">
+              {/* Imagen / logo a la izquierda */}
+            < div className="col-12 col-md-auto text-center">
+              {/* wrapper con tamaño fijo */}
+              <div className="newsletter-avatar" style={{ width: 200, height: 200 }}>
+                <img src={newsletterLogo} alt="Lunchy" />
+              </div>
+            </div>
+
+
+              {/* Texto al centro */}
+              <div className="col-12 col-md">
+                <h3 className="h4 mb-1">Suscribite y recibí ofertas secretas</h3>
                 <p className="mb-0 text-white-50">Nada de spam, sólo gangas esporádicas.</p>
               </div>
-              <div className="col-lg-6">
+
+              {/* Input y botón */}
+              <div className="col-12 col-md-5">
                 <form className="d-flex gap-2 flex-column flex-sm-row">
-                  <input type="email" className="form-control form-control-lg" placeholder="tu@email.com" />
+                  <input
+                    type="email"
+                    className="form-control form-control-lg"
+                    placeholder="tu@email.com"
+                  />
                   <button type="button" className="btn btn-success btn-lg">Unirme</button>
                 </form>
               </div>
@@ -230,7 +236,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react';  
 
 const AboutUsPage = () => {
     return (
@@ -42,7 +42,7 @@ const AboutUsPage = () => {
                                         <strong className="me-2">✉️</strong>
                                         <div>
                                             <span className="fw-medium">Email:</span>
-                                            <p className="text-muted mb-0">contacto@mitienda.com</p>
+                                            <p className="text-muted mb-0">lunchy@gmail.com</p>
                                         </div>
                                     </li>
                                 </ul>
