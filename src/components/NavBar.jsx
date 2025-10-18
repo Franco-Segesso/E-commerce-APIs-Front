@@ -65,7 +65,7 @@ const Navbar = () => {
                                 {user.email}
                             </a>
                             <ul className="dropdown-menu dropdown-menu-end">
-                                <li><a className="dropdown-item" href="#">Mi Perfil</a></li>
+                                <li><Link className="dropdown-item" to="/profile">Mi Perfil</Link></li>
                                 <li><hr className="dropdown-divider" /></li>
                                 <li>
                                     <button onClick={handleLogout} className="dropdown-item">

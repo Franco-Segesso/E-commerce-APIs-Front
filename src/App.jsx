@@ -13,6 +13,7 @@ import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva pág
 import AdminCategoriesPage from './views/AdminCategoriesPage.jsx';
 import AdminRoute from './components/AdminRoute.jsx'; // Importamos el componente de ruta admin
 import AdminProductsPage from './views/AdminProductsPage.jsx';
+import ProfilePage from './views/ProfilePage.jsx';
 
 import HomePage from './views/HomePage.jsx';
 import AboutUsPage from './views/AboutUsPage.jsx';
@@ -72,6 +73,15 @@ function App() {
                             }
                         />
 
+
+                        <Route 
+                            path="/profile"
+                            element={ 
+                                <ProtectedRoute> 
+                                    <ProfilePage /> 
+                                </ProtectedRoute> 
+                            }
+                        />
                     </Routes>
                 </main>
                 <Footer />
