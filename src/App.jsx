@@ -17,6 +17,8 @@ import AdminProductsPage from './views/AdminProductsPage.jsx';
 import HomePage from './views/HomePage.jsx';
 import AboutUsPage from './views/AboutUsPage.jsx';
 
+import AdminOrdersPage from './views/AdminOrdersPage.jsx';
+
 function App() {
     return (
         <BrowserRouter>
@@ -60,6 +62,16 @@ function App() {
                                 </AdminRoute>
                             }
                         />
+
+                        <Route 
+                            path="/admin/orders"
+                            element={
+                                <AdminRoute>
+                                    <AdminOrdersPage />
+                                </AdminRoute>
+                            }
+                        />
+
                     </Routes>
                 </main>
                 <Footer />
