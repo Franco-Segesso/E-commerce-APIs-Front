@@ -21,13 +21,26 @@ export const CartProvider = ({ children }) => {
     const addToCart = (productToAdd) => {
         setCartItems(prevItems => {
             const itemExists = prevItems.find(item => item.id === productToAdd.id);
+
+            const stockDisponible = productToAdd.stock;
+
             if (itemExists) {
+                const newQuantity = itemExists.quantity + productToAdd.quantity;
+                if (newQuantity > stockDisponible) {
+                    alert(`No puedes agregar más unidades de "${productToAdd.name}". Stock máximo: ${stockDisponible}.`);
+                    return prevItems; // Devolvemos el carrito sin cambios
+                }
+
                 return prevItems.map(item =>
                     item.id === productToAdd.id
                         ? { ...item, quantity: item.quantity + productToAdd.quantity }
                         : item
                 );
             } else {
+                if (productToAdd.quantity > stockDisponible) {
+                    alert(`No puedes agregar ${productToAdd.quantity} unidades de "${productToAdd.name}". Stock disponible: ${stockDisponible}.`);
+                    return prevItems;
+                }
                 return [...prevItems, { ...productToAdd }];
             }
         });

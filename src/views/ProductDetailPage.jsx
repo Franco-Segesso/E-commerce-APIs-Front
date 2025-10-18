@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext.jsx';
 const ProductDetailPage = () => {
     // ... (toda la lógica de fetch y de agregar al carrito no cambia)
     const { productId } = useParams();
-    const { addToCart } = useCart();
+    const { addToCart, cartItems } = useCart();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -34,11 +34,26 @@ const ProductDetailPage = () => {
     const finalPrice = hasDiscount ? product.price * (1 - product.discount) : product?.price;
 
     const handleAddToCart = () => {
-        if (product) {
-            const productToAdd = { ...product, price: finalPrice, quantity: parseInt(quantity, 10) || 1 };
-            addToCart(productToAdd);
-            alert(`${product.name} (x${quantity}) agregado al carrito.`);
+        if (!product) return;
+
+        // Buscamos si el producto ya está en el carrito para saber su cantidad actual
+        const itemInCart = cartItems.find(item => item.id === product.id);
+        const currentQuantityInCart = itemInCart ? itemInCart.quantity : 0;
+        const requestedQuantity = parseInt(quantity, 10) || 1;
+
+        // --- VALIDACIÓN DE STOCK ---
+        if (currentQuantityInCart + requestedQuantity > product.stock) {
+            alert(`¡Stock insuficiente! Solo quedan ${product.stock} unidades disponibles de "${product.name}".`);
+            return; // Detenemos la ejecución
         }
+        
+        const productToAdd = { 
+            ...product, 
+            price: finalPrice, 
+            quantity: requestedQuantity
+        };
+        addToCart(productToAdd);
+        alert(`${product.name} (x${quantity}) agregado al carrito.`);
     };
     
     if (loading) return <div className="text-center p-5"><h4>Cargando...</h4></div>;

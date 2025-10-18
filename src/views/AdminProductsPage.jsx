@@ -144,7 +144,7 @@ const AdminProductsPage = () => {
             fetchData(); // Recargamos la lista de productos
         })
         .catch(err => {
-            setError(err.message);
+            setError("Error al reactivar el producto: " + err.message);
         })
         .finally(() => {
             setLoading(false); // Aseguramos que el estado de carga se actualice
