@@ -134,7 +134,7 @@ const AdminProductsPage = () => {
         .then (response => {
             if (!response.ok) {
                 return response.json().then(errData => {
-                    throw new Error(errData.message || "Error al reactivar el producto.");
+                    throw new Error((errData.message || errData.error || errData.reason || `Error al reactivar el producto.`));
                 });
             }
             return response.json();

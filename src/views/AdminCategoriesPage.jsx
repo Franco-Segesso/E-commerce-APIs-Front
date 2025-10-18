@@ -15,7 +15,7 @@ const AdminCategoriesPage = () => {
     // Función para recargar las categorías desde el backend
     const fetchCategories = () => {
         setLoading(true);
-        fetch('http://localhost:4002/categories')
+        fetch('http://localhost:4002/categories/all')
             .then(response => response.json())
             .then(data => {
                 setCategories(data.content || []);
@@ -33,6 +33,9 @@ const AdminCategoriesPage = () => {
     useEffect(() => {
         fetchCategories();
     }, []);
+
+    const activeCategories = categories.filter(cat => cat.active);
+    const inactiveCategories = categories.filter(cat => !cat.active);
 
     const handleCreateOrUpdate = (e) => {
         e.preventDefault();
@@ -101,6 +104,42 @@ const AdminCategoriesPage = () => {
         });
     };
 
+
+    const handleReactivate = (category) => {
+        if (!window.confirm(`¿Seguro que quieres reactivar la categoría "${category.description}"?`)) return;
+        setError('');
+        setLoading(true);
+
+        fetch(`http://localhost:4002/categories/${category.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ description: category.description}) // Enviamos la misma descripción para reactivar
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    throw new Error(errData.message || "Error al reactivar la categoría.");
+                });
+            }
+            return response.json();
+        })
+        .then(() => {
+            alert("Categoría reactivada con éxito.");
+            fetchCategories(); // Recargamos la lista
+        })
+        .catch(err => {
+            console.error(err);
+            setError(err.message);
+        })
+        .finally(() => {
+            setLoading(false);
+        }); 
+
+    }
+
     const startEdit = (category) => {
         setEditingCategory(category);
         setNewCategoryName(category.description);
@@ -140,13 +179,14 @@ const AdminCategoriesPage = () => {
             {error && <div className="alert alert-danger">{error}</div>}
 
             {/* Tabla de Categorías */}
+            <h4 className="mt-4">Categorías Activas ({activeCategories.length})</h4>
             <div className="card">
                 <div className="card-header">
                     Categorías Existentes
                 </div>
                 <ul className="list-group list-group-flush">
                     {loading ? <li className="list-group-item">Cargando...</li> : (
-                        categories.map(cat => (
+                        activeCategories.map(cat => (
                             <li key={cat.id} className="list-group-item d-flex justify-content-between align-items-center">
                                 {cat.description}
                                 <div>
@@ -156,7 +196,42 @@ const AdminCategoriesPage = () => {
                             </li>
                         ))
                     )}
+                    { !loading && activeCategories.length === 0 && !error && (
+                        <li className="list-group-item text-center">No hay categorías activas.</li>
+                    )}
                 </ul>
+            </div>
+
+            {/* Acordeón para Categorías Eliminadas */}
+            <div className="accordion mt-5" id="inactiveCategoriesAccordion">
+                <div className="accordion-item">
+                    <h2 className="accordion-header" id="headingInactive">
+                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInactive" aria-expanded="false" aria-controls="collapseInactive">
+                        Categorías Eliminadas ({inactiveCategories.length})
+                    </button>
+                    </h2>
+                    <div id="collapseInactive" className="accordion-collapse collapse" aria-labelledby="headingInactive" data-bs-parent="#inactiveCategoriesAccordion">
+                        <div className="accordion-body">
+                             {loading ? <p>Cargando...</p> : (
+                                inactiveCategories.length > 0 ? (
+                                    <ul className="list-group">
+                                        {inactiveCategories.map(cat => (
+                                            <li key={cat.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                                {cat.description}
+                                                <button className="btn btn-outline-success btn-sm" onClick={() => handleReactivate(cat)} disabled={loading}>
+                                                    Reactivar
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>No hay categorías eliminadas.</p>
+                                )
+                             )}
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     );
