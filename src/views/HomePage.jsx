@@ -93,7 +93,7 @@ const HomePage = () => {
         <h2 className="h3 m-1 text-stroke-black text-center">Aprovechá Nuestras Ofertas</h2>
 
         <div className="position-absolute end-0 top-50 translate-middle-y me-3">
-                <Link to="/products" className="btn btn-dark">Ver Todo</Link>
+                <Link to="/products" className="btn btn-verde">Ver Todo</Link>
               </div>
       </div>
 
@@ -164,7 +164,7 @@ const HomePage = () => {
           <div className="d-flex align-items-end justify-content-between mb-3">
             <h2 className="h3 m-0">Disfrutá de Nuevos Ingresos</h2>
             <div className="col-md-auto">
-                <Link to="/products" className="btn btn-dark">Ver Todo</Link>
+                <Link to="/products" className="btn btn-verde">Ver Todo</Link>
               </div>
           </div>
 
