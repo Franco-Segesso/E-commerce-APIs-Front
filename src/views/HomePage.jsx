@@ -27,6 +27,53 @@ async function nuevos_ingresos() {
   return sorted.slice(0, 4);
 }
 
+async function enviarNewsletterEmail(email) {
+  const payload = {
+    toUser: [email],
+    subject: "Gracias por suscribirte a Lunchy",
+    message: "¡Hola! Te damos la bienvenida a Lunchy 🍽️. Pronto recibirás nuestras mejores ofertas y descuentos exclusivos."
+  };
+
+  try {
+    const res = await fetch("http://localhost:4002/api/mail/sendMessage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error("Error al enviar el email");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Error al enviar el email:", err);
+    throw err;
+  }
+}
+
+async function handleNewsletterSubmit(e) {
+  e.preventDefault();
+  const input = e.target.elements.email;
+  const email = input.value.trim();
+
+  if (!email) {
+    alert("Por favor, ingresá un correo válido.");
+    return;
+  }
+
+  try {
+    await enviarNewsletterEmail(email);
+    alert("¡Gracias por suscribirte! Te enviamos un correo de bienvenida.");
+    input.value = "";
+  } catch {
+    alert("No pudimos enviar el correo. Intentá nuevamente más tarde.");
+  }
+}
+
+
 // --- Componente principal ---
 const HomePage = () => {
   const [hotSale, setHotSale] = useState([]);
@@ -220,14 +267,22 @@ const HomePage = () => {
 
               {/* Input y botón */}
               <div className="col-12 col-md-5">
-                <form className="d-flex gap-2 flex-column flex-sm-row">
-                  <input
-                    type="email"
-                    className="form-control form-control-lg"
-                    placeholder="tu@email.com"
-                  />
-                  <button type="button" className="btn btn-success btn-lg">Unirme</button>
-                </form>
+                <form
+  className="d-flex gap-2 flex-column flex-sm-row"
+  onSubmit={handleNewsletterSubmit}
+>
+  <input
+    type="email"
+    name="email"
+    className="form-control form-control-lg"
+    placeholder="tu@email.com"
+    required
+  />
+  <button type="submit" className="btn btn-success btn-lg">
+    Unirme
+  </button>
+</form>
+
               </div>
             </div>
           </div>
