@@ -54,24 +54,8 @@ async function enviarNewsletterEmail(email) {
   }
 }
 
-async function handleNewsletterSubmit(e) {
-  e.preventDefault();
-  const input = e.target.elements.email;
-  const email = input.value.trim();
 
-  if (!email) {
-    alert("Por favor, ingresá un correo válido.");
-    return;
-  }
 
-  try {
-    await enviarNewsletterEmail(email);
-    alert("¡Gracias por suscribirte! Te enviamos un correo de bienvenida.");
-    input.value = "";
-  } catch {
-    alert("No pudimos enviar el correo. Intentá nuevamente más tarde.");
-  }
-}
 
 
 // --- Componente principal ---
@@ -83,6 +67,33 @@ const HomePage = () => {
   const [newProducts, setNewProducts] = useState([]);
   const [loadingNew, setLoadingNew] = useState(true);
   const [errorNew, setErrorNew] = useState(null);
+
+  //Mail
+  const [newsletterStatus, setNewsletterStatus] = useState(null); // "success" | "error"
+  const [newsletterMsg, setNewsletterMsg] = useState("");
+
+  // Manejar envío de newsletter
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    const input = e.target.elements.email;
+    const email = input.value.trim();
+
+    if (!email) {
+      setNewsletterStatus("error");
+      setNewsletterMsg("Por favor, ingresá un correo válido.");
+      return;
+    }
+
+    try {
+      await enviarNewsletterEmail(email);
+      setNewsletterStatus("success");
+      setNewsletterMsg("¡Gracias por suscribirte! Te enviamos un correo de bienvenida.");
+      input.value = "";
+    } catch {
+      setNewsletterStatus("error");
+      setNewsletterMsg("No pudimos enviar el correo. Intentá nuevamente más tarde.");
+    }
+  };
 
   useEffect(() => {
     async function fetchHotSale() {
@@ -268,21 +279,30 @@ const HomePage = () => {
               {/* Input y botón */}
               <div className="col-12 col-md-5">
                 <form
-  className="d-flex gap-2 flex-column flex-sm-row"
-  onSubmit={handleNewsletterSubmit}
->
-  <input
-    type="email"
-    name="email"
-    className="form-control form-control-lg"
-    placeholder="tu@email.com"
-    required
-  />
-  <button type="submit" className="btn btn-success btn-lg">
-    Unirme
-  </button>
-</form>
-
+                className="d-flex gap-2 flex-column flex-sm-row"
+                onSubmit={handleNewsletterSubmit}
+              >
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control form-control-lg"
+                  placeholder="tu@email.com"
+                  required
+                />
+                <button type="submit" className="btn btn-success btn-lg">
+                  Unirme
+                </button>
+              </form>
+              {/* Mensaje de estado */}
+              {newsletterStatus && (
+                  <div
+                    className={`mt-2 p-2 rounded-3 text-center ${
+                      newsletterStatus === "success" ? "bg-success text-white" : "bg-danger text-white"
+                    }`}
+                  >
+                    {newsletterMsg}
+                  </div>
+                )}
               </div>
             </div>
           </div>
