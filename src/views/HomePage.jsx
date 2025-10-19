@@ -27,6 +27,37 @@ async function nuevos_ingresos() {
   return sorted.slice(0, 4);
 }
 
+async function enviarNewsletterEmail(email) {
+  const payload = {
+    toUser: [email],
+    subject: "Gracias por suscribirte a Lunchy",
+    message: "¡Hola! Te damos la bienvenida a Lunchy 🍽️. Pronto recibirás nuestras mejores ofertas y descuentos exclusivos."
+  };
+
+  try {
+    const res = await fetch("http://localhost:4002/api/mail/sendMessage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error("Error al enviar el email");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Error al enviar el email:", err);
+    throw err;
+  }
+}
+
+
+
+
+
 // --- Componente principal ---
 const HomePage = () => {
   const [hotSale, setHotSale] = useState([]);
@@ -36,6 +67,33 @@ const HomePage = () => {
   const [newProducts, setNewProducts] = useState([]);
   const [loadingNew, setLoadingNew] = useState(true);
   const [errorNew, setErrorNew] = useState(null);
+
+  //Mail
+  const [newsletterStatus, setNewsletterStatus] = useState(null); // "success" | "error"
+  const [newsletterMsg, setNewsletterMsg] = useState("");
+
+  // Manejar envío de newsletter
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    const input = e.target.elements.email;
+    const email = input.value.trim();
+
+    if (!email) {
+      setNewsletterStatus("error");
+      setNewsletterMsg("Por favor, ingresá un correo válido.");
+      return;
+    }
+
+    try {
+      await enviarNewsletterEmail(email);
+      setNewsletterStatus("success");
+      setNewsletterMsg("¡Gracias por suscribirte! Te enviamos un correo de bienvenida.");
+      input.value = "";
+    } catch {
+      setNewsletterStatus("error");
+      setNewsletterMsg("No pudimos enviar el correo. Intentá nuevamente más tarde.");
+    }
+  };
 
   useEffect(() => {
     async function fetchHotSale() {
@@ -220,14 +278,31 @@ const HomePage = () => {
 
               {/* Input y botón */}
               <div className="col-12 col-md-5">
-                <form className="d-flex gap-2 flex-column flex-sm-row">
-                  <input
-                    type="email"
-                    className="form-control form-control-lg"
-                    placeholder="tu@email.com"
-                  />
-                  <button type="button" className="btn btn-success btn-lg">Unirme</button>
-                </form>
+                <form
+                className="d-flex gap-2 flex-column flex-sm-row"
+                onSubmit={handleNewsletterSubmit}
+              >
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control form-control-lg"
+                  placeholder="tu@email.com"
+                  required
+                />
+                <button type="submit" className="btn btn-success btn-lg">
+                  Unirme
+                </button>
+              </form>
+              {/* Mensaje de estado */}
+              {newsletterStatus && (
+                  <div
+                    className={`mt-2 p-2 rounded-3 text-center ${
+                      newsletterStatus === "success" ? "bg-success text-white" : "bg-danger text-white"
+                    }`}
+                  >
+                    {newsletterMsg}
+                  </div>
+                )}
               </div>
             </div>
           </div>
