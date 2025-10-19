@@ -2,7 +2,7 @@ import React from 'react';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/lunchy.png';
+import logo from '../assets/lunchy.webp';
 
 
 const Navbar = () => {

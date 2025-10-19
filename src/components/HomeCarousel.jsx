@@ -4,44 +4,44 @@ import Image from 'react-bootstrap/Image';
 function HomeCarousel() {
   return (
     <Carousel>
-      <Carousel.Item>
+      <Carousel.Item className="hero-slide">
         <Image
           src="src/assets/carouselImage1.avif"
           alt="Comida saludable y nutritiva"
-          className="d-block w-100"
-          style={{ maxHeight: '500px', objectFit: 'cover' }}
+          className="d-block w-100 hero-img"
         />
         <Carousel.Caption>
-          <h3>Las mejores comidas</h3>
+          <h3>Comé rico, viví ligero</h3>
           <p>Disfruta de una selección de las mejores comidas saludables y nutritivas.</p>
         </Carousel.Caption>
       </Carousel.Item>
-      <Carousel.Item>
+
+      <Carousel.Item className="hero-slide">
         <Image
           src="src/assets/carouselImage2.avif"
           alt="Comida saludable y nutritiva"
-          className="d-block w-100"
-          style={{ maxHeight: '500px', objectFit: 'cover' }}
+          className="d-block w-100 hero-img"
         />
         <Carousel.Caption>
-          <h3>Las mejores ensaladas</h3>
-          <p>Disfruta de una selección de las mejores ensaladas frescas y saludables.</p>
+          <h3>Energía que se cocina</h3>
+          <p>Platos balanceados y sabrosos para todos los días.</p>
         </Carousel.Caption>
       </Carousel.Item>
-      <Carousel.Item>
+
+      <Carousel.Item className="hero-slide">
         <Image
-          src="src/assets/carouselImage3.avif"
+          src="src/assets/photo6.jpg"
           alt="Suplementos deportivos"
-          className="d-block w-100"
-          style={{ maxHeight: '500px', objectFit: 'cover' }}
+          className="d-block w-100 hero-img"
         />
         <Carousel.Caption>
           <h3>Alcanza tus objetivos</h3>
           <p>
-            Encuentra los mejores alimentos para mejorar tu rendimiento y alcanzar tus objetivos.
+            Más proteína, mejor rendimiento. Sentí la diferencia.
           </p>
         </Carousel.Caption>
       </Carousel.Item>
+
     </Carousel>
   );
 }

@@ -9,22 +9,6 @@ import HomeCarousel from "../components/HomeCarousel";
 // Importá el logo (asegurate que el archivo exista en src/assets)
 
 
-
-const categories = [
-  {
-    title: "Audio",
-    img: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    title: "Wearables",
-    img: "https://images.unsplash.com/photo-1557180295-76eee20ae8aa?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    title: "Gaming",
-    img: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop",
-  },
-];
-
 // --- Funciones para traer productos ---
 async function productos_con_descuento() {
   const res = await fetch("http://localhost:4002/products/discounted");
@@ -89,49 +73,81 @@ const HomePage = () => {
       {/* Carrusel principal */}
       <HomeCarousel />
 
-      {/* HOT SALE */}
-      <section className="py-5">
-        <div className="container-fluid px-4">
-          <div className="d-flex align-items-end justify-content-between mb-3">
-            <h2 className="h3 m-0">🔥 Hot Sale</h2>
-            <Link to="/products" className="link-secondary">Ver todo</Link>
-          </div>
+      {/* HOT SALE con fondo verde y ondas (versión simple/infalible) */}
+<section className="wave-wrap">
+  {/* Onda superior */}
+  <div className="wave-top">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path
+        d="M0,64 C240,96 480,0 720,32 C960,64 1200,64 1440,32 L1440,100 L0,100 Z"
+        fill="#dcf8eaff"   /* color fijo para asegurar visibilidad */
+    
+      />
+    </svg>
+  </div>
 
-          {loadingHot && (
-            <div className="text-center py-5 w-100">
-              <div className="spinner-border text-success mb-3" role="status"></div>
-              <p className="text-muted">Cargando productos en oferta...</p>
-            </div>
-          )}
+  {/* Cuerpo verde */}
+  <div className="wave-body">
+    <div className="container-fluid px-4">
+      <div className="position-relative mb-3 text-center">
+        <h2 className="h3 m-1 text-stroke-black text-center">Aprovechá Nuestras Ofertas</h2>
 
-          {!loadingHot && errorHot && (
-            <div className="alert alert-danger" role="alert">
-              {errorHot}
-            </div>
-          )}
+        <div className="position-absolute end-0 top-50 translate-middle-y me-3">
+                <Link to="/products" className="btn btn-dark">Ver Todo</Link>
+              </div>
+      </div>
 
-          {!loadingHot && !errorHot && (
-            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-              {hotSale.length > 0 ? (
-                hotSale.map((p) => <ProductCard key={p.id} product={p} />)
-              ) : (
-                <p className="text-center text-muted w-100">
-                  No hay productos en oferta por el momento.
-                </p>
-              )}
-            </div>
+      {loadingHot && (
+        <div className="text-center py-5 w-100">
+          <div className="spinner-border text-light mb-3" role="status"></div>
+          <p className="text-light m-0">Cargando productos en oferta...</p>
+        </div>
+      )}
+
+      {!loadingHot && errorHot && (
+        <div className="alert alert-light bg-opacity-10 text-white border-0" role="alert">
+          {errorHot}
+        </div>
+      )}
+
+      {!loadingHot && !errorHot && (
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+          {hotSale.length > 0 ? (
+            hotSale.map((p) => <ProductCard key={p.id} product={p} />)
+          ) : (
+            <p className="text-center text-light w-100 m-0">
+              No hay productos en oferta por el momento.
+            </p>
           )}
         </div>
-      </section>
+      )}
+    </div>
+  </div>
+
+  {/* Onda inferior */}
+  <div className="wave-bottom">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path
+        d="M0,0 L0,0 C240,32 480,100 720,68 C960,36 1200,36 1440,68 L1440,100 L0,100 Z"
+        fill="#dcf8eaff"  /* color fijo para asegurar visibilidad */
+      />
+    </svg>
+  </div>
+</section>
+
 
       {/* Banner simple */}
       <section className="py-4">
         <div className="container-fluid px-4">
-          <div className="p-4 p-md-5 rounded-3 text-center text-md-start bg-warning-subtle">
+          <div
+            className="p-4 p-md-5 rounded-3 text-center text-md-start text-white"
+              style={{ backgroundColor: "#3b9168ff" }}
+              >
+
             <div className="row align-items-center g-3">
               <div className="col-md">
-                <h3 className="h4 mb-1">Envío gratis desde $50.000</h3>
-                <p className="mb-0 text-muted">Y devoluciones fáciles. Probá sin miedo.</p>
+                <h3 className="h3 mb-1">Envío gratis desde $50.000</h3>
+                <p className="h5 mb-1 text-muted">Y devoluciones fáciles. Probá sin miedo.</p>
               </div>
               <div className="col-md-auto">
                 <Link to="/products" className="btn btn-dark">Comprar ahora</Link>
@@ -141,12 +157,15 @@ const HomePage = () => {
         </div>
       </section>
 
+
       {/* NUEVOS INGRESOS */}
       <section className="py-5">
         <div className="container-fluid px-4">
           <div className="d-flex align-items-end justify-content-between mb-3">
-            <h2 className="h3 m-0">🆕 Nuevos ingresos</h2>
-            <Link to="/products" className="link-secondary">Ver todo</Link>
+            <h2 className="h3 m-0">Disfrutá de Nuevos Ingresos</h2>
+            <div className="col-md-auto">
+                <Link to="/products" className="btn btn-dark">Ver Todo</Link>
+              </div>
           </div>
 
           {loadingNew && (
@@ -176,35 +195,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* CATEGORÍAS DESTACADAS */}
-      <section className="py-5 bg-light">
-        <div className="container-fluid px-4">
-          <h2 className="h3 mb-4">Categorías destacadas</h2>
-          <div className="row g-4 row-cols-1 row-cols-md-3">
-            {categories.map((c, i) => (
-              <div className="col" key={i}>
-                <div className="card border-0 shadow-sm h-100 overflow-hidden">
-                  <div className="ratio ratio-21x9">
-                    <img src={c.img} alt={c.title} className="w-100 h-100 object-fit-cover" />
-                  </div>
-                  <div className="card-body">
-                    <h5 className="card-title mb-1">{c.title}</h5>
-                    <p className="card-text text-muted">
-                      Explorá la categoría.
-                    </p>
-                    <Link to="/products" className="btn btn-outline-dark btn-sm">Ver productos</Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
+            
 
       {/* NEWSLETTER con imagen a la izquierda */}
       <section className="py-5">
         <div className="container-fluid px-4">
-          <div className="rounded-4 p-4 p-md-5 bg-dark text-white">
+          <div className="rounded-4 p-4 p-md-5 newsletter-card text-dark">
             <div className="row g-4 align-items-center">
               {/* Imagen / logo a la izquierda */}
             < div className="col-12 col-md-auto text-center">
@@ -218,7 +215,7 @@ const HomePage = () => {
               {/* Texto al centro */}
               <div className="col-12 col-md">
                 <h3 className="h4 mb-1">Suscribite y recibí ofertas secretas</h3>
-                <p className="mb-0 text-white-50">Nada de spam, sólo gangas esporádicas.</p>
+                <p className="mb-0 text-black-50">Nada de spam, sólo promos esporádicas.</p>
               </div>
 
               {/* Input y botón */}

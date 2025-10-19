@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+
 const ProductCard = ({ product }) => {
     const imageUrl = product.imageUrl || 'https://via.placeholder.com/300x200';
 
@@ -42,7 +43,7 @@ const ProductCard = ({ product }) => {
                 
                 <div className="card-footer p-4 pt-0 border-top-0 bg-transparent">
                     <div className="text-center">
-                        <Link className="btn btn-outline-dark mt-auto" to={`/products/${product.id}`}>
+                        <Link className="btn btn-verde mt-auto" to={`/products/${product.id}`}>
                             Ver detalles
                         </Link>
                     </div>
