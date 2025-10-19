@@ -5,7 +5,7 @@ const Footer = () => {
         <footer className="py-4 bg-light mt-auto">
             <div className="container-fluid px-4">
                 <div className="d-flex align-items-center justify-content-between small">
-                    <div className="text-muted">&copy; 2024 MiTienda</div>
+                    <div className="text-muted">&copy; 2025 Lunchy</div>
                     <div>
                         <a href="#">Privacy Policy</a>
                         &middot;
