@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import './ProductDetailPage.css';
 
+
 const ProductDetailPage = () => {
     // ... (toda la lógica de fetch y de agregar al carrito no cambia)
     const { productId } = useParams();

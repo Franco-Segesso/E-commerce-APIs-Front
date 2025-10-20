@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import './CartPage.css';
+
 
 const CartPage = () => {
     const { cartItems, removeFromCart } = useCart();

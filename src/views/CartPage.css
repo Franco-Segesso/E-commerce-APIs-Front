@@ -1,0 +1,126 @@
+/* src/views/CartPage.css */
+
+/* --- Estilo General del Contenedor del Carrito --- */
+.container.my-5 {
+  max-width: 1140px; /* Limitamos el ancho para una mejor lectura */
+}
+
+/* --- Nuevo Estilo para CADA ÍTEM del Carrito --- */
+/* Quitamos el borde y la sombra para que parezca una lista, no una tarjeta */
+.card.mb-3 {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+  border-bottom: 1px solid #e9ecef; /* Separador entre ítems */
+  padding: 1.5rem 0;
+}
+.card.mb-3:last-child {
+  border-bottom: none; /* El último ítem no necesita separador */
+}
+
+/* Contenedor de la imagen */
+.card.mb-3 .col-md-2 {
+  padding: 0;
+}
+
+.card.mb-3 .img-fluid {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+/* --- Reorganización MÁGICA con CSS Grid --- */
+/* Convertimos el card-body en una grilla para reordenar todo */
+.card.mb-3 .card-body {
+  display: grid;
+  padding: 0 0 0 1.5rem; /* Espacio a la izquierda de la imagen */
+  grid-template-columns: 1fr auto; /* Columna 1 flexible, Columna 2 se ajusta al contenido */
+  grid-template-rows: auto auto;    /* Dos filas automáticas */
+  gap: 0.25rem 1rem; /* Espacio entre filas y columnas */
+  align-items: center;
+}
+
+/* Hacemos que el <div> que contiene el título y el precio "desaparezca" para que sus hijos se ubiquen en la grilla */
+.card.mb-3 .d-flex.justify-content-between {
+  display: contents;
+}
+
+/* Posicionando cada elemento en la grilla */
+.card.mb-3 .card-title:first-of-type { /* El Nombre */
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: left;
+}
+
+.card.mb-3 .card-text { /* La Cantidad */
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  text-align: left;
+}
+
+.card.mb-3 .card-title:last-of-type { /* El Precio */
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  justify-self: end; /* Lo alineamos a la derecha */
+}
+
+.card.mb-3 .btn-outline-danger { /* El botón Eliminar */
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  justify-self: end; /* Lo alineamos a la derecha */
+  align-self: start; /* Lo alineamos arriba en su celda */
+
+  /* Estilo de texto para que sea más sutil */
+  background: none !important;
+  border: none !important;
+  color: #dc3545 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.card.mb-3 .btn-outline-danger:hover {
+  text-decoration: underline;
+}
+
+
+/* --- Estilos para el Resumen del Pedido (sin cambios) --- */
+.col-md-4 .card {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+  .col-md-4 .card {
+    position: sticky;
+    top: 100px;
+  }
+}
+
+.btn-success {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+  color: white !important;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.8rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-success:hover {
+  background-color: #047a41 !important;
+  border-color: #047a41 !important;
+}
