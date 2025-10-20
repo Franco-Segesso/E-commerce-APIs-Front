@@ -56,6 +56,10 @@
 .read-the-docs {
   color: #888;
 }
+ /* Evita que el texto se quiebre en ciertas partes */
+.no-wrap {
+  white-space: nowrap;
+}
 
 /* ---------- newsletter ---------- */
 /* agregado*/
