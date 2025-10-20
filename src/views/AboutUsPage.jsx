@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../assets/logo-instagram.webp';
 
 const AboutUsPage = () => {
     return (
@@ -8,7 +9,7 @@ const AboutUsPage = () => {
                 
                 {/* 1. Onda superior (AHORA MÁS GRANDE con viewBox y path ajustados) */}
                 <div className="wave-top wave-top-about">
-                    {/* viewBox: Ajustado a 1440 de ancho y 150 de alto (antes 100)
+                    {/* viewBox: Ajustado a 1440 de ancho y 150 de alto
                         path d: Modificado para una curva más pronunciada */}
                     <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
                         <path
@@ -28,17 +29,17 @@ const AboutUsPage = () => {
                         </p>
                         <div className="d-flex justify-content-center gap-3 mt-4">
                             <span className="badge rounded-pill p-3 fs-6" style={{ backgroundColor: '#4F9D60', color: 'white' }}>#Lunchy</span>
-                            <span className="badge rounded-pill p-3 fs-6" style={{ backgroundColor: '#8BC34A', color: 'white' }}>#AplicacionesInteractivas</span>
-                            <span className="badge rounded-pill p-3 fs-6" style={{ backgroundColor: '#6ACCCF', color: 'white' }}>#DesarrolloWeb</span>
+                            <span className="badge rounded-pill p-3 fs-6" style={{ backgroundColor: '#8BC34A', color: 'white' }}>#Viandas</span>
+                            <span className="badge rounded-pill p-3 fs-6" style={{ backgroundColor: '#6acf9eff', color: 'white' }}>#Sencillo</span>
                         </div>
                     </div>
                 </div>
 
                 {/* 3. Onda inferior (AHORA MÁS GRANDE con viewBox y path ajustados) */}
                 <div className="wave-bottom wave-bottom-about">
-                    {/* viewBox: Ajustado a 1440 de ancho y 150 de alto (antes 100)
+                    {/* viewBox: Ajustado a 2000 de ancho y 150 de alto
                         path d: Modificado para una curva más pronunciada */}
-                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
+                    <svg viewBox="0 0 2000 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
                         <path
                             d="M0,0 L0,0 C240,64 480,150 720,118 C960,86 1200,86 1440,118 L1440,150 L0,150 Z" /* Ajustado para una curva más alta */
                             fill="#dcf8eaff"
@@ -58,41 +59,81 @@ const AboutUsPage = () => {
                             {/* --- BLOQUE 1: NUESTRA HISTORIA / EQUIPO --- */}
                             <div className="row g-5 align-items-center mb-5">
                                 <div className="col-md-12 text-center">
-                                    <h2 className="fw-bolder text-info mb-3">Historia: El Equipo Detrás de Lunchy</h2>
-                                    <p className="lead text-muted mx-auto" style={{ maxWidth: '800px' }}>
-                                        Somos un equipo de **estudiantes apasionados por la tecnología y el desarrollo de software**, cursando la materia **Aplicaciones Interactivas**. Este E-commerce es el resultado de nuestro esfuerzo y dedicación a lo largo del cuatrimestre, aplicando principios de diseño y programación para crear una plataforma tan robusta como intuitiva.
+                                    
+                                    <h2 
+                                        style={{
+                                            color: '#27AE60', // Verde con buena legibilidad
+                                            fontWeight: '700',
+                                        }}>
+                                            Historia: El Equipo Detrás de Lunchy
+                                    </h2>
+                                    <p className="lead text-muted mx-auto mb-2" style={{ maxWidth: '800px' }}>
+                                        Somos un equipo de estudiantes apasionados por la tecnología y el desarrollo de software, cursando la materia Aplicaciones Interactivas. Este E-commerce es el resultado de nuestro esfuerzo y dedicación a lo largo del cuatrimestre, aplicando principios de diseño y programación para crear una plataforma tan robusta como intuitiva.
                                     </p>
                                 </div>
                             </div>
 
-                            <hr className="my-5 border-success opacity-25" />
+                            <hr className="border-success opacity-25 my-2" />
 
                             {/* --- BLOQUE 2: CONTACTO --- */}
-                            <div className="text-center mb-4">
-                                <h2 className="fw-bolder text-dark mb-4">Conectemos</h2>
+                            <div className="text-center mt-2 mb-3">
+                                <h2 className="fw-bolder text-dark m-0">Conectemos</h2>
                             </div>
                             <div className="row justify-content-center g-4 mb-5">
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <div className="card h-100 p-4 shadow-sm rounded-4 border-0 text-center bg-light">
                                         <div className="fs-2 text-success mb-3">📍</div>
                                         <h5 className="fw-bold text-dark">Ubicación</h5>
                                         <p className="text-muted mb-0">Av. Callao 1240, CABA</p>
                                     </div>
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <div className="card h-100 p-4 shadow-sm rounded-4 border-0 text-center bg-light">
                                         <div className="fs-2 text-info mb-3">📞</div>
                                         <h5 className="fw-bold text-dark">Teléfono</h5>
                                         <p className="text-muted mb-0">+54 11 1234-5678</p>
                                     </div>
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <div className="card h-100 p-4 shadow-sm rounded-4 border-0 text-center bg-light">
                                         <div className="fs-2 text-warning mb-3">✉️</div>
                                         <h5 className="fw-bold text-dark">Email</h5>
-                                        <p className="text-muted mb-0">lunchycorp@gmail.com</p>
+                                        
+                                        <p
+                                            className="text-muted mb-0 mx-auto"
+                                            style={{
+                                                fontSize: '0.90rem',   // tamaño fijo (no se adapta al zoom o tamaño de ventana)
+                                                whiteSpace: 'normal',  // permite saltos de línea
+                                                wordBreak: 'break-word', // corta el mail si hace falta sin deformarlo
+                                                lineHeight: '1.3',     // ajusta el espacio vertical
+                                                margin: '0 auto',      // centra el texto horizontalmente
+                                                maxWidth: '99%',       // usa más espacio dentro del recuadro
+                                            }}
+                                            >
+                                            lunchycorp@gmail.com
+                                            </p>                                   
                                     </div>
                                 </div>
+                                <div className="col-md-3">
+                                    <a
+                                        href="https://www.instagram.com/lunchycorp/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-decoration-none"
+                                    >
+                                        <div className="card h-100 p-4 shadow-sm rounded-4 border-0 text-center bg-light hover-zoom">
+                                            <img
+                                                src={logo}
+                                                alt="Instagram"
+                                                className="mx-auto mb-3"
+                                                style={{ width: '50px', height: '50px', objectFit: 'contain' }}
+                                            />
+                                            <h5 className="fw-bold text-dark">Instagram</h5>
+                                            <p className="text-muted mb-0">@lunchycorp</p>
+                                        </div>
+                                    </a>
+                                </div>
+                         
                             </div>
                             
                             {/* Mapa */}
