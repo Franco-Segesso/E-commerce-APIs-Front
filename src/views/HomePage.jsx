@@ -55,9 +55,6 @@ async function enviarNewsletterEmail(email) {
 }
 
 
-
-
-
 // --- Componente principal ---
 const HomePage = () => {
   const [hotSale, setHotSale] = useState([]);
