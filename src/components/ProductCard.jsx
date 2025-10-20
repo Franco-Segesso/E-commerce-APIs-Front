@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
         <div className="col mb-4">
             {/* --- ESTILO DE TARJETA ACTUALIZADO --- */}
             {/* Tarjeta sin bordes, con sombra y esquinas redondeadas */}
-            <div className="card h-100 border-0 shadow-sm rounded-3">
+            <div className="card product-card h-100 border-0 shadow-sm rounded-3">
                 {hasDiscount && <div className="badge bg-dark text-white position-absolute" style={{top: '0.75rem', right: '0.75rem'}}>Oferta</div>}
 
                 <img 

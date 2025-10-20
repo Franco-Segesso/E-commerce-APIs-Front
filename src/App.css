@@ -51,7 +51,6 @@
 
 .card {
   padding: 2em;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .read-the-docs {
@@ -130,8 +129,32 @@
   color: white !important;
 }
 
-.card:hover {
+/* Efecto hover para las tarjetas de producto */
+.product-card:hover {
   transform: translateY(-8px); /* sube 7px */
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* sombra más profunda */
  
+}
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* --- CSS ESPECÍFICO PARA LA PÁGINA "SOBRE NOSOTROS" (Onda MUCHO Más Grande) --- */
+
+/* 1. Ajusta la altura del fondo verde (wave-body) */
+.wave-body.about-wave-body {
+  /* Aumentamos aún más el padding para hacer el bloque verde mucho más alto */
+  padding-top: 6rem !important; /* Más espacio arriba */
+  padding-bottom: 6rem !important; /* Más espacio abajo para la curva */
+  position: relative; 
+  z-index: 1; 
+}
+
+/* 2. Clase de superposición para la tarjeta principal */
+.container.about-card-superposition {
+  /* Aumentamos el valor negativo para que la tarjeta suba aún más
+     para superponerse a esta ola mucho más grande. Ajusta este valor si es necesario. */
+  margin-top: -9rem !important; /* Ejemplo: antes era -6.5rem */
+  position: relative; 
+  z-index: 10; 
 }
