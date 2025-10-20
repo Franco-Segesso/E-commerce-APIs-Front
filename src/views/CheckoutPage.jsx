@@ -2,23 +2,57 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useEffect } from 'react';
 
 const CheckoutPage = () => {
     const { cartItems, clearCart } = useCart();
-    const { authToken } = useAuth();
+    const { authToken, user } = useAuth();
     const navigate = useNavigate();
     
     const [shippingAddress, setShippingAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('Tarjeta de Crédito');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [userId, setUserId] = useState(null); // Estado para almacenar el userId
 
     const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+
+
+    useEffect(() => {
+        if(authToken){
+            setLoading(true);
+            fetch('http://localhost:4002/users/profile', {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el perfil.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                setUserId(data.id);
+            })
+            .catch(err => {
+                setError("Error al obtener el ID de usuario. Por favor, intenta de nuevo.");
+                console.error(err);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+        }
+    }, [authToken]);
+
+
 
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
         if (!shippingAddress) {
             setError("Por favor, completa la dirección de envío.");
+            return;
+        }
+        if (!userId) {
+            setError("ID de usuario no disponible. No se puede procesar la orden.");
             return;
         }
         
@@ -28,15 +62,12 @@ const CheckoutPage = () => {
         // --- TRANSFORMACIÓN DE DATOS CLAVE AQUÍ ---
         // 1. "Aplanamos" el carrito: si hay 3 milanesas, agregamos el ID de la milanesa 3 veces a la lista.
         const productsIdList = cartItems.flatMap(item => Array(item.quantity).fill(item.id));
-        
-        // 2. Simulamos el userId. Tu backend espera que el frontend lo envíe, lo cual no es seguro,
-        // pero para este TP, lo simulamos con un valor fijo.
-        const mockUserId = 1;
+    
 
-        // 3. Creamos el objeto final con los nombres que el backend SÍ entiende.
+        // 2. Creamos el objeto final con los nombres que el backend SÍ entiende.
         const orderData = {
             productsId: productsIdList,
-            userId: mockUserId,
+            userId: userId,
             shippingAddress: shippingAddress,
             paymentMethod: paymentMethod
         };

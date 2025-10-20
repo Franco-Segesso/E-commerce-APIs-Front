@@ -15,9 +15,12 @@ import CheckoutPage from './views/CheckoutPage.jsx'; // Importamos la nueva pág
 import AdminCategoriesPage from './views/AdminCategoriesPage.jsx';
 import AdminRoute from './components/AdminRoute.jsx'; // Importamos el componente de ruta admin
 import AdminProductsPage from './views/AdminProductsPage.jsx';
+import ProfilePage from './views/ProfilePage.jsx';
 
 import HomePage from './views/HomePage.jsx';
 import AboutUsPage from './views/AboutUsPage.jsx';
+
+import AdminOrdersPage from './views/AdminOrdersPage.jsx';
 
 function App() {
     return (
@@ -60,6 +63,25 @@ function App() {
                                 <AdminRoute>
                                     <AdminProductsPage />
                                 </AdminRoute>
+                            }
+                        />
+
+                        <Route 
+                            path="/admin/orders"
+                            element={
+                                <AdminRoute>
+                                    <AdminOrdersPage />
+                                </AdminRoute>
+                            }
+                        />
+
+
+                        <Route 
+                            path="/profile"
+                            element={ 
+                                <ProtectedRoute> 
+                                    <ProfilePage /> 
+                                </ProtectedRoute> 
                             }
                         />
                     </Routes>
