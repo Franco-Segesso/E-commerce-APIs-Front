@@ -27,7 +27,7 @@ function App() {
         <BrowserRouter>
             <div className="d-flex flex-column min-vh-100">
                 <Navbar />
-                <main className="flex-grow-1 py-4 w-100">
+                <main className="flex-grow-1 w-100">
                     <Routes>
                         {/* Rutas Públicas */}
                         <Route path="/" element={<HomePage />} />
