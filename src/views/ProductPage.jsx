@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar from '../components/FilterSidebar.jsx';
 import SearchBar from '../components/SearchBar.jsx'; // Mantenemos el searchbar aquí
+import './ProductPage.css'; // Asegúrate de tener estilos específicos para esta página
 
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
@@ -86,26 +87,33 @@ const ProductsPage = () => {
     };
 
     return (
-        <div className="container my-5 py-5">
-            {/* --- SECCIÓN DE TÍTULO MEJORADA --- */}
+        // Contenedor principal con fondo blanco y padding
+        <div className="container-fluid product-page-container px-lg-5">
+            {/* Sección de Título */}
             <div className="text-center mb-5">
-                <h1 className="display-4 fw-bolder">Explorá Nuestros Productos</h1>
-                <p className="lead text-muted">Encontrá la opción perfecta para tu estilo de vida.</p>
+                <h1 className="page-title">Explorá Nuestros Productos</h1>
+                <p className="page-subtitle">Encontrá la opción perfecta para tu estilo de vida.</p>
             </div>
 
-            <div className="row">
+            <div className="row gx-lg-5"> {/* gx-lg-5 añade espacio horizontal entre columnas en pantallas grandes */}
+                {/* Columna de Filtros */}
                 <div className="col-lg-3">
-                    <FilterSidebar onFilterChange={handleFilterChange} />
+                    <div className="filter-sidebar">
+                        <FilterSidebar onFilterChange={handleFilterChange} />
+                    </div>
                 </div>
+
+                {/* Columna de Productos */}
                 <div className="col-lg-9">
-                    <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
+                    {/* Barra de Búsqueda y Ordenamiento */}
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 search-sort-bar">
                         <div className="flex-grow-1">
                             <SearchBar onSearch={(query) => handleFilterChange({ searchQuery: query })} />
                         </div>
-                        <div>
-                            <select 
-                                className="form-select" 
-                                value={filters.sort} 
+                        <div style={{ minWidth: '200px' }}> {/* Ancho mínimo para el dropdown */}
+                            <select
+                                className="form-select"
+                                value={filters.sort}
                                 onChange={(e) => handleFilterChange({ sort: e.target.value })}
                             >
                                 <option value="asc">Ordenar por Precio (Menor)</option>
@@ -113,18 +121,19 @@ const ProductsPage = () => {
                             </select>
                         </div>
                     </div>
-                    
-                    {loading && <div className="text-center"><h4>Cargando...</h4></div>}
-                    {error && <div className="alert alert-danger">Error: {error}</div>}
+
+                    {/* Grilla de Productos */}
+                    {loading && <div className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>}
+                    {error && <div className="alert alert-danger">{error}</div>}
                     
                     {!loading && !error && (
-                        <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4"> {/* g-4 añade espacio entre tarjetas */}
                             {displayedProducts.length > 0 ? (
                                 displayedProducts.map(product => (
                                     <ProductCard key={product.id} product={product} />
                                 ))
                             ) : (
-                                <p className="text-center text-muted col-12">No se encontraron productos que coincidan con los filtros.</p>
+                                <p className="text-center text-muted col-12 mt-5">No se encontraron productos que coincidan con tu búsqueda o filtros.</p>
                             )}
                         </div>
                     )}

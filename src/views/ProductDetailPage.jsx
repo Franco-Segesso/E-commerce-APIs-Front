@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
+import './ProductDetailPage.css';
 
 const ProductDetailPage = () => {
     // ... (toda la lógica de fetch y de agregar al carrito no cambia)
@@ -31,8 +32,19 @@ const ProductDetailPage = () => {
     }, [productId]);
     
     const hasDiscount = product?.discount && product.discount > 0;
-    const finalPrice = hasDiscount ? product.price * (1 - product.discount) : product?.price;
+    const finalPricePerUnit = hasDiscount ? product.price * (1 - product.discount) : product?.price;
 
+    const totalPriceForQuantity = (finalPricePerUnit * quantity).toFixed(2);
+    
+    const handleQuantityChange = (amount) => {
+        setQuantity(prevQuantity => {
+            const newQuantity = prevQuantity + amount;
+            // Asegura que la cantidad no sea menor que 1
+            return newQuantity < 1 ? 1 : newQuantity;
+        });
+    };
+    
+    
     const handleAddToCart = () => {
         if (!product) return;
 
@@ -49,7 +61,7 @@ const ProductDetailPage = () => {
         
         const productToAdd = { 
             ...product, 
-            price: finalPrice, 
+            price: finalPricePerUnit, 
             quantity: requestedQuantity
         };
         addToCart(productToAdd);
@@ -62,38 +74,78 @@ const ProductDetailPage = () => {
 
 
     return (
-        <section className="py-5">
-            <div className="container px-4 px-lg-5 my-5">
-                <div className="row gx-4 gx-lg-5 align-items-center">
-                    {/* --- CORRECCIÓN CLAVE AQUÍ --- */}
-                    {/* Agregamos "position-relative" al contenedor de la imagen */}
-                    <div className="col-md-6 position-relative">
-                        
-                        <img className="card-img-top mb-5 mb-md-0" src={`data:image/jpeg;base64,${product.imageBase64}`} alt={product.name} />
+        // Usamos container-fluid para más control y padding personalizado
+        <div className="container-fluid product-detail-page px-lg-5"> 
+            <div className="row gx-lg-5 align-items-center"> {/* gx-lg-5 da espacio entre columnas */}
+                {/* Columna de la Imagen */}
+                <div className="col-lg-6 mb-4 mb-lg-0">
+                    <img 
+                        className="img-fluid product-detail-img w-100" // Aplicamos la nueva clase
+                        src={`data:image/jpeg;base64,${product.imageBase64}`} 
+                        alt={product.name} 
+                    />
+                </div>
+                
+                {/* Columna de Detalles */}
+                <div className="col-lg-6 product-details">
+                    <h1 className="product-detail-title">{product.name}</h1>
+                    
+                    {/* Sección de Precio */}
+                    <div className="product-detail-price">
+                        {hasDiscount ? (
+                            <>
+                                <span className="original-price">${product.price.toFixed(2)}</span>
+                                <span className="fw-bold">${finalPricePerUnit.toFixed(2)}</span>
+                            </>
+                        ) : (
+                            <span>${finalPricePerUnit.toFixed(2)}</span>
+                        )}
                     </div>
-                    <div className="col-md-6">
-                        <h1 className="display-5 fw-bolder">{product.name}</h1>
-                        <div className="fs-5 mb-3">
-                            {hasDiscount ? (
-                                <div>
-                                    <span className="text-decoration-line-through me-2">${product.price.toFixed(2)}</span>
-                                    <span className="fw-bold">${finalPrice.toFixed(2)}</span>
-                                </div>
-                            ) : (
-                                <span>${product.price.toFixed(2)}</span>
-                            )}
-                        </div>
-                        <p className="lead">{product.description}</p>
-                        <div className="d-flex">
-                            <input className="form-control text-center me-3" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} min="1" style={{maxWidth: '4rem'}} />
-                            <button onClick={handleAddToCart} className="btn btn-outline-dark flex-shrink-0" type="button">
-                                Agregar al carrito
-                            </button>
-                        </div>
+
+                    <p className="lead mb-4">{product.description}</p>
+
+                    {/* Selector de Cantidad */}
+                    <div className = "quantity-selector-wrapper">
+                    <label className="form-label fw-bold">ELIGE LA CANTIDAD</label>
+                    <div className="quantity-selector">
+                        <button 
+                            className="btn btn-quantity" 
+                            onClick={() => handleQuantityChange(-1)}
+                            aria-label="Disminuir cantidad"
+                        >
+                            -
+                        </button>
+                        <input 
+                            className="form-control quantity-input" 
+                            type="number" 
+                            value={quantity} 
+                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} // Evita valores inválidos
+                            min="1"
+                            aria-label="Cantidad"
+                        />
+                        <button 
+                            className="btn btn-quantity" 
+                            onClick={() => handleQuantityChange(1)}
+                            aria-label="Aumentar cantidad"
+                        >
+                            +
+                        </button>
+                    </div>
+                    </div>
+
+                    {/* Botón Agregar al Carrito con precio dinámico */}
+                    <div className="d-grid">
+                        <button 
+                            onClick={handleAddToCart} 
+                            className="btn btn-add-to-cart btn-lg" 
+                            type="button"
+                        >
+                            Añadir - ${totalPriceForQuantity} 
+                        </button>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

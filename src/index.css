@@ -26,3 +26,78 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
 }
+
+/* 1. Definimos tu nuevo color verde como el primario de Bootstrap */
+:root {
+  --bs-primary: #05934E; /* Tu nuevo verde */
+  --bs-primary-rgb: 5, 147, 78; /* Componentes RGB del nuevo verde */
+  --bs-link-color: var(--bs-primary); /* Links también en verde primario */
+  --bs-link-hover-color: #047a41; /* Un verde un poco más oscuro al pasar el mouse */
+}
+
+/* 2. Botón Primario (Verde sólido) */
+/* Usado en el sidebar para "Aplicar Precio" */
+.btn-primary {
+  --bs-btn-color: #ffffff; /* Texto blanco (mejor contraste con este verde) */
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: #047a41; /* Verde más oscuro para hover */
+  --bs-btn-hover-border-color: #036f3a;
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: #036f3a; /* Aún más oscuro para active */
+  --bs-btn-active-border-color: #036134;
+  --bs-btn-disabled-bg: var(--bs-primary);
+  --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+/* 3. Botón Outline Dark (Verde borde y texto) */
+/* Usado en la ProductCard para "Ver detalles" */
+.btn-outline-dark {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-color: #ffffff; /* Texto blanco al pasar mouse */
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: var(--bs-primary);
+  --bs-btn-active-border-color: var(--bs-primary);
+  --bs-btn-disabled-color: var(--bs-primary);
+  --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+/* 4. Botón Outline Secondary (Verde borde y texto) */
+/* Usado en el sidebar para "Limpiar Filtros" */
+.btn-outline-secondary {
+    --bs-btn-color: var(--bs-primary); /* Texto verde */
+    --bs-btn-border-color: var(--bs-primary); /* Borde verde */
+    --bs-btn-hover-color: #fff; /* Texto blanco al pasar mouse */
+    --bs-btn-hover-bg: var(--bs-primary);
+    --bs-btn-hover-border-color: var(--bs-primary);
+    /* Mantener estilo similar al outline-dark */
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--bs-primary);
+    --bs-btn-active-border-color: var(--bs-primary);
+}
+
+/* 5. Categoría activa y hover en el Sidebar */
+.filter-sidebar .category-list .list-group-item {
+  color: #495057;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+.filter-sidebar .category-list .list-group-item:hover {
+  color: var(--bs-primary); /* Verde al pasar el mouse */
+  font-weight: 500;
+}
+.filter-sidebar .category-list .list-group-item.active {
+  color: var(--bs-primary); /* Verde cuando está activa */
+  font-weight: 600;
+}
+
+/* 6. Precio en la Product Card */
+.product-card-price {
+  color: var(--bs-primary); /* Precio principal en verde */
+}
+.product-card-price .original-price {
+  color: #6c757d;
+}

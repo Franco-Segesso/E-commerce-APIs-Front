@@ -1,0 +1,195 @@
+/* src/views/ProductPage.css */
+
+/* Estilo para el contenedor principal de la página */
+.product-page-container {
+  background-color: #ffffff; /* Fondo blanco limpio */
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+/* Título de la página */
+.page-title {
+  font-weight: 700; /* Más grueso */
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: #6c757d; /* Gris Bootstrap */
+  margin-bottom: 2.5rem;
+}
+
+/* Sidebar de filtros */
+.filter-sidebar {
+  background-color: #f8f9fa; /* Fondo gris claro */
+  padding: 1.5rem;
+  border-radius: 0.5rem; /* Bordes redondeados */
+  height: fit-content; /* Ajusta la altura al contenido */
+  position: sticky; /* Fija el sidebar al hacer scroll */
+  top: 80px; /* Espacio desde el navbar (ajusta si tu navbar es diferente) */
+}
+
+.filter-sidebar h5 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Estilo para los items de categoría */
+.category-list .list-group-item {
+  background-color: transparent;
+  border: none;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  color: #495057;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.category-list .list-group-item:hover,
+.category-list .list-group-item.active {
+  color: var(--bs-primary); /* Usa el color primario verde */
+  font-weight: 500;
+}
+
+/* Botones del sidebar */
+.filter-sidebar .btn {
+  font-size: 0.9rem;
+}
+
+/* Barra de búsqueda y ordenamiento */
+.search-sort-bar {
+  margin-bottom: 2rem;
+}
+
+.search-sort-bar .form-control,
+.search-sort-bar .form-select {
+  font-size: 0.9rem;
+}
+
+/* Tarjeta de producto mejorada */
+.product-card-enhanced {
+  border: 1px solid #dee2e6; /* Borde sutil */
+  border-radius: 0.5rem;
+  overflow: hidden; /* Para que la imagen no se salga */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.product-card-enhanced:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.product-card-img-container {
+  aspect-ratio: 4 / 3; /* Proporción más común para productos */
+  overflow: hidden;
+  background-color: #e9ecef; /* Color de fondo mientras carga la imagen */
+}
+
+.product-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card-enhanced:hover .product-card-img {
+  transform: scale(1.05); /* Efecto zoom sutil */
+}
+
+.product-card-body {
+  padding: 1rem;
+  text-align: left; /* Alineamos a la izquierda */
+}
+
+.product-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  white-space: nowrap; /* Evita que el título se rompa en dos líneas */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade "..." si el título es muy largo */
+}
+
+.product-card-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--bs-primary); /* Color verde primario */
+}
+
+.product-card-price .original-price {
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: #6c757d;
+  margin-right: 0.5rem;
+}
+
+.product-card-footer {
+  padding: 0 1rem 1rem 1rem; /* Padding solo abajo */
+  border-top: none;
+  background-color: transparent;
+}
+
+:root {
+  --bs-primary: #46ec13; /* Tu verde brillante */
+  --bs-primary-rgb: 70, 236, 19; /* Componentes RGB del verde */
+  --bs-link-color: #38b810; /* Un verde un poco más oscuro para links */
+  --bs-link-hover-color: #2a8a0c; /* Más oscuro al pasar el mouse */
+}
+
+/* 2. Botón Primario (Verde sólido) */
+/* Usado en el sidebar para "Aplicar Precio" */
+.btn-primary {
+  --bs-btn-color: #142210; /* Texto oscuro para contraste */
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-color: #142210;
+  --bs-btn-hover-bg: #3fcc11; 
+  --bs-btn-hover-border-color: #3cb810;
+  --bs-btn-active-color: #142210;
+  --bs-btn-active-bg: #3cb810;
+  --bs-btn-active-border-color: #39a30e;
+}
+
+/* 3. Botón Outline Dark (Verde borde y texto) */
+/* Usado en la ProductCard para "Ver detalles" */
+.btn-outline-dark {
+  --bs-btn-color: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-color: #142210; /* Texto oscuro al pasar mouse */
+  --bs-btn-hover-bg: var(--bs-primary);
+  --bs-btn-hover-border-color: var(--bs-primary);
+  --bs-btn-active-color: #142210;
+  --bs-btn-active-bg: var(--bs-primary);
+  --bs-btn-active-border-color: var(--bs-primary);
+  --bs-btn-disabled-color: var(--bs-primary);
+  --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+/* 4. Botón Outline Secondary (Verde borde y texto más suave) */
+/* Usado en el sidebar para "Limpiar Filtros" */
+.btn-outline-secondary {
+    --bs-btn-color: var(--bs-link-color); /* Verde más oscuro */
+    --bs-btn-border-color: #adb5bd; /* Borde gris estándar */
+    --bs-btn-hover-color: #fff; /* Texto blanco */
+    --bs-btn-hover-bg: var(--bs-link-color);
+    --bs-btn-hover-border-color: var(--bs-link-color);
+    /* ... (podrías definir :active también si querés) ... */
+}
+
+/* 5. Categoría activa en el Sidebar */
+.category-list .list-group-item.active {
+  color: var(--bs-primary);
+  font-weight: 600; /* Un poco más grueso */
+  background-color: transparent; /* Sin fondo */
+  border: none;
+}
+.category-list .list-group-item:hover {
+  color: var(--bs-link-color); /* Verde oscuro al pasar mouse */
+}
+
+/* 6. Precio en la Product Card */
+.product-card-price {
+  color: var(--bs-primary); /* Precio principal en verde */
+}
+.product-card-price .original-price {
+  color: #6c757d; /* Precio tachado sigue gris */
+}

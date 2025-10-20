@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import './FilterSidebar.css'; // Asegúrate de tener estilos específicos para el sidebar
 
 const FilterSidebar = ({ onFilterChange }) => {
     const [categories, setCategories] = useState([]);
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const [error, setError] = useState('');
+    const [activeCategory, setActiveCategory] = useState(null); // Para resaltar la categoría activa
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -36,7 +38,13 @@ const FilterSidebar = ({ onFilterChange }) => {
     
     const handleCategoryClick = (categoryId) => {
         setError('');
-        onFilterChange({ category: categoryId });
+        setActiveCategory(categoryId); // Guardamos la categoría activa
+        onFilterChange({ 
+            category: categoryId,
+            price_min: '', // Limpiamos precio al cambiar categoría
+            price_max: ''
+        });
+
     };
 
     const handleClearFilters = () => {
@@ -44,29 +52,25 @@ const FilterSidebar = ({ onFilterChange }) => {
         setMaxPrice('');
         setError('');
         onFilterChange({ category: null, price_min: '', price_max: '', sort: 'asc' });
+        setActiveCategory(null);
     };
 
     return (
-        // Quitamos el fondo y el borde para un look más integrado
-        <div className="p-3">
-            <h4 className="fw-bolder">Filtros</h4>
-            <hr />
-
+        <div> {/* Quitamos el contenedor extra, ya está en ProductPage */}
             <h5>Categorías</h5>
-            {/* Usamos list-group-flush y border-0 para un estilo más limpio */}
-            <ul className="list-group list-group-flush mb-3">
-                <li 
-                    className="list-group-item list-group-item-action border-0"
-                    style={{cursor: 'pointer'}}
+            <ul className="list-group list-group-flush mb-4 category-list">
+                {/* Botón para "Todas" */}
+                <li
+                    className={`list-group-item ${activeCategory === null ? 'active' : ''}`}
                     onClick={() => handleCategoryClick(null)}
                 >
                     Todas
                 </li>
+                {/* Mapeo de categorías */}
                 {categories.map(category => (
-                    <li 
-                        key={category.id} 
-                        className="list-group-item list-group-item-action border-0"
-                        style={{cursor: 'pointer'}}
+                    <li
+                        key={category.id}
+                        className={`list-group-item ${activeCategory === category.id ? 'active' : ''}`}
                         onClick={() => handleCategoryClick(category.id)}
                     >
                         {category.description}
@@ -74,24 +78,21 @@ const FilterSidebar = ({ onFilterChange }) => {
                 ))}
             </ul>
 
-            <hr />
-
-            <h5 className="mt-3">Precio</h5>
+            <h5>Precio</h5>
             <div className="input-group mb-2">
+                <span className="input-group-text">$</span>
                 <input type="number" className="form-control" placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} min="0"/>
             </div>
             <div className="input-group mb-3">
+                 <span className="input-group-text">$</span>
                 <input type="number" className="form-control" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} min="0"/>
             </div>
             {error && <small className="text-danger d-block mb-2">{error}</small>}
-            {/* Botón verde para coincidir con el estilo del ejemplo */}
-            <button className="btn btn-success w-100" onClick={handleApplyPriceFilter}>
-                Aplicar
+            <button className="btn btn-primary w-100 mb-4" onClick={handleApplyPriceFilter}>
+                Aplicar Precio
             </button>
 
-            <hr />
-
-            <button className="btn btn-outline-secondary w-100 mt-2" onClick={handleClearFilters}>
+            <button className="btn btn-outline-secondary w-100 btn-sm" onClick={handleClearFilters}>
                 Limpiar Filtros
             </button>
         </div>
