@@ -1,0 +1,60 @@
+/* --- CSS PARA EL LOGIN PAGE (LoginPage.jsx) --- */
+
+.login-page-wrapper {
+  /* Ocupa el 100% de la altura de la vista para centrar todo verticalmente */
+  min-height: 100vh; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f7f7f7; 
+}
+
+.login-card-split {
+  /* Contenedor principal de la tarjeta, con esquinas redondeadas y sombra */
+  display: flex;
+  width: 100%; 
+  max-width: 100%; 
+  min-height: 100%; 
+  border-radius: 1.5rem;
+  overflow: hidden; 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background-color: white; 
+}
+
+/* Columna de la izquierda (Imagen/Branding) */
+.login-left-panel {
+  flex: 1; 
+  background-color: #cde2cd; /* Verde muy claro similar al de Lunchy */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+/* Columna de la derecha (Formulario) */
+.login-right-panel {
+  width: 50%; 
+  padding: 3rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+}
+
+/* Ocultar el panel izquierdo en móviles */
+@media (max-width: 768px) {
+  .login-card-split {
+    width: 100%;
+    min-height: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .login-left-panel {
+    display: none;
+  }
+  .login-right-panel {
+    width: 100%;
+    padding: 2rem;
+  }
+}
