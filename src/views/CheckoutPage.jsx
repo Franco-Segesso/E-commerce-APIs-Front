@@ -3,20 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useEffect } from 'react';
+import './CheckoutPage.css';
 
 const CheckoutPage = () => {
     const { cartItems, clearCart } = useCart();
-    const { authToken, user } = useAuth();
+    const { authToken } = useAuth();
     const navigate = useNavigate();
     
+    // Simplificamos los estados del formulario
     const [shippingAddress, setShippingAddress] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('Tarjeta de Crédito');
+    const [paymentMethod, setPaymentMethod] = useState('Credit Card'); // Valor por defecto
+    
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [userId, setUserId] = useState(null); // Estado para almacenar el userId
+    const [userId, setUserId] = useState(null);
 
-    const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
-
+    // Cálculos de precios
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const estimatedTaxes = subtotal * 0.05;
+    const shipping = subtotal > 50000 ? 0.00 : 5000.00;
+    const totalPrice = (subtotal + estimatedTaxes + shipping).toFixed(2);
 
     useEffect(() => {
         if(authToken){
@@ -104,48 +110,107 @@ const CheckoutPage = () => {
     };
 
     return (
-        <div className="container my-5" style={{ maxWidth: '800px' }}>
-            <form onSubmit={handleConfirmOrder}>
-                <h2 className="mb-4">Finalizar Compra</h2>
-                <div className="card">
-                    <div className="card-body">
-                        <h5 className="card-title">Resumen y Datos</h5>
-                        {/* El resto del formulario no cambia, solo la lógica del botón */}
-                        <ul className="list-group list-group-flush mb-3">
-                            {cartItems.map(item => (
-                                <li key={item.id} className="list-group-item d-flex justify-content-between">
-                                    <span>{item.name} (x{item.quantity})</span>
-                                    <span>${(item.price * item.quantity).toFixed(2)}</span>
-                                </li>
-                            ))}
-                            <li className="list-group-item d-flex justify-content-between fw-bold fs-5">
-                                <span>Total</span>
-                                <span>${totalPrice}</span>
-                            </li>
-                        </ul>
+        <div className="container-fluid checkout-page-container">
+            <div className="checkout-layout"> {/* Contenedor de 2 columnas */}
+                
+                {/* --- Columna Izquierda: Formulario --- */}
+                <div className="checkout-form-section">
+                    <h4 className="mb-3 fw-bold">Método de pago</h4>
+                    <div className="payment-methods">
+                        {/* Botones para seleccionar método de pago */}
+                        <button 
+                            type="button" 
+                            className={`btn ${paymentMethod === 'Tarjeta de Credito' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('Tarjeta de Credito')}
+                        >
+                            Tarjeta de Credito
+                        </button>
+                        <button 
+                            type="button" 
+                            className={`btn ${paymentMethod === 'Mercado Pago' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('Mercado Pago')}
+                        >
+                            Mercado Pago
+                        </button>
+                         <button 
+                            type="button" 
+                            className={`btn ${paymentMethod === 'Google Pay' ? 'active' : ''}`}
+                            onClick={() => setPaymentMethod('Google Pay')}
+                        >
+                            Google Pay
+                        </button>
+                    </div>
 
+                    <h4 className="mb-3 fw-bold">Dirección de envío</h4>
+                    <form id="checkout-form" onSubmit={handleConfirmOrder}> {/* Damos un ID al form */}
                         <div className="mb-3">
-                            <label className="form-label">Dirección de Envío</label>
-                            <input type="text" className="form-control" value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} required />
+                            <label htmlFor="shippingAddress" className="form-label">Dirección</label>
+                            <input 
+                                type="text" 
+                                className="form-control" 
+                                id="shippingAddress" 
+                                value={shippingAddress} 
+                                onChange={(e) => setShippingAddress(e.target.value)} 
+                                placeholder="Av. Callao 1240"
+                                required 
+                            />
                         </div>
-                        <div className="mb-3">
-                             <label className="form-label">Método de Pago</label>
-                             <select className="form-select" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                                <option>Tarjeta de Crédito</option>
-                                <option>Mercado Pago</option>
-                             </select>
-                        </div>
+                        {/* Quitamos los otros campos: nombre, email, teléfono, ciudad, etc. */}
                         
-                        {error && <div className="alert alert-danger">{error}</div>}
+                        {error && <div className="alert alert-danger mt-3">{error}</div>}
+                    </form>
+                </div>
 
-                        <div className="d-grid mt-4">
-                            <button type="submit" className="btn btn-success btn-lg" disabled={loading}>
-                                {loading ? 'Procesando...' : 'Confirmar y Pagar'}
-                            </button>
+                {/* --- Columna Derecha: Resumen del Pedido --- */}
+                <div className="order-summary-section">
+                    <h4 className="mb-4 fw-bold">Tu orden</h4>
+                    
+                    {/* Lista de productos en el resumen */}
+                    {cartItems.map(item => (
+                        <div key={item.id} className="order-summary-item">
+                            <img src={`data:image/jpeg;base64,${item.imageBase64}`} alt={item.name} />
+                            <div className="order-summary-item-details">
+                                <p className="fw-medium mb-0">{item.name}</p>
+                                <p className="text-muted">Cant: {item.quantity}</p>
+                            </div>
+                            <span className="order-summary-item-price">${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    ))}
+
+                    {/* Totales */}
+                    <div className="summary-totals mt-3">
+                        <div>
+                            <span>Subtotal</span>
+                            <span>${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="text-muted">
+                            <span>Envío</span>
+                            <span>${shipping.toFixed(2)}</span>
+                        </div>
+                        <div className="text-muted">
+                            <span>Impuestos</span>
+                            <span>${estimatedTaxes.toFixed(2)}</span>
+                        </div>
+                        <hr/>
+                        <div className="total-row">
+                            <span>Total</span>
+                            <span>${totalPrice}</span>
                         </div>
                     </div>
+
+                    {/* Botón de Confirmar (ahora fuera del form, pero lo activa) */}
+                    <div className="d-grid mt-4">
+                        <button 
+                            type="submit" 
+                            form="checkout-form" // Vincula este botón al formulario
+                            className="btn btn-confirm-checkout btn-lg" 
+                            disabled={loading || !userId}
+                        >
+                            {loading ? 'Procesando...' : 'Confirmar Orden'}
+                        </button>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };
