@@ -1,0 +1,37 @@
+/* src/components/NavBar.css */
+
+.navbar-nav .nav-link.nav-link-hover {
+  position: relative; /* Necesario para el pseudo-elemento */
+  padding-bottom: 0.5rem; /* Espacio para la línea */
+  transition: color 0.2s ease-in-out; /* Transición suave de color */
+}
+
+/* La línea de abajo (pseudo-elemento ::after) */
+.navbar-nav .nav-link.nav-link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%; /* Empieza en el centro */
+  width: 0; /* Empieza invisible */
+  height: 2px; /* Grosor de la línea */
+  background-color: var(--bs-primary); /* Color verde */
+  transition: all 0.3s ease-in-out; /* Animación suave */
+  transform: translateX(-50%); /* Asegura que crezca desde el centro */
+}
+
+/* Al pasar el mouse por encima del link */
+.navbar-nav .nav-link.nav-link-hover:hover::after,
+.navbar-nav .nav-link.nav-link-hover.active::after { /* También si está activo */
+  width: 60%; /* Ancho final de la línea (ajusta si querés) */
+}
+
+.navbar-nav .nav-link.nav-link-hover:hover {
+  color: var(--bs-dark); /* Color del texto al pasar el mouse (opcional) */
+}
+
+/* Estilo para el nombre de usuario */
+.navbar-user-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Espacio entre ícono y nombre */
+}

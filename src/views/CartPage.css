@@ -1,126 +1,144 @@
 /* src/views/CartPage.css */
 
-/* --- Estilo General del Contenedor del Carrito --- */
-.container.my-5 {
-  max-width: 1140px; /* Limitamos el ancho para una mejor lectura */
+.cart-page-container {
+  background-color: #f8f9fa; /* Fondo gris claro para toda la página */
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  width: 100%; /* Asegura que ocupe todo el ancho */
 }
 
-/* --- Nuevo Estilo para CADA ÍTEM del Carrito --- */
-/* Quitamos el borde y la sombra para que parezca una lista, no una tarjeta */
-.card.mb-3 {
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  background-color: transparent;
-  border-bottom: 1px solid #e9ecef; /* Separador entre ítems */
-  padding: 1.5rem 0;
-}
-.card.mb-3:last-child {
-  border-bottom: none; /* El último ítem no necesita separador */
+/* Tarjeta de item del carrito */
+.cart-item-card {
+  border: none; /* Sin borde */
+  border-radius: 0.75rem; /* Bordes más redondeados */
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05); /* Sombra suave */
+  margin-bottom: 1.5rem;
+  overflow: hidden; /* Para que la imagen encaje bien */
 }
 
-/* Contenedor de la imagen */
-.card.mb-3 .col-md-2 {
-  padding: 0;
-}
-
-.card.mb-3 .img-fluid {
-  width: 100px;
+.cart-item-image img {
+  width: 100px; /* Tamaño fijo para la imagen */
   height: 100px;
   object-fit: cover;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem; /* Bordes redondeados para la imagen */
 }
 
-/* --- Reorganización MÁGICA con CSS Grid --- */
-/* Convertimos el card-body en una grilla para reordenar todo */
-.card.mb-3 .card-body {
-  display: grid;
-  padding: 0 0 0 1.5rem; /* Espacio a la izquierda de la imagen */
-  grid-template-columns: 1fr auto; /* Columna 1 flexible, Columna 2 se ajusta al contenido */
-  grid-template-rows: auto auto;    /* Dos filas automáticas */
-  gap: 0.25rem 1rem; /* Espacio entre filas y columnas */
+.cart-item-details {
+  padding-left: 1.5rem;
+}
+
+.cart-item-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.cart-item-price-unit {
+  font-size: 0.9rem;
+  color: #6c757d; /* Gris */
+}
+
+/* Selector de Cantidad (similar al de ProductDetail) */
+.cart-quantity-selector {
+  display: flex;
   align-items: center;
 }
 
-/* Hacemos que el <div> que contiene el título y el precio "desaparezca" para que sus hijos se ubiquen en la grilla */
-.card.mb-3 .d-flex.justify-content-between {
-  display: contents;
-}
-
-/* Posicionando cada elemento en la grilla */
-.card.mb-3 .card-title:first-of-type { /* El Nombre */
-  grid-column: 1 / 2;
-  grid-row: 1 / 2;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-  text-align: left;
-}
-
-.card.mb-3 .card-text { /* La Cantidad */
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
-  color: #6c757d;
-  font-size: 0.9rem;
-  margin: 0;
-  text-align: left;
-}
-
-.card.mb-3 .card-title:last-of-type { /* El Precio */
-  grid-column: 2 / 3;
-  grid-row: 1 / 2;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-  justify-self: end; /* Lo alineamos a la derecha */
-}
-
-.card.mb-3 .btn-outline-danger { /* El botón Eliminar */
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
-  justify-self: end; /* Lo alineamos a la derecha */
-  align-self: start; /* Lo alineamos arriba en su celda */
-
-  /* Estilo de texto para que sea más sutil */
-  background: none !important;
-  border: none !important;
-  color: #dc3545 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.card.mb-3 .btn-outline-danger:hover {
-  text-decoration: underline;
-}
-
-
-/* --- Estilos para el Resumen del Pedido (sin cambios) --- */
-.col-md-4 .card {
-  border: 1px solid #dee2e6;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
-}
-
-@media (min-width: 768px) {
-  .col-md-4 .card {
-    position: sticky;
-    top: 100px;
-  }
-}
-
-.btn-success {
-  background-color: var(--bs-primary) !important;
-  border-color: var(--bs-primary) !important;
-  color: white !important;
+.cart-quantity-selector .btn-quantity {
+  background-color: #e9ecef; /* Fondo gris claro para los botones */
+  color: #495057; /* Texto gris oscuro */
+  border: none;
+  width: 30px;
+  height: 30px;
+  font-size: 1rem;
   font-weight: bold;
-  font-size: 1.1rem;
-  padding: 0.8rem;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Botones redondos */
   transition: background-color 0.2s ease;
 }
 
-.btn-success:hover {
-  background-color: #047a41 !important;
-  border-color: #047a41 !important;
+.cart-quantity-selector .btn-quantity:hover {
+  background-color: #dee2e6; /* Gris un poco más oscuro */
+}
+
+.cart-quantity-selector .quantity-input {
+  width: 45px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none; /* Sin bordes */
+  background-color: transparent; /* Fondo transparente */
+  height: 30px;
+  padding: 0 0.25rem;
+  margin: 0 0.25rem; /* Pequeño espacio a los lados */
+}
+/* Oculta las flechas */
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button { margin: 0; -webkit-appearance: none; }
+.quantity-input[type=number] { -moz-appearance: textfield; }
+
+.cart-item-total-price {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.btn-remove-item {
+  color: #dc3545; /* Rojo Bootstrap */
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.btn-remove-item:hover {
+  color: #a71d2a; /* Rojo más oscuro */
+}
+
+/* Tarjeta Resumen del Pedido */
+.order-summary-card {
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  position: sticky; /* Fija el resumen al hacer scroll */
+  top: 80px; /* Espacio desde el navbar */
+}
+
+.order-summary-card hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.order-summary-total {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.cart-page-container .btn-proceed { /* <-- Añadimos el contenedor padre */
+  background-color: var(--bs-primary); /* Tu verde primario */
+  border-color: var(--bs-primary);
+  color: #142210; /* Texto oscuro */
+  font-weight: 600;
+  padding: 0.75rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; /* Transición suave */
+}
+
+.cart-page-container .btn-proceed:hover { /* <-- Añadimos el contenedor padre */
+  background-color: #047a41; /* Verde oscuro */
+  border-color: #036f3a;
+  color: #142210;
+}
+
+.continue-shopping-link {
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.continue-shopping-link:hover {
+  color: #495057;
+  text-decoration: underline;
 }

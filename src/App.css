@@ -56,6 +56,10 @@
 .read-the-docs {
   color: #888;
 }
+ /* Evita que el texto se quiebre en ciertas partes */
+.no-wrap {
+  white-space: nowrap;
+}
 
 /* ---------- newsletter ---------- */
 /* agregado*/
@@ -157,4 +161,39 @@
   margin-top: -9rem !important; /* Ejemplo: antes era -6.5rem */
   position: relative; 
   z-index: 10; 
+}
+/* ----- FOOTER ESTILO LUNCHY ----- */
+.footer-lunchy {
+  background-color: #3b9168ff; /* fondo beige claro */
+  color: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Links de navegación */
+.footer-lunchy .footer-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.footer-lunchy .footer-link:hover {
+  color:  #879c73;
+}
+
+
+/* Línea inferior */
+.footer-lunchy hr {
+  border-color: #a6b893;
+  opacity: 0.5;
+}
+
+/* Textos legales */
+.footer-lunchy .footer-legal {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.footer-lunchy .footer-legal:hover {
+  color: #000000;
 }

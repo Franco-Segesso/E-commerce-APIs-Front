@@ -101,3 +101,9 @@ h1, h2, h3, h4, h5, h6 {
 .product-card-price .original-price {
   color: #6c757d;
 }
+
+body {
+  overflow-y: scroll; /* Fuerza la barra de desplazamiento vertical siempre visible */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
