@@ -54,7 +54,26 @@ export const CartProvider = ({ children }) => {
         setCartItems([]);
     };
 
-    const value = { cartItems, addToCart, removeFromCart, clearCart };
+    const updateQuantity = (productId, amount) => {
+        setCartItems(prevItems =>
+            prevItems.map(item => {
+                if (item.id === productId) {
+                    const newQuantity = item.quantity + amount;
+
+                    if (item.stock !== undefined && newQuantity > item.stock) {
+                        alert(`¡Stock insuficiente! Solo quedan ${item.stock} unidades de "${item.name}".`);
+                        return item; // No cambiamos la cantidad
+                    }
+
+                    return { ...item, quantity: Math.max(1, newQuantity) };
+                }
+                
+                return item;
+            }).filter(item => item.quantity > 0) //Si la cantidad es 0, se elimina
+        );
+    };
+
+    const value = { cartItems, addToCart, removeFromCart, clearCart, updateQuantity };
 
     return (
         <CartContext.Provider value={value}>
