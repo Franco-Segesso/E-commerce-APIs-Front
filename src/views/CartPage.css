@@ -118,15 +118,16 @@
   font-weight: bold;
 }
 
-/* Botón Proceder al Pago (Verde) */
-.btn-proceed {
-  background-color: #05934E; /* Tu verde primario */
-  border-color: #05934E;
+.cart-page-container .btn-proceed { /* <-- Añadimos el contenedor padre */
+  background-color: var(--bs-primary); /* Tu verde primario */
+  border-color: var(--bs-primary);
   color: #142210; /* Texto oscuro */
   font-weight: 600;
   padding: 0.75rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; /* Transición suave */
 }
-.btn-proceed:hover {
+
+.cart-page-container .btn-proceed:hover { /* <-- Añadimos el contenedor padre */
   background-color: #047a41; /* Verde oscuro */
   border-color: #036f3a;
   color: #142210;

@@ -112,15 +112,16 @@
 }
 
 /* Botón de confirmar (verde) */
-.btn-confirm-checkout {
+.checkout-page-container .btn-confirm-checkout { /* <-- Añadimos el contenedor padre */
   background-color: var(--bs-primary, #05934E);
   border-color: var(--bs-primary, #05934E);
-  color: white; /* Texto blanco ahora */
+  color: white; /* Texto blanco */
   font-weight: 600;
   padding: 0.75rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-.btn-confirm-checkout:hover {
-  background-color: #047a41;
+.checkout-page-container .btn-confirm-checkout:hover { /* <-- Añadimos el contenedor padre */
+  background-color: #047a41; /* Verde oscuro */
   border-color: #036f3a;
   color: white;
 }
