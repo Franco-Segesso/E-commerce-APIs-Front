@@ -35,3 +35,8 @@
     align-items: center;
     gap: 0.5rem; /* Espacio entre ícono y nombre */
 }
+
+.btn btn-outline-primary btn-sm{
+    color: #05934E;
+    background-color: #05934E;
+}

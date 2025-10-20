@@ -103,7 +103,7 @@ const Navbar = () => {
                             </li>
                         ) : (
                             <li className="nav-item">
-                                <Link className="btn btn-outline-primary btn-sm" to="/login">Iniciar Sesión</Link>
+                                <Link className="btn btn-primary" to="/login">Iniciar Sesión</Link> {/* Botón verde simple de login */}
                             </li>
                         )}
                     </ul>
