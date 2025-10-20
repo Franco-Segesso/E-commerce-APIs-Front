@@ -1,68 +1,142 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx'; // Asegurate que la ruta sea correcta
+import Input from '../components/Input'; // Reutilizamos el componente Input
+import Button from '../components/Button'; // Reutilizamos el componente Button
+import Alert from '../components/Alert'; // Reutilizamos el componente Alert
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter.jsx';
+import './RegisterPage.css';
 
 const RegisterPage = () => {
-    const [firstname, setFirstname] = useState('');
-    const [lastname, setLastname] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+    });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const [passwordStrength, setPasswordStrength] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
 
-        try {
-            const response = await fetch('http://localhost:4002/api/v1/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ firstname, lastname, email, password, role: 'ROLE_USER' }),
-            });
 
-            if (!response.ok) {
-                throw new Error('No se pudo completar el registro. El email ya podría estar en uso.');
-            }
+    // Función para calcular la fortaleza de la contraseña
+    const calculateStrength = (password) => {
+        const hasMinLength = password.length >= 6;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasSymbol = /[!@#$%^&()_+.-]/.test(password); // Usamos la regex corregida
 
-            const data = await response.json();
-            login(data.access_token);
-            navigate('/');
-            
-        } catch (err) {
-            setError(err.message);
+        if (hasMinLength && hasUpperCase && hasSymbol) {
+            return 'strong';
+        } else if (hasMinLength && (hasUpperCase || hasSymbol)) {
+            return 'medium';
+        } else if (password.length > 0) {
+            return 'weak';
+        } else {
+            return ''; // Vacío si no hay contraseña
         }
     };
 
+    const handleChange = (e) => {
+        const {name, value} = e.target;
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+
+        if (name === 'password') {
+            setPasswordStrength(calculateStrength(value));
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+
+        // Validación de contraseña
+        if (passwordStrength !== 'strong') {
+            setError('La contraseña debe tener entre 6-20 caracteres, incluir al menos una mayúscula y un símbolo (!@#$%^&()_+.-).');
+            return;
+        }
+
+        setLoading(true);
+
+        const registrationData = {
+                ...formData,
+                role: 'ROLE_USER', // Rol por defecto
+        };
+
+        fetch('http://localhost:4002/api/v1/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(registrationData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Intentamos leer el mensaje de error del backend
+                return response.json().then(errData => {
+                    throw new Error(errData.message || 'No se pudo completar el registro.');
+                }).catch(() => {
+                     throw new Error('No se pudo completar el registro. El email ya podría estar en uso.');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            login(data.access_token); // Usamos la función login del AuthContext
+            navigate('/'); // Redirigimos al inicio después del registro
+        })
+        .catch(err => {
+            setError(err.message);
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+    };
+
     return (
-        <div className="container" style={{ maxWidth: '500px' }}>
-            <div className="card p-4">
-                <h2 className="text-center mb-4">Crear una Cuenta</h2>
+        // Contenedor principal que centra
+        <div className="container register-page-container">
+            {/* Contenedor del formulario con fondo blanco y sombra */}
+            <div className="register-form-container">
+                <h2 className="text-center">Crear una Cuenta</h2>
                 <form onSubmit={handleSubmit}>
-                     <div className="row">
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">Nombre</label>
-                            <input type="text" className="form-control" value={firstname} onChange={(e) => setFirstname(e.target.value)} required />
+                    <Alert message={error} type="danger" />
+                    
+                    {/* Usamos row/col solo para nombre y apellido */}
+                    <div className="row">
+                        <div className="col-md-6">
+                            <Input id="firstname" label="Nombre" name="firstname" value={formData.firstname} onChange={handleChange} required />
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">Apellido</label>
-                            <input type="text" className="form-control" value={lastname} onChange={(e) => setLastname(e.target.value)} required />
+                        <div className="col-md-6">
+                            <Input id="lastname" label="Apellido" name="lastname" value={formData.lastname} onChange={handleChange} required />
                         </div>
                     </div>
-                    <div className="mb-3">
-                        <label className="form-label">Email</label>
-                        <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </div>
-                    <div className="mb-3">
-                        <label className="form-label">Contraseña</label>
-                        <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    </div>
-                    {error && <div className="alert alert-danger">{error}</div>}
-                    <div className="d-grid">
-                        <button type="submit" className="btn btn-primary">Registrarse</button>
+                    
+                    <Input id="email" label="Correo Electrónico" type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <Input
+                        id="password"
+                        label="Contraseña"
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        helpText="Entre 6-20 caracteres, con mayúscula y símbolo."
+                        autoComplete="new-password"
+                    />
+                    <PasswordStrengthMeter strength={passwordStrength} />
+
+                    <div className="d-grid mt-4">
+                        <Button type="submit" loading={loading} className="btn btn-primary btn-lg">
+                            Registrarse
+                        </Button>
                     </div>
                 </form>
+                <div className="text-center mt-4">
+                    <small className="text-muted">
+                        ¿Ya tienes una cuenta? <Link to="/login" className = "fw-bold">Inicia Sesión</Link>
+                    </small>
+                </div>
             </div>
         </div>
     );

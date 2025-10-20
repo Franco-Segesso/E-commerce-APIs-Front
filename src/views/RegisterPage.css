@@ -1,0 +1,76 @@
+/* src/views/RegisterPage.css */
+
+.register-page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra verticalmente */
+  align-items: center; /* Centra horizontalmente */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  min-height: calc(100vh - 120px); /* Ajusta según altura de navbar y footer */
+  padding: 2rem 1rem; /* Padding general */
+}
+
+/* Contenedor del formulario */
+.register-form-container {
+  background-color: #ffffff; /* Fondo blanco */
+  border-radius: 1rem; /* Bordes redondeados */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* Sombra suave */
+  padding: 2.5rem; /* Padding interno */
+  max-width: 550px; /* Ancho máximo del formulario */
+  width: 100%;
+}
+
+.register-form-container h2 {
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Estilo para los inputs (más redondeados) */
+.register-form-container .form-control {
+  border-radius: 0.5rem; /* Bordes más redondeados */
+  border: 1px solid #dee2e6; /* Borde más sutil */
+  padding: 0.8rem 1rem; /* Ajuste de altura */
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.register-form-container .form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Botón de registro */
+.register-form-container .btn-primary {
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+  font-weight: 600;
+  font-size: 1rem;
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #142210;
+}
+.register-form-container .btn-primary:hover {
+  background-color: #047a41;
+  border-color: #036f3a;
+}
+
+/* Password Strength Meter (sin cambios) */
+.password-strength-meter {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.password-strength-meter-bar {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 4px;
+}
+.strength-weak { background-color: #dc3545; width: 33%; }
+.strength-medium { background-color: #ffc107; width: 66%; }
+.strength-strong { background-color: #198754; width: 100%; }
+
+/* Link inferior */
+.register-form-container .text-center small {
+  font-size: 0.9rem;
+}
