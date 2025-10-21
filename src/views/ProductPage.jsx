@@ -2,68 +2,79 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar from '../components/FilterSidebar.jsx';
 import SearchBar from '../components/SearchBar.jsx';
-import './ProductPage.css'; // Asegúrate de importar el CSS
+import './ProductPage.css'; // Asumiendo que tenés los estilos aquí
 
 const ProductsPage = () => {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([]); // Productos recibidos del backend (filtrados por categoría/precio)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [filters, setFilters] = useState({
+    // Estado SOLO para los filtros que SÍ van al backend
+    const [backendFilters, setBackendFilters] = useState({
         category: null,
         price_min: null,
         price_max: null,
         sort: 'asc',
-        searchQuery: ''
     });
 
-    const fetchProducts = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        let url;
+    // --- ESTADO SEPARADO PARA LA BÚSQUEDA ---
+    const [searchQuery, setSearchQuery] = useState('');
 
-        if (filters.searchQuery) {
-            console.log("Búsqueda por frontend (temporal):", filters.searchQuery);
-            // Si la búsqueda está activa, podrías necesitar un endpoint diferente o filtrar en el frontend
-            // Por ahora, asumimos que la búsqueda limpia otros filtros y se hace sobre la lista general
-            url = new URL('http://localhost:4002/products');
-        } else if (filters.category) {
-            url = new URL(`http://localhost:4002/categories/${filters.category}/products`);
-        } else if (filters.price_min && filters.price_max) {
+    // useCallback para la función de fetch, depende SOLO de los filtros del backend
+    const fetchProducts = useCallback(async () => {
+        setLoading(true); // Mostramos carga SOLO al pedir datos al back
+        setError(null);
+
+        let url;
+        if (backendFilters.category) {
+            url = new URL(`http://localhost:4002/categories/${backendFilters.category}/products`);
+        } else if (backendFilters.price_min && backendFilters.price_max) {
             url = new URL('http://localhost:4002/products/by-price');
-            url.searchParams.append('minPrice', filters.price_min);
-            url.searchParams.append('maxPrice', filters.price_max);
+            url.searchParams.append('minPrice', backendFilters.price_min);
+            url.searchParams.append('maxPrice', backendFilters.price_max);
         } else {
              url = new URL('http://localhost:4002/products/sorted-by-price');
-             url.searchParams.append('order', filters.sort);
+             url.searchParams.append('order', backendFilters.sort);
         }
 
         try {
             const response = await fetch(url.toString());
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const data = await response.json();
-            setProducts(data.content || []);
+            setProducts(data.content || []); // Guardamos los productos recibidos
         } catch (error) {
             setError(error.message);
             setProducts([]);
         } finally {
-            setLoading(false);
+            setLoading(false); // Ocultamos carga
         }
-    }, [filters.category, filters.price_min, filters.price_max, filters.sort, filters.searchQuery]);
+    }, [backendFilters]); // <-- SOLO depende de los filtros del backend
 
+    // useEffect que llama a fetchProducts cuando cambian los filtros del backend
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
 
+    // --- FILTRADO EN FRONTEND PARA LA BÚSQUEDA ---
+    // Filtramos la lista 'products' actual basándonos en 'searchQuery'
     const displayedProducts = products.filter(product => {
-        if (filters.searchQuery) {
-            return product.name.toLowerCase().includes(filters.searchQuery.toLowerCase());
+        if (searchQuery) {
+            return product.name.toLowerCase().includes(searchQuery.toLowerCase());
         }
-        return true;
+        return true; // Si no hay búsqueda, muestra todos los productos de la lista actual
     });
 
-    const handleFilterChange = (newFilters) => {
-        setFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
+    // Función que actualiza los filtros del BACKEND
+    const handleBackendFilterChange = (newFilters) => {
+        // Al aplicar un filtro de categoría/precio/orden, limpiamos la búsqueda
+        setSearchQuery('');
+        setBackendFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
+    };
+
+    // Función que actualiza SOLO el estado de búsqueda
+    const handleSearchChange = (query) => {
+        setSearchQuery(query);
+        // NO llamamos a handleBackendFilterChange aquí
     };
 
     return (
@@ -112,22 +123,30 @@ const ProductsPage = () => {
 
             {/* --- CONTENIDO PRINCIPAL DE LA PÁGINA --- */}
             <div className="container-fluid product-page-container px-lg-5">
+            {/* ... (Título) ... */}
                 <div className="row gx-lg-5">
+                    {/* Columna de Filtros */}
                     <div className="col-lg-3">
                         <div className="filter-sidebar">
-                            <FilterSidebar onFilterChange={handleFilterChange} />
+                            {/* Pasamos handleBackendFilterChange al sidebar */}
+                            <FilterSidebar onFilterChange={handleBackendFilterChange} />
                         </div>
                     </div>
+
+                    {/* Columna de Productos */}
                     <div className="col-lg-9">
+                        {/* Barra de Búsqueda y Ordenamiento */}
                         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 search-sort-bar">
                             <div className="flex-grow-1">
-                                <SearchBar onSearch={(query) => handleFilterChange({ searchQuery: query })} />
+                                {/* El SearchBar ahora llama a handleSearchChange */}
+                                <SearchBar onSearch={handleSearchChange} />
                             </div>
                             <div style={{ minWidth: '200px' }}>
                                 <select
                                     className="form-select"
-                                    value={filters.sort}
-                                    onChange={(e) => handleFilterChange({ sort: e.target.value })}
+                                    value={backendFilters.sort}
+                                    // El select de orden SÍ actualiza los filtros del backend
+                                    onChange={(e) => handleBackendFilterChange({ sort: e.target.value })}
                                 >
                                     <option value="asc">Ordenar por Precio (Menor)</option>
                                     <option value="desc">Ordenar por Precio (Mayor)</option>
@@ -135,17 +154,21 @@ const ProductsPage = () => {
                             </div>
                         </div>
 
+                        {/* Grilla de Productos */}
                         {loading && <div className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>}
                         {error && <div className="alert alert-danger">{error}</div>}
                         
                         {!loading && !error && (
-                            <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+                            // Mostramos 'displayedProducts' (la lista filtrada en el frontend)
+                            <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 d-flex align-items-start" style={{ minHeight: '300px' }}>
                                 {displayedProducts.length > 0 ? (
                                     displayedProducts.map(product => (
                                         <ProductCard key={product.id} product={product} />
                                     ))
                                 ) : (
-                                    <p className="text-center text-muted col-12 mt-5">No se encontraron productos que coincidan con tu búsqueda o filtros.</p>
+                                    <p className="text-center text-muted col-12 mt-5">
+                                        No se encontraron productos que coincidan con tu búsqueda o filtros.
+                                    </p>
                                 )}
                             </div>
                         )}
