@@ -5,15 +5,14 @@ const Button = ({ children, loading = false, type = 'button', className = 'btn b
   return (
     <button
       type={type}
-      className={className} // Permite personalizar las clases del botón (ej. btn-success, btn-lg)
-      disabled={loading || disabled} // Deshabilita si está cargando o si se pasa 'disabled'
+      className={className} 
+      disabled={loading || disabled} 
       {...props}
     >
       {loading ? (
         <>
           {/* Spinner de Bootstrap */}
           <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          {/* Texto opcional durante la carga */}
           <span className="ms-2">Cargando...</span>
         </>
       ) : (

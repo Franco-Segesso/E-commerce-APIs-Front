@@ -1,8 +1,8 @@
 import React from 'react';
 
-// Recibe props estándar de un input, más un 'label'
+// Recibe props estándar de un input
 const Input = ({ id, label, type = 'text', name, value, onChange, required, placeholder, helpText, autocomplete, ...props }) => {
-  const inputId = id || name; // Usa 'name' como fallback para 'id' y 'htmlFor'
+  const inputId = id || name;
 
   return (
     <div className="mb-3"> {/* Contenedor estándar de Bootstrap para inputs */}
@@ -20,9 +20,9 @@ const Input = ({ id, label, type = 'text', name, value, onChange, required, plac
         onChange={onChange}
         required={required}
         placeholder={placeholder}
-        aria-describedby={helpText ? `${inputId}Help` : undefined} // Para accesibilidad si hay texto de ayuda
+        aria-describedby={helpText ? `${inputId}Help` : undefined}
         autoComplete={autocomplete}
-        {...props} // Permite pasar otros atributos HTML (ej. min, max, step)
+        {...props}
       />
       {helpText && ( // Muestra texto de ayuda si se proporciona
         <div id={`${inputId}Help`} className="form-text">

@@ -2,19 +2,19 @@
   color: #212529; /* Color de texto oscuro por defecto */
   padding: 0.35rem 0.5rem;
   font-weight: 500;
-  text-transform: capitalize; /* Coincide con "vegetariana", "carne" */
+  text-transform: capitalize;
   transition: background-color 0.15s ease-in-out;
 }
 
-/* Color al pasar el mouse (opcional, pero buena UX) */
+/* Color al pasar el mouse */
 .category-link:hover {
-  background-color: #f8f9fa; /* Un gris muy claro */
+  background-color: #f8f9fa;
   color: #000;
 }
 
-/* Estilo para el enlace ACTIVO (cuando está seleccionado) */
+/* Estilo para el enlace ACTIVO */
 .category-link.active {
-  color: #198754; /* Verde (btn-success) */
+  color: #198754;
   background-color: transparent;
   font-weight: 700; /* Más grueso cuando está activo */
 }

@@ -3,21 +3,21 @@ import React, { useState, useEffect } from 'react';
 
 const ProductForm = ({ product, onSave, onHide }) => {
     const [formData, setFormData] = useState({
-        name: '', description: '', categoryId: '', price: '', stock: '', discount: ''
+        name: '', description: '', categoryId: '', price: '', stock: '', discount: '' // Estado inicial del formulario
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [categories, setCategories] = useState([]);
 
 
-    // Cargar categorías para el dropdown
+    // Carga las categorías para el dropdown y así poder seleccionar una al crear/editar producto
     useEffect(() => {
         fetch('http://localhost:4002/categories')
             .then(res => res.json())
             .then(data => setCategories(data.content || []));
     }, []);
 
-    // Si estamos editando, llenar el formulario con los datos del producto
+    // Si estamos editando, el formulario se llena automáticametne con los datos del producto, luego estos podrán ser modificados
     useEffect(() => {
         if (product) {
             setFormData({
@@ -30,18 +30,18 @@ const ProductForm = ({ product, onSave, onHide }) => {
             });
             setImagePreview(`data:image/jpeg;base64,${product.imageBase64}`);
         } else {
-            // Si es para crear, reseteamos el form
+            // Si es para crear, reseteamos el formulario
             setFormData({ name: '', description: '', categoryId: '', price: '', stock: '', discount: '' });
             setImagePreview('');
             setImageFile(null);
         }
     }, [product]);
 
-    const handleChange = (e) => {
+    const handleChange = (e) => { // Maneja cambios en los inputs del formulario
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = (e) => { // Maneja la selección de imagen
         const file = e.target.files[0];
         if (file) {
             setImageFile(file);
@@ -49,7 +49,7 @@ const ProductForm = ({ product, onSave, onHide }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e) => { // Maneja el envío del formulario
         e.preventDefault();
         
         const submissionData = new FormData();
@@ -60,7 +60,7 @@ const ProductForm = ({ product, onSave, onHide }) => {
         const productJson = { ...formData, discount: formData.discount ? parseFloat(formData.discount) : null };
         submissionData.append('product', new Blob([JSON.stringify(productJson)], { type: 'application/json' }));
 
-        onSave(submissionData, product ? product.id : null);
+        onSave(submissionData, product ? product.id : null); // Llama a la función onSave pasada como prop para guardar el producto
     };
 
     return (

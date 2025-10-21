@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="footer-lunchy text-center">
       <div className="container py-5">
 
-        {/* 🔹 ÍCONOS REDONDOS */}
+        {/* Ícono de instagram */}
         <div className="d-flex justify-content-center gap-4 mb-4">
           <a href="https://www.instagram.com/lunchycorp/" target="_blank" rel="noopener noreferrer" className="social-circle">
             <img
@@ -21,7 +21,7 @@ export default function Footer() {
 
         </div>
 
-        {/* 🔹 LINKS DE NAVEGACIÓN */}
+        {/* Links de navegación */}
         <nav className="mb-4">
           <ul className="list-inline m-0">
             <li className="list-inline-item mx-3"><Link className="footer-link" to="/">Inicio</Link></li>
@@ -33,7 +33,7 @@ export default function Footer() {
 
         <hr className="my-4 opacity-50" />
 
-        {/* 🔹 COPYRIGHT Y LINKS LEGALES */}
+        {/* T&C y Cookies (es un agregado más visual que funcional) */}
         <div className="d-flex flex-column flex-md-row justify-content-center gap-4 small text-muted">
           <a href="" className="footer-legal">Términos & Condiciones</a>
           <a href="" className="footer-legal">Política de Cookies</a>

@@ -1,10 +1,10 @@
 import React from 'react';
 import './PasswordStrength.css';
 
-// Recibe la fortaleza ('weak', 'medium', 'strong')
+// Recibe la fortaleza de la contraseña ('weak', 'medium', 'strong')
 const PasswordStrengthMeter = ({ strength }) => {
   let strengthClass = '';
-  switch (strength) {
+  switch (strength) { // Asigna clase CSS según la fortaleza
     case 'weak':
       strengthClass = 'strength-weak';
       break;
