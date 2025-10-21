@@ -170,7 +170,7 @@ const HomePage = () => {
           {hotSale.length > 0 ? (
             hotSale.map((p) => <ProductCard key={p.id} product={p} />)
           ) : (
-            <p className="text-center text-light w-100 m-0">
+            <p className="text-center text-muted w-100">
               No hay productos en oferta por el momento.
             </p>
           )}
