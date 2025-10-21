@@ -5,7 +5,8 @@ import Input from '../components/Input'; // Reutilizamos el componente Input
 import Button from '../components/Button'; // Reutilizamos el componente Button
 import Alert from '../components/Alert'; // Reutilizamos el componente Alert
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter.jsx';
-import './RegisterPage.css';
+import './Login&RegisterPage.css'; // Reutilizamos los estilos del Login
+import lunchyLogo from "../assets/lunchy-logo.png"; // Asegura esta ruta
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -94,48 +95,73 @@ const RegisterPage = () => {
     };
 
     return (
-        // Contenedor principal que centra
-        <div className="container register-page-container">
-            {/* Contenedor del formulario con fondo blanco y sombra */}
-            <div className="register-form-container">
-                <h2 className="text-center">Crear una Cuenta</h2>
-                <form onSubmit={handleSubmit}>
-                    <Alert message={error} type="danger" />
-                    
-                    {/* Usamos row/col solo para nombre y apellido */}
-                    <div className="row">
-                        <div className="col-md-6">
-                            <Input id="firstname" label="Nombre" name="firstname" value={formData.firstname} onChange={handleChange} required />
-                        </div>
-                        <div className="col-md-6">
-                            <Input id="lastname" label="Apellido" name="lastname" value={formData.lastname} onChange={handleChange} required />
-                        </div>
+        // 1. Contenedor principal que centra (usamos la clase del login)
+        <div className="login-page-wrapper">
+            
+            {/* 2. Tarjeta principal dividida en dos */}
+            <div className="login-card-split">
+                
+                {/* Panel Izquierdo: Branding y Visual (Verde suave) */}
+                <div className="login-left-panel">
+                    <div className="mb-4">
+                        <img src={lunchyLogo} alt="Lunchy Logo" style={{ width: '150px' }} />
                     </div>
-                    
-                    <Input id="email" label="Correo Electrónico" type="email" name="email" value={formData.email} onChange={handleChange} required />
-                    <Input
-                        id="password"
-                        label="Contraseña"
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        helpText="Entre 6-20 caracteres, con mayúscula y símbolo."
-                        autoComplete="new-password"
-                    />
-                    <PasswordStrengthMeter strength={passwordStrength} />
+                    <h1 className="h3 fw-bold text-success mb-2">¡Comida Saludable y Fácil!</h1>
+                    <p className="lead text-dark-emphasis">
+                        Únete a la comunidad de Lunchy y empieza a disfrutar de tus planes de comidas.
+                    </p>
+                </div>
 
-                    <div className="d-grid mt-4">
-                        <Button type="submit" loading={loading} className="btn btn-primary btn-lg">
-                            Registrarse
-                        </Button>
+                {/* Panel Derecho: Formulario de Registro */}
+                <div className="login-right-panel">
+                    <h2 className="h4 fw-bold text-center">Crear una Cuenta</h2>
+                    
+                    <form onSubmit={handleSubmit}>
+                        {/* El Alert de error va arriba */}
+                        <Alert message={error} type="danger" />
+                        
+                        {/* Nombre y Apellido en la misma fila */}
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Input id="firstname" label="Nombre" name="firstname" value={formData.firstname} onChange={handleChange} required />
+                            </div>
+                            <div className="col-md-6">
+                                <Input id="lastname" label="Apellido" name="lastname" value={formData.lastname} onChange={handleChange} required />
+                            </div>
+                        </div>
+
+                        {/* Correo Electrónico */}
+                        <Input id="email" label="Correo Electrónico" type="email" name="email" value={formData.email} onChange={handleChange} required />
+                        
+                        {/* Contraseña y medidor de fuerza */}
+                        <Input
+                            id="password"
+                            label="Contraseña"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            helpText="Entre 6-20 caracteres, con mayúscula y símbolo."
+                            autoComplete="new-password"
+                        />
+                        <PasswordStrengthMeter strength={passwordStrength} />
+                        
+                        <div className="d-grid mt-4">
+                            <Button type="submit" loading={loading} className="btn btn-success btn-lg">
+                                Registrarse
+                            </Button>
+                        </div>
+                    </form>
+                    
+                    {/* Link a Iniciar Sesión */}
+                    <div className="text-center mt-4">
+                        <p className="mb-0">
+                            <small className="text-muted">
+                                ¿Ya tienes una cuenta? <Link to="/login" className="fw-bold">Inicia Sesión</Link>
+                            </small>
+                        </p>
                     </div>
-                </form>
-                <div className="text-center mt-4">
-                    <small className="text-muted">
-                        ¿Ya tienes una cuenta? <Link to="/login" className = "fw-bold">Inicia Sesión</Link>
-                    </small>
                 </div>
             </div>
         </div>

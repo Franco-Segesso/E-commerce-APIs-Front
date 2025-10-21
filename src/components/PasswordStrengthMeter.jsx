@@ -1,4 +1,5 @@
 import React from 'react';
+import './PasswordStrength.css';
 
 // Recibe la fortaleza ('weak', 'medium', 'strong')
 const PasswordStrengthMeter = ({ strength }) => {

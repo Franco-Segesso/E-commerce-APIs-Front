@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import lunchyLogo from "../assets/lunchy-logo.png";
-import './LoginPage.css';
+import './Login&RegisterPage.css';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -83,8 +83,21 @@ const LoginPage = () => {
                         </div>
                     </form>
                     
-                    <div className="text-center mt-3 pt-3 border-top">
-                        <p className="mb-0">¿No tienes una cuenta? <Link to="/register" className="fw-bold">Registrate</Link></p>
+                    
+                    <div className="text-center mt-4">
+                        <p className="mb-0">
+                            <small className="text-muted">
+                                ¿No tienes una cuenta?  <Link to="/register" className="fw-bold">Registrate</Link>
+                            </small>
+                        </p>
+                    </div>
+
+                    <div className="text-center mt-3 pt-3 border-secondary-subtle">
+                        <p className="mb-0 text-muted">
+                            <Link to="/" className="text-secondary fw-bold">
+                                Continuar como invitado
+                            </Link>
+                        </p>
                     </div>
                 </div>
             </div>
