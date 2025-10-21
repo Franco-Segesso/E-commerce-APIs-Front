@@ -1,19 +1,10 @@
-/* ================================================================= */
-/* CSS COMPLETO Y DEFINITIVO para src/views/ProductPage.css          */
-/* ================================================================= */
 
-/* --- ENCABEZADO CON ONDAS --- */
-/*
-  Las clases base para las ondas (.wave-wrap, .wave-top, .wave-body, .wave-bottom)
-  ya existen en tu archivo App.css. Aquí solo agregamos estilos específicos para el
-  texto y el espaciado de este encabezado en particular.
-*/
 .wave-top.wave-top-about {
   margin-top: 0 !important;
   padding-top: 0 !important;
   background-color: #dcf8eaff;
 }
-/* Le damos al cuerpo verde un espaciado vertical generoso */
+
 .wave-body .container.text-center.py-5 {
   padding-top: 4rem !important;
   padding-bottom: 4rem !important;
@@ -22,36 +13,32 @@
 /* Título principal dentro del encabezado */
 .wave-body .display-4 {
   font-weight: 700;
-  color: #333; /* Texto oscuro para un buen contraste */
+  color: #333; 
 }
 
 /* Subtítulo dentro del encabezado */
 .wave-body .lead {
-  color: #555; /* Gris oscuro para mejor legibilidad */
+  color: #555;
 }
 
 
-/* --- CONTENIDO PRINCIPAL DE LA PÁGINA --- */
-/*
-  Este contenedor aloja los filtros y la grilla de productos.
-  Le quitamos el padding superior para que se pegue perfectamente
-  a la onda inferior del encabezado.
-*/
+/* CONTENIDO PRINCIPAL DE LA PÁGINA */
+
 .product-page-container {
-  padding-top: 2rem; /* Espacio después de la onda */
+  padding-top: 2rem; 
   background-color: #ffffff;
   margin-bottom: 3rem;
 }
 
 
-/* --- SIDEBAR DE FILTROS --- */
+/* SIDEBAR DE FILTROS */
 .filter-sidebar {
   background-color: #f8f9fa;
   padding: 1.5rem;
   border-radius: 0.5rem;
   height: fit-content;
   position: sticky;
-  top: 100px; /* Distancia desde el navbar al hacer scroll */
+  top: 100px; 
 }
 
 .filter-sidebar h5 {
@@ -75,17 +62,14 @@
 }
 
 
-/* --- BARRA DE BÚSQUEDA Y ORDENAMIENTO --- */
+/* BARRA DE BÚSQUEDA Y ORDENAMIENTO */
 .search-sort-bar {
   margin-bottom: 2rem;
 }
 
 
-/* --- TARJETAS DE PRODUCTO --- */
-/*
-  Estos son los estilos que ya tenías para las tarjetas,
-  los mantengo porque funcionan bien con el diseño.
-*/
+/* TARJETAS DE PRODUCTO */
+
 .product-card-enhanced {
   border: 1px solid #dee2e6;
   border-radius: 0.5rem;

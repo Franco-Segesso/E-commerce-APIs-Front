@@ -4,12 +4,12 @@ import { useCart } from '../context/CartContext.jsx';
 import './CartPage.css';
 
 const CartPage = () => {
-    // Obtenemos updateQuantity del contexto
+    
     const { cartItems, removeFromCart, updateQuantity } = useCart();
     const navigate = useNavigate();
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    // Simulación de impuestos y envío (ajusta o quita si no aplica)
+    //Pusimos para q simule un impuesto del 5% 
     const estimatedTaxes = subtotal * 0.05;
     const shipping = subtotal > 50000 ? 0.00 : 5000.00;
     const totalPrice = (subtotal + estimatedTaxes + shipping).toFixed(2);
@@ -60,7 +60,7 @@ const CartPage = () => {
                                             className="form-control quantity-input"
                                             type="number"
                                             value={item.quantity}
-                                            readOnly // Hacemos que solo se pueda cambiar con los botones
+                                            readOnly // para q solo se pueda cambiar con los botones
                                             aria-label="Cantidad"
                                         />
                                         <button
@@ -74,7 +74,7 @@ const CartPage = () => {
                                 <div className="text-end ms-3">
                                     <p className="cart-item-total-price mb-2">${(item.price * item.quantity).toFixed(2)}</p>
                                     <button onClick={() => removeFromCart(item.id)} className="btn-remove-item" aria-label="Eliminar item">
-                                        &times; {/* Símbolo 'x' para eliminar */}
+                                        &times; 
                                     </button>
                                 </div>
                             </div>

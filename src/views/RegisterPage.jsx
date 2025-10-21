@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx'; // Asegurate que la ruta sea correcta
-import Input from '../components/Input'; // Reutilizamos el componente Input
-import Button from '../components/Button'; // Reutilizamos el componente Button
-import Alert from '../components/Alert'; // Reutilizamos el componente Alert
+import { useAuth } from '../context/AuthContext.jsx'; 
+import Input from '../components/Input'; 
+import Button from '../components/Button'; 
+import Alert from '../components/Alert'; 
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter.jsx';
-import './Login&RegisterPage.css'; // Reutilizamos los estilos del Login
-import lunchyLogo from "../assets/lunchy-logo.png"; // Asegura esta ruta
+import './Login&RegisterPage.css'; 
+import lunchyLogo from "../assets/lunchy-logo.png"; 
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -23,11 +23,11 @@ const RegisterPage = () => {
 
 
 
-    // Función para calcular la fortaleza de la contraseña
+    // Función para calcular que tan segura es la contraseña
     const calculateStrength = (password) => {
         const hasMinLength = password.length >= 6;
         const hasUpperCase = /[A-Z]/.test(password);
-        const hasSymbol = /[!@#$%^&()_+.-]/.test(password); // Usamos la regex corregida
+        const hasSymbol = /[!@#$%^&()_+.-]/.test(password); 
 
         if (hasMinLength && hasUpperCase && hasSymbol) {
             return 'strong';
@@ -95,13 +95,13 @@ const RegisterPage = () => {
     };
 
     return (
-        // 1. Contenedor principal que centra (usamos la clase del login)
+        // Contenedor principal que centra 
         <div className="login-page-wrapper">
             
-            {/* 2. Tarjeta principal dividida en dos */}
+            {/*Tarjeta principal dividida en dos */}
             <div className="login-card-split">
                 
-                {/* Panel Izquierdo: Branding y Visual (Verde suave) */}
+                {/*Panel Izquierdo: Branding y Visual  */}
                 <div className="login-left-panel">
                     <div className="mb-4">
                         <img src={lunchyLogo} alt="Lunchy Logo" style={{ width: '150px' }} />
@@ -117,10 +117,10 @@ const RegisterPage = () => {
                     <h2 className="h4 fw-bold text-center">Crear una Cuenta</h2>
                     
                     <form onSubmit={handleSubmit}>
-                        {/* El Alert de error va arriba */}
+                        
                         <Alert message={error} type="danger" />
                         
-                        {/* Nombre y Apellido en la misma fila */}
+                        {/* Nombre y Apellido*/}
                         <div className="row">
                             <div className="col-md-6">
                                 <Input id="firstname" label="Nombre" name="firstname" value={formData.firstname} onChange={handleChange} required />

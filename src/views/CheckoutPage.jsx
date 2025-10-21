@@ -10,9 +10,9 @@ const CheckoutPage = () => {
     const { authToken } = useAuth();
     const navigate = useNavigate();
     
-    // Simplificamos los estados del formulario
+    
     const [shippingAddress, setShippingAddress] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('Credit Card'); // Valor por defecto
+    const [paymentMethod, setPaymentMethod] = useState(''); 
     
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -57,6 +57,10 @@ const CheckoutPage = () => {
             setError("Por favor, completa la dirección de envío.");
             return;
         }
+        if (!paymentMethod) {
+            setError("Por favor, selecciona un método de pago.");
+            return;
+        }
         if (!userId) {
             setError("ID de usuario no disponible. No se puede procesar la orden.");
             return;
@@ -65,12 +69,12 @@ const CheckoutPage = () => {
         setLoading(true);
         setError('');
 
-        // --- TRANSFORMACIÓN DE DATOS CLAVE AQUÍ ---
-        // 1. "Aplanamos" el carrito: si hay 3 milanesas, agregamos el ID de la milanesa 3 veces a la lista.
+       
+        
         const productsIdList = cartItems.flatMap(item => Array(item.quantity).fill(item.id));
     
 
-        // 2. Creamos el objeto final con los nombres que el backend SÍ entiende.
+       
         const orderData = {
             productsId: productsIdList,
             userId: userId,
@@ -89,11 +93,11 @@ const CheckoutPage = () => {
             });
 
             if (!response.ok) {
-                // Si la respuesta es 403, el problema son los permisos (ver Problema 2).
+                
                 if (response.status === 403) {
                     throw new Error("Error de permisos (403): Tu usuario no tiene el rol necesario para crear órdenes.");
                 }
-                throw new Error("No se pudo procesar la orden. Revisa la consola del backend.");
+                throw new Error("No se pudo procesar la orden.");
             }
 
             const createdOrder = await response.json();
@@ -111,9 +115,9 @@ const CheckoutPage = () => {
 
     return (
         <div className="container-fluid checkout-page-container">
-            <div className="checkout-layout"> {/* Contenedor de 2 columnas */}
+            <div className="checkout-layout"> 
                 
-                {/* --- Columna Izquierda: Formulario --- */}
+                {/* Formulario */}
                 <div className="checkout-form-section">
                     <h4 className="mb-3 fw-bold">Método de pago</h4>
                     <div className="payment-methods">
@@ -142,7 +146,7 @@ const CheckoutPage = () => {
                     </div>
 
                     <h4 className="mb-3 fw-bold">Dirección de envío</h4>
-                    <form id="checkout-form" onSubmit={handleConfirmOrder}> {/* Damos un ID al form */}
+                    <form id="checkout-form" onSubmit={handleConfirmOrder}> 
                         <div className="mb-3">
                             <label htmlFor="shippingAddress" className="form-label">Dirección</label>
                             <input 
@@ -155,13 +159,13 @@ const CheckoutPage = () => {
                                 required 
                             />
                         </div>
-                        {/* Quitamos los otros campos: nombre, email, teléfono, ciudad, etc. */}
+                        
                         
                         {error && <div className="alert alert-danger mt-3">{error}</div>}
                     </form>
                 </div>
 
-                {/* --- Columna Derecha: Resumen del Pedido --- */}
+                {/*Resumen del Pedido*/}
                 <div className="order-summary-section">
                     <h4 className="mb-4 fw-bold">Tu orden</h4>
                     
@@ -198,11 +202,11 @@ const CheckoutPage = () => {
                         </div>
                     </div>
 
-                    {/* Botón de Confirmar (ahora fuera del form, pero lo activa) */}
+                    {/*Botón de Confirmar*/}
                     <div className="d-grid mt-4">
                         <button 
                             type="submit" 
-                            form="checkout-form" // Vincula este botón al formulario
+                            form="checkout-form" 
                             className="btn btn-confirm-checkout btn-lg" 
                             disabled={loading || !userId}
                         >

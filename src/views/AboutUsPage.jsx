@@ -4,24 +4,21 @@ import logo from '../assets/logo-instagram.webp';
 const AboutUsPage = () => {
     return (
         <div className="about-us-wrapper">
-            {/* INICIO DE LA SECCIÓN DE ONDA (Estructura de 3 partes replicada) */}
+            {/* INICIO DE LA SECCIÓN DE ONDA */}
             <section className="wave-wrap">
                 
-                {/* 1. Onda superior (AHORA MÁS GRANDE con viewBox y path ajustados) */}
+                {/*Onda superior*/}
                 <div className="wave-top wave-top-about">
-                    {/* viewBox: Ajustado a 1440 de ancho y 150 de alto
-                        path d: Modificado para una curva más pronunciada */}
-                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
+                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> 
                         <path
-                            d="M0,96 C240,128 480,32 720,64 C960,96 1200,96 1440,64 L1440,150 L0,150 Z" /* Ajustado para una curva más alta */
+                            d="M0,96 C240,128 480,32 720,64 C960,96 1200,96 1440,64 L1440,150 L0,150 Z" 
                             fill="#dcf8eaff"
                         />
                     </svg>
                 </div>
 
-                {/* 2. Cuerpo Verde (Contiene el Título y Badges, usa el CSS de ajuste) */}
+                {/*Cuerpo Verde (tiene el Título y los #s*/}
                 <div className="wave-body about-wave-body text-center" style={{ backgroundColor: '#dcf8eaff' }}>
-                    {/* Agregamos un translateY para subir el contenido dentro de la onda más grande */}
                     <div style={{ transform: 'translateY(-2rem)' }}> 
                         <h1 className="display-4 fw-bold text-dark mb-3">Sobre Nosotros</h1>
                         <p className="lead text-dark-emphasis mx-auto" style={{ maxWidth: '800px' }}>
@@ -35,13 +32,11 @@ const AboutUsPage = () => {
                     </div>
                 </div>
 
-                {/* 3. Onda inferior (AHORA MÁS GRANDE con viewBox y path ajustados) */}
+                {/* Onda inferior*/}
                 <div className="wave-bottom wave-bottom-about">
-                    {/* viewBox: Ajustado a 2000 de ancho y 150 de alto
-                        path d: Modificado para una curva más pronunciada */}
-                    <svg viewBox="0 0 2000 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
+                    <svg viewBox="0 0 2000 150" preserveAspectRatio="none"> 
                         <path
-                            d="M0,0 L0,0 C240,64 480,150 720,118 C960,86 1200,86 1440,118 L1440,150 L0,150 Z" /* Ajustado para una curva más alta */
+                            d="M0,0 L0,0 C240,64 480,150 720,118 C960,86 1200,86 1440,118 L1440,150 L0,150 Z" 
                             fill="#dcf8eaff"
                         />
                     </svg>
@@ -49,33 +44,33 @@ const AboutUsPage = () => {
             </section>
             {/* FIN DE LA SECCIÓN DE ONDA */}
 
-            {/* 4. CONTENIDO PRINCIPAL: La tarjeta BLANCA que se superpone a la onda. */}
+            {/*CONTENIDO PRINCIPAL: La tarjeta BLANCA que se superpone a la onda.*/}
             <div className="container about-card-superposition mb-5"> 
                 <div className="row justify-content-center">
                     <div className="col-lg-10">
                         {/* Tarjeta Principal */}
                         <div className="card border-0 shadow-lg p-4 p-md-5 rounded-4 bg-white">
                             
-                            {/* --- BLOQUE 1: NUESTRA HISTORIA / EQUIPO --- */}
+                            {/*El equipo...*/}
                             <div className="row g-5 align-items-center mb-5">
                                 <div className="col-md-12 text-center">
                                     
                                     <h2 
                                         style={{
-                                            color: '#27AE60', // Verde con buena legibilidad
+                                            color: '#27AE60', 
                                             fontWeight: '700',
                                         }}>
-                                            Historia: El Equipo Detrás de Lunchy
+                                            Historia: El Equipo detrás de Lunchy
                                     </h2>
                                     <p className="lead text-muted mx-auto mb-2" style={{ maxWidth: '800px' }}>
-                                        Somos un equipo de estudiantes apasionados por la tecnología y el desarrollo de software, cursando la materia Aplicaciones Interactivas. Este E-commerce es el resultado de nuestro esfuerzo y dedicación a lo largo del cuatrimestre, aplicando principios de diseño y programación para crear una plataforma tan robusta como intuitiva.
+                                        Somos un equipo de estudiantes apasionados por la tecnología y el desarrollo de software, cursando la materia Aplicaciones Interactivas. Este E-commerce es el resultado de nuestro esfuerzo y dedicación a lo largo del cuatrimestre, aplicando principios de diseño y programación para crear una plataforma tanto robusta como intuitiva.
                                     </p>
                                 </div>
                             </div>
 
                             <hr className="border-success opacity-25 my-2" />
 
-                            {/* --- BLOQUE 2: CONTACTO --- */}
+                            {/*CONTACTO*/}
                             <div className="text-center mt-2 mb-3">
                                 <h2 className="fw-bolder text-dark m-0">Conectemos</h2>
                             </div>
@@ -102,12 +97,12 @@ const AboutUsPage = () => {
                                         <p
                                             className="text-muted mb-0 mx-auto"
                                             style={{
-                                                fontSize: '0.90rem',   // tamaño fijo (no se adapta al zoom o tamaño de ventana)
-                                                whiteSpace: 'normal',  // permite saltos de línea
-                                                wordBreak: 'break-word', // corta el mail si hace falta sin deformarlo
-                                                lineHeight: '1.3',     // ajusta el espacio vertical
-                                                margin: '0 auto',      // centra el texto horizontalmente
-                                                maxWidth: '99%',       // usa más espacio dentro del recuadro
+                                                fontSize: '0.90rem',   
+                                                whiteSpace: 'normal',  
+                                                wordBreak: 'break-word', 
+                                                lineHeight: '1.3',     
+                                                margin: '0 auto',      
+                                                maxWidth: '99%',       
                                             }}
                                             >
                                             lunchycorp@gmail.com

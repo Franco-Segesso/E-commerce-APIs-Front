@@ -28,10 +28,10 @@ const LoginPage = () => {
         }
     };
     return (
-        // 1. Contenedor principal para centrar todo en la página
+        //Contenedor principal para centrar todo en la página
         <div className="login-page-wrapper">
             
-            {/* 2. Tarjeta principal dividida en dos */}
+            {/*Tarjeta principal dividida en dos */}
             <div className="login-card-split">
                 
                 {/* Panel Izquierdo: Branding y Visual */}
@@ -43,7 +43,7 @@ const LoginPage = () => {
                     <p className="lead text-dark-emphasis">
                         Ingresá para gestionar tus pedidos y disfrutar de nuestras ofertas.
                     </p>
-                    {/* Aquí iría la imagen visual (como las verduras) si la tuvieras importada */}
+                    
                 </div>
 
                 {/* Panel Derecho: Formulario de Login */}

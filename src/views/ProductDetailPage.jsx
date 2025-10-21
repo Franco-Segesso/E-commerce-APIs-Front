@@ -5,7 +5,7 @@ import './ProductDetailPage.css';
 
 
 const ProductDetailPage = () => {
-    // ... (toda la lógica de fetch y de agregar al carrito no cambia)
+    
     const { productId } = useParams();
     const { addToCart, cartItems } = useCart();
     const [product, setProduct] = useState(null);
@@ -54,10 +54,10 @@ const ProductDetailPage = () => {
         const currentQuantityInCart = itemInCart ? itemInCart.quantity : 0;
         const requestedQuantity = parseInt(quantity, 10) || 1;
 
-        // --- VALIDACIÓN DE STOCK ---
+        // VALIDACIÓN DE STOCK 
         if (currentQuantityInCart + requestedQuantity > product.stock) {
             alert(`¡Stock insuficiente! Solo quedan ${product.stock} unidades disponibles de "${product.name}".`);
-            return; // Detenemos la ejecución
+            return; 
         }
         
         const productToAdd = { 
@@ -75,13 +75,13 @@ const ProductDetailPage = () => {
 
 
     return (
-        // Usamos container-fluid para más control y padding personalizado
+        
         <div className="container-fluid product-detail-page px-lg-5"> 
-            <div className="row gx-lg-5 align-items-center"> {/* gx-lg-5 da espacio entre columnas */}
+            <div className="row gx-lg-5 align-items-center"> 
                 {/* Columna de la Imagen */}
                 <div className="col-lg-6 mb-4 mb-lg-0">
                     <img 
-                        className="img-fluid product-detail-img w-100" // Aplicamos la nueva clase
+                        className="img-fluid product-detail-img w-100" 
                         src={`data:image/jpeg;base64,${product.imageBase64}`} 
                         alt={product.name} 
                     />
@@ -120,7 +120,7 @@ const ProductDetailPage = () => {
                             className="form-control quantity-input" 
                             type="number" 
                             value={quantity} 
-                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} // Evita valores inválidos
+                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} 
                             min="1"
                             aria-label="Cantidad"
                         />
@@ -134,7 +134,7 @@ const ProductDetailPage = () => {
                     </div>
                     </div>
 
-                    {/* Botón Agregar al Carrito con precio dinámico */}
+                    {/* Botón Agregar al Carrito*/}
                     <div className="d-grid">
                         <button 
                             onClick={handleAddToCart} 

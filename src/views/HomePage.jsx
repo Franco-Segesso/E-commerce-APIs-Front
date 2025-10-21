@@ -1,4 +1,4 @@
-// src/views/HomePage.jsx
+
 import newsletterLogo from "../assets/lunchy-logo.png";
 
 import { Link } from "react-router-dom";
@@ -6,10 +6,10 @@ import ProductCard from "../components/ProductCard.jsx";
 import { useEffect, useState } from "react";
 import HomeCarousel from "../components/HomeCarousel";
 
-// Importá el logo (asegurate que el archivo exista en src/assets)
 
 
-// --- Funciones para traer productos ---
+
+// Funciones para traer productos 
 async function productos_con_descuento() {
   const res = await fetch("http://localhost:4002/products/discounted");
   if (!res.ok) throw new Error("Error al cargar productos en oferta");
@@ -55,7 +55,7 @@ async function enviarNewsletterEmail(email) {
 }
 
 
-// --- Componente principal ---
+//Componente principal
 const HomePage = () => {
   const [hotSale, setHotSale] = useState([]);
   const [loadingHot, setLoadingHot] = useState(true);
@@ -66,7 +66,7 @@ const HomePage = () => {
   const [errorNew, setErrorNew] = useState(null);
 
   //Mail
-  const [newsletterStatus, setNewsletterStatus] = useState(null); // "success" | "error"
+  const [newsletterStatus, setNewsletterStatus] = useState(null); 
   const [newsletterMsg, setNewsletterMsg] = useState("");
 
   // Manejar envío de newsletter
@@ -128,14 +128,14 @@ const HomePage = () => {
       {/* Carrusel principal */}
       <HomeCarousel />
 
-      {/* HOT SALE con fondo verde y ondas (versión simple/infalible) */}
+      {/* productos con descuento con fondo verde y ondas*/}
 <section className="wave-wrap">
   {/* Onda superior */}
   <div className="wave-top">
     <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
       <path
         d="M0,64 C240,96 480,0 720,32 C960,64 1200,64 1440,32 L1440,100 L0,100 Z"
-        fill="#dcf8eaff"   /* color fijo para asegurar visibilidad */
+        fill="#dcf8eaff"   
     
       />
     </svg>
@@ -184,14 +184,14 @@ const HomePage = () => {
     <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
       <path
         d="M0,0 L0,0 C240,32 480,100 720,68 C960,36 1200,36 1440,68 L1440,100 L0,100 Z"
-        fill="#dcf8eaff"  /* color fijo para asegurar visibilidad */
+        fill="#dcf8eaff"  
       />
     </svg>
   </div>
 </section>
 
 
-      {/* Banner simple */}
+      {/* Banner de envios gratis*/}
       <section className="py-4">
         <div className="container-fluid px-4">
           <div
@@ -253,21 +253,21 @@ const HomePage = () => {
 
             
 
-      {/* NEWSLETTER con imagen a la izquierda */}
+      {/* NEWSLETTER*/}
       <section className="py-5">
         <div className="container-fluid px-4">
           <div className="rounded-4 p-4 p-md-5 newsletter-card text-dark">
             <div className="row g-4 align-items-center">
-              {/* Imagen / logo a la izquierda */}
+              
             < div className="col-12 col-md-auto text-center">
-              {/* wrapper con tamaño fijo */}
+              
               <div className="newsletter-avatar" style={{ width: 200, height: 200 }}>
                 <img src={newsletterLogo} alt="Lunchy" />
               </div>
             </div>
 
 
-              {/* Texto al centro */}
+              
               <div className="col-12 col-md">
                 <h3 className="h4 mb-1">Suscribite y recibí ofertas secretas</h3>
                 <p className="mb-0 text-black-50">Nada de spam, sólo promos esporádicas.</p>
@@ -290,7 +290,7 @@ const HomePage = () => {
                   Unirme
                 </button>
               </form>
-              {/* Mensaje de estado */}
+              
               {newsletterStatus && (
                   <div
                     className={`mt-2 p-2 rounded-3 text-center ${

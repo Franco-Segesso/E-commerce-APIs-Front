@@ -1,4 +1,4 @@
-/* src/views/ProfilePage.css */
+
 
 .para-el-fondo {
   background-color: #e9f7ef;
@@ -47,17 +47,17 @@
 }
 
 .btn-edit {
-background-color: var(--bs-primary) !important; /* ¡Tu verde principal! */
-  color: white !important; /* Texto blanco para contraste */
+background-color: var(--bs-primary) !important; 
+  color: white !important; 
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
   padding: 0.5rem 1rem;
-  transition: background-color 0.2s ease; /* Transición suave */
+  transition: background-color 0.2s ease;
 }
 
 .btn-edit:hover {
-  background-color: #047a41 !important; /* Verde más oscuro al pasar el mouse */
+  background-color: #047a41 !important; 
 }
 
 .info-grid {
@@ -71,7 +71,7 @@ background-color: var(--bs-primary) !important; /* ¡Tu verde principal! */
     grid-template-columns: 1fr 1fr;
   }
   .info-grid .email-field {
-    grid-column: 1 / -1; /* Ocupa todo el ancho */
+    grid-column: 1 / -1; 
   }
 }
 

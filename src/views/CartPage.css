@@ -1,26 +1,26 @@
-/* src/views/CartPage.css */
+
 
 .cart-page-container {
-  background-color: #f8f9fa; /* Fondo gris claro para toda la página */
+  background-color: #f8f9fa; 
   padding-top: 2rem;
   padding-bottom: 3rem;
-  width: 100%; /* Asegura que ocupe todo el ancho */
+  width: 100%; 
 }
 
 /* Tarjeta de item del carrito */
 .cart-item-card {
-  border: none; /* Sin borde */
-  border-radius: 0.75rem; /* Bordes más redondeados */
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05); /* Sombra suave */
+  border: none; 
+  border-radius: 0.75rem; 
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05); 
   margin-bottom: 1.5rem;
   overflow: hidden; /* Para que la imagen encaje bien */
 }
 
 .cart-item-image img {
-  width: 100px; /* Tamaño fijo para la imagen */
+  width: 100px; 
   height: 100px;
   object-fit: cover;
-  border-radius: 0.5rem; /* Bordes redondeados para la imagen */
+  border-radius: 0.5rem; 
 }
 
 .cart-item-details {
@@ -35,18 +35,18 @@
 
 .cart-item-price-unit {
   font-size: 0.9rem;
-  color: #6c757d; /* Gris */
+  color: #6c757d; 
 }
 
-/* Selector de Cantidad (similar al de ProductDetail) */
+/* Selector de Cantidad */
 .cart-quantity-selector {
   display: flex;
   align-items: center;
 }
 
 .cart-quantity-selector .btn-quantity {
-  background-color: #e9ecef; /* Fondo gris claro para los botones */
-  color: #495057; /* Texto gris oscuro */
+  background-color: #e9ecef; 
+  color: #495057; 
   border: none;
   width: 30px;
   height: 30px;
@@ -57,12 +57,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%; /* Botones redondos */
+  border-radius: 50%; 
   transition: background-color 0.2s ease;
 }
 
 .cart-quantity-selector .btn-quantity:hover {
-  background-color: #dee2e6; /* Gris un poco más oscuro */
+  background-color: #dee2e6; 
 }
 
 .cart-quantity-selector .quantity-input {
@@ -70,11 +70,11 @@
   text-align: center;
   font-size: 1rem;
   font-weight: 500;
-  border: none; /* Sin bordes */
-  background-color: transparent; /* Fondo transparente */
+  border: none; 
+  background-color: transparent; 
   height: 30px;
   padding: 0 0.25rem;
-  margin: 0 0.25rem; /* Pequeño espacio a los lados */
+  margin: 0 0.25rem; 
 }
 /* Oculta las flechas */
 .quantity-input::-webkit-outer-spin-button,
@@ -87,7 +87,7 @@
 }
 
 .btn-remove-item {
-  color: #dc3545; /* Rojo Bootstrap */
+  color: #dc3545; 
   background: none;
   border: none;
   padding: 0;
@@ -95,7 +95,7 @@
   line-height: 1;
 }
 .btn-remove-item:hover {
-  color: #a71d2a; /* Rojo más oscuro */
+  color: #a71d2a; 
 }
 
 /* Tarjeta Resumen del Pedido */
@@ -118,17 +118,17 @@
   font-weight: bold;
 }
 
-.cart-page-container .btn-proceed { /* <-- Añadimos el contenedor padre */
-  background-color: var(--bs-primary); /* Tu verde primario */
+.cart-page-container .btn-proceed { 
+  background-color: var(--bs-primary); 
   border-color: var(--bs-primary);
-  color: #142210; /* Texto oscuro */
+  color: #142210; 
   font-weight: 600;
   padding: 0.75rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; /* Transición suave */
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; 
 }
 
-.cart-page-container .btn-proceed:hover { /* <-- Añadimos el contenedor padre */
-  background-color: #047a41; /* Verde oscuro */
+.cart-page-container .btn-proceed:hover { 
+  background-color: #047a41; 
   border-color: #036f3a;
   color: #142210;
 }

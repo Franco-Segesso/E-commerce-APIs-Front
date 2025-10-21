@@ -96,7 +96,7 @@ const AdminProductsPage = () => {
             if (!response.ok) {
                 throw new Error("Error al eliminar el producto.");
             }
-            // DELETE no suele devolver contenido, así que no es necesario un .json()
+            // DELETE no devuelve contenido, así que no es necesario un .json()
         })
         .then(() => {
             alert("Producto eliminado con éxito.");
@@ -189,7 +189,7 @@ const AdminProductsPage = () => {
                             <tr key={p.id}>
                                 <td>{p.id}</td>
                                 <td>{p.name}</td>
-                                {/* Usamos el mapa para encontrar el nombre de la categoría por su ID */}
+                                {/* Usamos el map para encontrar el nombre de la categoría por su ID */}
                                 <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
                                 <td>${p.price.toFixed(2)}</td>
                                 <td>{p.stock}</td>
@@ -206,7 +206,7 @@ const AdminProductsPage = () => {
                 </tbody>
             </table>
             
-            {/* Acordeón para Productos Inactivos */}
+            {/* Acordeon para Productos Inactivos */}
             <div className="accordion mt-5" id="inactiveProductsAccordion">
                 <div className="accordion-item">
                     <h2 className="accordion-header" id="headingOne">
@@ -218,7 +218,7 @@ const AdminProductsPage = () => {
                         <div className="accordion-body">
                              {loading ? <p>Cargando...</p> : (
                                 inactiveProducts.length > 0 ? (
-                                    <table className="table table-sm table-hover"> {/* Usamos table-sm para que sea más compacta */}
+                                    <table className="table table-sm table-hover"> 
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
@@ -234,7 +234,6 @@ const AdminProductsPage = () => {
                                                     <td>{p.name}</td>
                                                     <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
                                                     <td>
-                                                        {/* Botón que llama a handleReactivate */}
                                                         <button className="btn btn-outline-success btn-sm" onClick={() => handleReactivate(p)} disabled={loading}>
                                                             Reactivar
                                                         </button>

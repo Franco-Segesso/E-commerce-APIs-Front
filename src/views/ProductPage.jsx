@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar from '../components/FilterSidebar.jsx';
 import SearchBar from '../components/SearchBar.jsx';
-import './ProductPage.css'; // Asumiendo que tenés los estilos aquí
+import './ProductPage.css'; 
 
 const ProductsPage = () => {
     const [products, setProducts] = useState([]); // Productos recibidos del backend (filtrados por categoría/precio)
@@ -17,7 +17,7 @@ const ProductsPage = () => {
         sort: 'asc',
     });
 
-    // --- ESTADO SEPARADO PARA LA BÚSQUEDA ---
+    //  ESTADO SEPARADO PARA LA BÚSQUEDA 
     const [searchQuery, setSearchQuery] = useState('');
 
     // useCallback para la función de fetch, depende SOLO de los filtros del backend
@@ -48,14 +48,14 @@ const ProductsPage = () => {
         } finally {
             setLoading(false); // Ocultamos carga
         }
-    }, [backendFilters]); // <-- SOLO depende de los filtros del backend
+    }, [backendFilters]); // SOLO depende de los filtros del backend
 
     // useEffect que llama a fetchProducts cuando cambian los filtros del backend
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
 
-    // --- FILTRADO EN FRONTEND PARA LA BÚSQUEDA ---
+    // Busqueda de productos segun el nombre
     // Filtramos la lista 'products' actual basándonos en 'searchQuery'
     const displayedProducts = products.filter(product => {
         if (searchQuery) {
@@ -74,30 +74,29 @@ const ProductsPage = () => {
     // Función que actualiza SOLO el estado de búsqueda
     const handleSearchChange = (query) => {
         setSearchQuery(query);
-        // NO llamamos a handleBackendFilterChange aquí
+        // NO llamamos a handleBackendFilterChange aca
     };
 
     return (
-        // Usamos un fragmento <> para poder tener la sección de ondas y el contenido como hermanos
+        
         <>
-            {/* INICIO DE LA SECCIÓN DE ONDA (Estructura de 3 partes replicada) */}
+            {/* INICIO DE LA SECCIÓN DE ONDA */}
             <section className="wave-wrap">
                 
-                {/* 1. Onda superior (AHORA MÁS GRANDE con viewBox y path ajustados) */}
+                {/*Onda superior */}
                 <div className="wave-top wave-top-about">
-                    {/* viewBox: Ajustado a 1440 de ancho y 150 de alto (antes 100)
-                        path d: Modificado para una curva más pronunciada */}
-                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
+                    
+                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> 
                         <path
-                            d="M0,96 C240,128 480,32 720,64 C960,96 1200,96 1440,64 L1440,150 L0,150 Z" /* Ajustado para una curva más alta */
+                            d="M0,96 C240,128 480,32 720,64 C960,96 1200,96 1440,64 L1440,150 L0,150 Z" 
                             fill="#dcf8eaff"
                         />
                     </svg>
                 </div>
 
-                {/* 2. Cuerpo Verde (Contiene el Título y Badges, usa el CSS de ajuste) */}
+                {/*Cuerpo Verde*/}
                 <div className="wave-body about-wave-body text-center" style={{ backgroundColor: '#dcf8eaff' }}>
-                    {/* Agregamos un translateY para subir el contenido dentro de la onda más grande */}
+                    
                     <div style={{ transform: 'translateY(-2rem)' }}> 
                         <h1 className="display-4 fw-bold text-dark mb-3">Explorá nuestros productos</h1>
                         <p className="lead text-dark-emphasis mx-auto" style={{ maxWidth: '800px' }}>
@@ -107,13 +106,12 @@ const ProductsPage = () => {
                     </div>
                 </div>
 
-                {/* 3. Onda inferior (AHORA MÁS GRANDE con viewBox y path ajustados) */}
+                {/*Onda inferior */}
                 <div className="wave-bottom wave-bottom-about">
-                    {/* viewBox: Ajustado a 1440 de ancho y 150 de alto (antes 100)
-                        path d: Modificado para una curva más pronunciada */}
-                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> {/* Aumentado el height del viewBox */}
+                    
+                    <svg viewBox="0 0 1440 150" preserveAspectRatio="none"> 
                         <path
-                            d="M0,0 L0,0 C240,64 480,150 720,118 C960,86 1200,86 1440,118 L1440,150 L0,150 Z" /* Ajustado para una curva más alta */
+                            d="M0,0 L0,0 C240,64 480,150 720,118 C960,86 1200,86 1440,118 L1440,150 L0,150 Z" 
                             fill="#dcf8eaff"
                         />
                     </svg>
@@ -121,9 +119,9 @@ const ProductsPage = () => {
             </section>
             {/* FIN DE LA SECCIÓN DE ONDA */}
 
-            {/* --- CONTENIDO PRINCIPAL DE LA PÁGINA --- */}
+            {/* CONTENIDO PRINCIPAL DE LA PÁGINA */}
             <div className="container-fluid product-page-container px-lg-5">
-            {/* ... (Título) ... */}
+            
                 <div className="row gx-lg-5">
                     {/* Columna de Filtros */}
                     <div className="col-lg-3">
@@ -138,7 +136,7 @@ const ProductsPage = () => {
                         {/* Barra de Búsqueda y Ordenamiento */}
                         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 search-sort-bar">
                             <div className="flex-grow-1">
-                                {/* El SearchBar ahora llama a handleSearchChange */}
+
                                 <SearchBar onSearch={handleSearchChange} />
                             </div>
                             <div style={{ minWidth: '200px' }}>
@@ -154,12 +152,12 @@ const ProductsPage = () => {
                             </div>
                         </div>
 
-                        {/* Grilla de Productos */}
+                        {/* Catalogo de Productos */}
                         {loading && <div className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>}
                         {error && <div className="alert alert-danger">{error}</div>}
                         
                         {!loading && !error && (
-                            // Mostramos 'displayedProducts' (la lista filtrada en el frontend)
+                            // Mostramos el displayproducts
                             <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 d-flex align-items-start" style={{ minHeight: '300px' }}>
                                 {displayedProducts.length > 0 ? (
                                     displayedProducts.map(product => (

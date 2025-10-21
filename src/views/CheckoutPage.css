@@ -1,18 +1,18 @@
-/* src/views/CheckoutPage.css */
+
 
 .checkout-page-container {
-  background-color: #f8f9fa; /* Fondo gris claro */
-  padding: 3rem 0; /* Espaciado vertical */
+  background-color: #f8f9fa; 
+  padding: 3rem 0; 
   width: 100%;
 }
 
-/* Contenedor principal con las dos columnas */
+/* Contenedor principal*/
 .checkout-layout {
-  max-width: 960px; /* Ancho máximo para el contenido */
-  margin: 0 auto; /* Centrar el layout */
+  max-width: 960px; 
+  margin: 0 auto; 
   display: grid;
-  grid-template-columns: 1fr 350px; /* Columna izquierda flexible, derecha fija */
-  gap: 2rem; /* Espacio entre columnas */
+  grid-template-columns: 1fr 350px; 
+  gap: 2rem; 
 }
 
 /* Estilo para la columna izquierda (formulario) */
@@ -39,9 +39,9 @@
 }
 
 .payment-methods .btn.active {
-  background-color: var(--bs-primary-bg-subtle, #e0f8e8); /* Fondo verde muy claro */
-  border-color: var(--bs-primary, #05934E); /* Borde verde */
-  color: var(--bs-primary, #05934E); /* Texto verde */
+  background-color: var(--bs-primary-bg-subtle, #e0f8e8); 
+  border-color: var(--bs-primary, #05934E); 
+  color: var(--bs-primary, #05934E); 
   font-weight: 500;
 }
 
@@ -53,7 +53,7 @@
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   height: fit-content; /* Se ajusta al contenido */
   position: sticky;
-  top: 80px; /* Espacio desde el navbar */
+  top: 80px; 
 }
 
 .order-summary-item {
@@ -111,17 +111,17 @@
   font-weight: bold;
 }
 
-/* Botón de confirmar (verde) */
-.checkout-page-container .btn-confirm-checkout { /* <-- Añadimos el contenedor padre */
+/* Botón de confirmar*/
+.checkout-page-container .btn-confirm-checkout { 
   background-color: var(--bs-primary, #05934E);
   border-color: var(--bs-primary, #05934E);
-  color: white; /* Texto blanco */
+  color: white; 
   font-weight: 600;
   padding: 0.75rem;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-.checkout-page-container .btn-confirm-checkout:hover { /* <-- Añadimos el contenedor padre */
-  background-color: #047a41; /* Verde oscuro */
+.checkout-page-container .btn-confirm-checkout:hover { 
+  background-color: #047a41; 
   border-color: #036f3a;
   color: white;
 }

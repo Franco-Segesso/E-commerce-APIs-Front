@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import './ProfilePage.css'; // ¡Importamos los nuevos estilos!
+import './ProfilePage.css'; // 
 import OrderDetailModal from '../components/OrderDetailModal.jsx';
 
 
@@ -32,7 +32,7 @@ const ProfilePage = () => {
         })
         .catch(err => setError(err.message))
         .finally(() => setLoadingProfile(false));
-    }, [authToken, isEditing]); // Agregamos isEditing para recargar los datos al cancelar
+    }, [authToken, isEditing]); // Agregamos isEditing para recargar los datos cuando cancelamos
 
     useEffect(() => {
         if (!authToken) return;
@@ -142,7 +142,7 @@ const ProfilePage = () => {
                                 <span>Número de Pedido</span>
                                 <span>Fecha</span>
                                 <span>Total</span>
-                                <span></span> {/* Columna vacía para el link */}
+                                <span></span> {/* Columna vacía para el ver detalles */}
                             </div>
                             {orders.map(order => (
                                 <div key={order.id} className="order-row">
@@ -151,7 +151,7 @@ const ProfilePage = () => {
                                     <span>${order.totalPrice.toFixed(2)}</span>
                                     <span className="text-end">
                                         <button
-                                            className="btn btn-link order-details-link p-0" // Usamos btn-link para que parezca texto
+                                            className="btn btn-link order-details-link p-0" 
                                             onClick={() => handleViewDetails(order)}
                                         >
                                             Ver Detalles

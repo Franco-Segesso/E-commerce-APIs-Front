@@ -8,7 +8,7 @@ const AdminCategoriesPage = () => {
     
     // Estados para el formulario
     const [newCategoryName, setNewCategoryName] = useState('');
-    const [editingCategory, setEditingCategory] = useState(null); // Guardará la categoría que se está editando
+    const [editingCategory, setEditingCategory] = useState(null); // Guardamos la categoría que estamos editando
 
     const { authToken } = useAuth();
 
@@ -39,7 +39,7 @@ const AdminCategoriesPage = () => {
 
     const handleCreateOrUpdate = (e) => {
         e.preventDefault();
-        setError(''); // Limpia errores anteriores
+        setError(''); // para limpiar errores anteriores
         
         const isUpdating = editingCategory !== null;
         const url = isUpdating 
@@ -149,7 +149,7 @@ const AdminCategoriesPage = () => {
         <div className="container my-5">
             <h2 className="mb-4">Gestión de Categorías</h2>
 
-            {/* Formulario de Creación / Edición */}
+            {/* Formulario para crear / editar categorías */}
             <div className="card mb-4">
                 <div className="card-body">
                     <h5 className="card-title">{editingCategory ? 'Editando Categoría' : 'Crear Nueva Categoría'}</h5>
@@ -178,7 +178,7 @@ const AdminCategoriesPage = () => {
 
             {error && <div className="alert alert-danger">{error}</div>}
 
-            {/* Tabla de Categorías */}
+            {/* Tabla de categorias activas*/}
             <h4 className="mt-4">Categorías Activas ({activeCategories.length})</h4>
             <div className="card">
                 <div className="card-header">
@@ -202,7 +202,7 @@ const AdminCategoriesPage = () => {
                 </ul>
             </div>
 
-            {/* Acordeón para Categorías Eliminadas */}
+            {/* Desplegable para Categorías Eliminadas */}
             <div className="accordion mt-5" id="inactiveCategoriesAccordion">
                 <div className="accordion-item">
                     <h2 className="accordion-header" id="headingInactive">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { Accordion } from 'react-bootstrap'; // Usamos un componente de React-Bootstrap
+import { Accordion } from 'react-bootstrap'; 
 
 const AdminOrdersPage = () => {
     const [orders, setOrders] = useState([]);
@@ -74,8 +74,6 @@ useEffect(() => {
                                 <div className="d-flex w-100 justify-content-between align-items-center pe-3">
                                     <span className="fw-bold">Orden #{order.id}</span>
                                     <span>{new Date(order.date).toLocaleDateString()}</span>
-                                    {/* --- CÓDIGO SEGURO --- */}
-                                    {/* Accede al email del usuario de forma segura */}
                                     <span className="text-muted">{userMap.get(order.userId) || 'Usuario no disponible'}</span>
                                     <span className="badge bg-success">${(order.totalPrice || 0).toFixed(2)}</span>
                                 </div>
@@ -95,7 +93,7 @@ useEffect(() => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* Accede a los detalles de la orden de forma segura */}
+                                        
                                         {(order.orderDetails || []).map(detail => (
                                             <tr key={detail.id}>
                                                 <td>{detail.product?.name || 'Producto eliminado'}</td>
