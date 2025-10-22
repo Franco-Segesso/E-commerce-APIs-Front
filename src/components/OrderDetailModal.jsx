@@ -14,7 +14,7 @@ const OrderDetailModal = ({ show, onHide, order }) => {
             <Modal.Body>
                 {/* Información General de la Orden */}
                 <div className="mb-3">
-                    <p><strong>Fecha:</strong> {new Date(order.date).toLocaleDateString()}</p>
+                    <p><strong>Fecha:</strong> {(order.date)}</p>
                     <p><strong>Total:</strong> ${order.totalPrice.toFixed(2)}</p>
                     <p><strong>Dirección de Envío:</strong> {order.shippingAddress}</p>
                     <p><strong>Método de Pago:</strong> {order.paymentMethod}</p>

@@ -147,7 +147,8 @@ const ProfilePage = () => {
                             {orders.map(order => (
                                 <div key={order.id} className="order-row">
                                     <span className="fw-medium">#{order.id}</span>
-                                    <span>{new Date(order.date).toLocaleDateString()}</span>
+
+                                    <span>{(order.date)}</span>
                                     <span>${order.totalPrice.toFixed(2)}</span>
                                     <span className="text-end">
                                         <button

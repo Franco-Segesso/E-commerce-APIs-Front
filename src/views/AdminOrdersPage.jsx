@@ -73,7 +73,7 @@ useEffect(() => {
                             <Accordion.Header>
                                 <div className="d-flex w-100 justify-content-between align-items-center pe-3">
                                     <span className="fw-bold">Orden #{order.id}</span>
-                                    <span>{new Date(order.date).toLocaleDateString()}</span>
+                                    <span>{(order.date)}</span>
                                     <span className="text-muted">{userMap.get(order.userId) || 'Usuario no disponible'}</span>
                                     <span className="badge bg-success">${(order.totalPrice || 0).toFixed(2)}</span>
                                 </div>
