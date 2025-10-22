@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './FilterSidebar.css'; // Asegúrate de tener estilos específicos para el sidebar
+import './FilterSidebar.css';
 
 const FilterSidebar = ({ onFilterChange }) => {
     const [categories, setCategories] = useState([]);
@@ -9,7 +9,7 @@ const FilterSidebar = ({ onFilterChange }) => {
     const [activeCategory, setActiveCategory] = useState(null); // Para resaltar la categoría activa
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchCategories = async () => { // Carga categorías desde la API
             try {
                 const response = await fetch('http://localhost:4002/categories');
                 if (response.ok) {
@@ -23,7 +23,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         fetchCategories();
     }, []);
 
-    const handleApplyPriceFilter = () => {
+    const handleApplyPriceFilter = () => { // Valida y aplica el filtro de precio
         if (minPrice && maxPrice) {
             if (parseFloat(minPrice) > parseFloat(maxPrice)) {
                 setError('El precio mínimo no puede ser mayor que el máximo.');
@@ -36,7 +36,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         }
     };
     
-    const handleCategoryClick = (categoryId) => {
+    const handleCategoryClick = (categoryId) => { // Maneja el clic en una categoría
         setError('');
         setActiveCategory(categoryId); // Guardamos la categoría activa
         onFilterChange({ 
@@ -47,7 +47,7 @@ const FilterSidebar = ({ onFilterChange }) => {
 
     };
 
-    const handleClearFilters = () => {
+    const handleClearFilters = () => { // Limpia todos los filtros
         setMinPrice('');
         setMaxPrice('');
         setError('');
@@ -56,7 +56,7 @@ const FilterSidebar = ({ onFilterChange }) => {
     };
 
     return (
-        <div> {/* Quitamos el contenedor extra, ya está en ProductPage */}
+        <div>
             <h5>Categorías</h5>
             <ul className="list-group list-group-flush mb-4 category-list">
                 {/* Botón para "Todas" */}

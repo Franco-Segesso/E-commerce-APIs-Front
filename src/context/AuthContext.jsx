@@ -3,24 +3,24 @@ import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
+export const useAuth = () => { // Hook personalizado para usar el contexto de autenticación
     return useContext(AuthContext);
 };
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }) => { // Proveedor de contexto de autenticación. Maneja login, logout y estado del usuario.
     const [authToken, setAuthToken] = useState(() => localStorage.getItem('token'));
     const [user, setUser] = useState(null); // El estado 'user' guardará el email y los roles
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
+
+    useEffect(() => { // Cada vez que 'authToken' cambie, actualizamos el estado del usuario
         if (authToken) {
             try {
-                const decodedToken = jwtDecode(authToken);
+                const decodedToken = jwtDecode(authToken); // Decodifica el token JWT
                 
-                console.log("Token decodificado:", decodedToken);
                 // Ahora guardamos tanto el email (sub) como los roles (authorities)
                 setUser({ 
                     email: decodedToken.sub,
-                    roles: decodedToken.authorities || [] // 'authorities' es donde Spring Security pone los roles en el token
+                    roles: decodedToken.authorities || [] // 'authorities' es donde se encuentra el rol del usuario en el token
                 });
                 
                 localStorage.setItem('token', authToken);
@@ -36,19 +36,17 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, [authToken]);
 
-    const login = (token) => {
+    const login = (token) => { // Maneja el login estableciendo el token de autenticación
         setAuthToken(token);
     };
 
-    const logout = () => {
+    const logout = () => { // Maneja el logout limpiando el token y el estado del usuario
         setAuthToken(null);
     };
     
-    // Esta función ahora funcionará correctamente porque 'user.roles' ya existe
-    const isAdmin = user && user.roles.includes('ROLE_ADMIN');
+    const isAdmin = user && user.roles.includes('ROLE_ADMIN'); // Verifica si el usuario tiene rol de admin
 
-    // Nos aseguramos de pasar 'isAdmin' al resto de la aplicación
-    const value = { authToken, user, loading, login, logout, isAdmin };
+    const value = { authToken, user, loading, login, logout, isAdmin }; // Valores que estarán disponibles en el contexto
 
     return (
         <AuthContext.Provider value={value}>

@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 
 // Este componente recibe la orden completa y la muestra en un modal
 const OrderDetailModal = ({ show, onHide, order }) => {
-    if (!order) return null; // No renderizar nada si no hay orden seleccionada
+    if (!order) return null; // No returnea nada si no hay orden seleccionada
 
     return (
         <Modal show={show} onHide={onHide} size="lg" centered>
@@ -33,11 +33,11 @@ const OrderDetailModal = ({ show, onHide, order }) => {
                     </thead>
                     <tbody>
                         {order.orderDetails && order.orderDetails.map(detail => {
-                            // Calculamos el precio unitario (considerando posible descuento en el futuro si lo agregas)
+                            // Calculamos el precio unitario y el subtotal
                             const unitPrice = detail.product ? detail.product.price : 0;
                             const subtotal = unitPrice * detail.quantity;
 
-                            return (
+                            return ( // Agregamos una fila por cada detalle de la orden
                                 <tr key={detail.id}>
                                     <td>{detail.product ? detail.product.name : 'Producto no disponible'}</td>
                                     <td className="text-center">{detail.quantity}</td>

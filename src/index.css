@@ -1,12 +1,8 @@
-/* Hacemos que la base de la página (html, body y el div#root de React) 
-   ocupe el 100% de la altura de la pantalla. Esto es CRUCIAL. */
+/* Hacemos que la base de la página ocupe el 100% de la altura de la pantalla. */
 html, body, #root {
   height: 100%;
 }
 
-/* Convertimos el div#root en un contenedor flex que organiza 
-   su contenido en una columna. Esto es necesario para que 
-   el <main> pueda crecer. */
 #root {
   display: flex;
   flex-direction: column;
@@ -21,42 +17,40 @@ body {
   color: #333;
 }
 
-/* Opcional: títulos más pesados */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
 }
 
-/* 1. Definimos tu nuevo color verde como el primario de Bootstrap */
+/* Definimos el verde como el color primario de Bootstrap */
 :root {
-  --bs-primary: #05934E; /* Tu nuevo verde */
-  --bs-primary-rgb: 5, 147, 78; /* Componentes RGB del nuevo verde */
-  --bs-link-color: var(--bs-primary); /* Links también en verde primario */
-  --bs-link-hover-color: #047a41; /* Un verde un poco más oscuro al pasar el mouse */
+  --bs-primary: #05934E; 
+  --bs-primary-rgb: 5, 147, 78;
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: #047a41;
 }
 
-/* 2. Botón Primario (Verde sólido) */
-/* Usado en el sidebar para "Aplicar Precio" */
+/* Botón Primario */
 .btn-primary {
-  --bs-btn-color: #ffffff; /* Texto blanco (mejor contraste con este verde) */
+  --bs-btn-color: #ffffff;
   --bs-btn-bg: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
   --bs-btn-hover-color: #ffffff;
-  --bs-btn-hover-bg: #047a41; /* Verde más oscuro para hover */
+  --bs-btn-hover-bg: #047a41;
   --bs-btn-hover-border-color: #036f3a;
   --bs-btn-active-color: #ffffff;
-  --bs-btn-active-bg: #036f3a; /* Aún más oscuro para active */
+  --bs-btn-active-bg: #036f3a;
   --bs-btn-active-border-color: #036134;
   --bs-btn-disabled-bg: var(--bs-primary);
   --bs-btn-disabled-border-color: var(--bs-primary);
 }
 
-/* 3. Botón Outline Dark (Verde borde y texto) */
+/* Botón Outline Dark */
 /* Usado en la ProductCard para "Ver detalles" */
 .btn-outline-dark {
   --bs-btn-color: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
-  --bs-btn-hover-color: #ffffff; /* Texto blanco al pasar mouse */
+  --bs-btn-hover-color: #ffffff;
   --bs-btn-hover-bg: var(--bs-primary);
   --bs-btn-hover-border-color: var(--bs-primary);
   --bs-btn-active-color: #ffffff;
@@ -66,35 +60,34 @@ h1, h2, h3, h4, h5, h6 {
   --bs-btn-disabled-border-color: var(--bs-primary);
 }
 
-/* 4. Botón Outline Secondary (Verde borde y texto) */
+/* Botón Outline Secondary */
 /* Usado en el sidebar para "Limpiar Filtros" */
 .btn-outline-secondary {
-    --bs-btn-color: var(--bs-primary); /* Texto verde */
-    --bs-btn-border-color: var(--bs-primary); /* Borde verde */
-    --bs-btn-hover-color: #fff; /* Texto blanco al pasar mouse */
+    --bs-btn-color: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-color: #fff;
     --bs-btn-hover-bg: var(--bs-primary);
     --bs-btn-hover-border-color: var(--bs-primary);
-    /* Mantener estilo similar al outline-dark */
     --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--bs-primary);
     --bs-btn-active-border-color: var(--bs-primary);
 }
 
-/* 5. Categoría activa y hover en el Sidebar */
+/* Categoría activa y hover en el Sidebar */
 .filter-sidebar .category-list .list-group-item {
   color: #495057;
   transition: color 0.2s ease, font-weight 0.2s ease;
 }
 .filter-sidebar .category-list .list-group-item:hover {
-  color: var(--bs-primary); /* Verde al pasar el mouse */
+  color: var(--bs-primary);
   font-weight: 500;
 }
 .filter-sidebar .category-list .list-group-item.active {
-  color: var(--bs-primary); /* Verde cuando está activa */
+  color: var(--bs-primary);
   font-weight: 600;
 }
 
-/* 6. Precio en la Product Card */
+/* Precio en la Product Card */
 .product-card-price {
   color: var(--bs-primary); /* Precio principal en verde */
 }
@@ -103,7 +96,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  overflow-y: scroll; /* Fuerza la barra de desplazamiento vertical siempre visible */
+  overflow-y: scroll; /* Fuerza la barra de desplazamiento vertical a que siempre esté visible así el NavBar 
+                      no da la sensación de que se mueve al cambiar entre distintas vistas */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

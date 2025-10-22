@@ -1,7 +1,7 @@
 import Carousel from 'react-bootstrap/Carousel';
 import Image from 'react-bootstrap/Image';
 
-function HomeCarousel() {
+function HomeCarousel() { // Componente del carrusel de la página principal
   return (
     <Carousel>
       <Carousel.Item className="hero-slide">

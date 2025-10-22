@@ -15,25 +15,24 @@ const Navbar = () => {
 
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-    const handleLogout = () => {
+    const handleLogout = () => { // Función para cerrar sesión
         logout();
         navigate('/');
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm"> {/* Fondo blanco y sombra */}
+        <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm">
             <div className="container">
                 {/* Logo a la izquierda */}
                 <Link className="navbar-brand d-flex align-items-center" to="/">
-                    <img src={logo} alt="Lunchy Logo" height="30" className="me-2"/> {/* Usa el logo */}
+                    <img src={logo} alt="Lunchy Logo" height="30" className="me-2"/> {/* Usamos el logo de lunchy como 'boton', si clickeas el logo te rederige al home*/}
                 </Link>
 
-                {/* Botón Toggler para móviles */}
+                {/* Botón Toggler cuando se achica la pantalla */}
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavContent" aria-controls="navbarNavContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                {/* Contenido Colapsable */}
                 <div className="collapse navbar-collapse" id="navbarNavContent">
 
                     {/* Links Centrales */}
@@ -47,7 +46,7 @@ const Navbar = () => {
                             Sobre Nosotros
                         </NavLink>
                         
-                         {/* Link condicional al panel de Admin */}
+                         {/* Panel de Admin, se chequea si cumple el rol del usuario para visualizar dicho panel */}
                         {isAdmin && (
                              <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle fw-bold text-success" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -62,16 +61,16 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Iconos a la Derecha */}
+                    {/* Íconos a la Derecha */}
                     <ul className="navbar-nav ms-auto d-flex flex-row align-items-center gap-3">
                         {/* Carrito */}
                         <li className="nav-item">
                             <Link to="/cart" className="nav-link position-relative">
-                                {/* Icono de Carrito */}
+                                {/* Ícono de Carrito */}
                                 <img
                                         src={cartIcon}
                                         alt="carrito"
-                                        height="24" // Ajusta el tamaño como necesites
+                                        height="24"
                                     />
                                 {totalItems > 0 && (
                                     <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.6em' }}>
@@ -85,12 +84,12 @@ const Navbar = () => {
                         {user ? (
                             <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle d-flex align-items-center navbar-user-display" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                     {/* Icono de Usuario */}
+                                     {/* Ícono de Usuario */}
                                         <img
                                         src={profilePic}
                                         alt="Perfil"
-                                        height="24" // Ajusta el tamaño como necesites
-                                        className="rounded-circle me-1" // Opcional: hacerlo circular
+                                        height="24"
+                                        className="rounded-circle me-1"
                                     />
                                     {/* Mostramos el mail del usuario */}
                                     <span className="d-none d-lg-inline ms-1">{user.email}</span>
@@ -103,7 +102,7 @@ const Navbar = () => {
                             </li>
                         ) : (
                             <li className="nav-item">
-                                <Link className="btn btn-primary" to="/login">Iniciar Sesión</Link> {/* Botón verde simple de login */}
+                                <Link className="btn btn-primary" to="/login">Iniciar Sesión</Link> {/* Botón de login */}
                             </li>
                         )}
                     </ul>

@@ -6,7 +6,7 @@ const AdminRoute = ({ children }) => {
     const { authToken, isAdmin, loading } = useAuth();
 
     if (loading) {
-        //returnea un spinner indicando que está cargando
+        // Returnea un spinner indicando que está cargando
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
                 <div className="spinner-border text-primary" role="status">
@@ -22,8 +22,7 @@ const AdminRoute = ({ children }) => {
     }
 
     if (!isAdmin) {
-        // Si está logueado pero NO es admin, lo mandamos al inicio
-        // (y podríamos mostrar un mensaje de "Acceso denegado")
+        // Si está logueado pero NO es admin, aparece una alerta indicando que no tiene acceso y lo envía al home
         alert("Acceso denegado. No tienes permisos de administrador.");
         return <Navigate to="/" replace />;
     }
