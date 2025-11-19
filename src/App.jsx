@@ -19,6 +19,7 @@ import HomePage from './views/HomePage.jsx';
 import AboutUsPage from './views/AboutUsPage.jsx';
 
 import AdminOrdersPage from './views/AdminOrdersPage.jsx';
+import { ToastContainer } from 'react-toastify';
 
 
 const SiteLayout = () => ( // Define la estructura estándar de las páginas (Navbar + Footer)
@@ -34,6 +35,22 @@ const SiteLayout = () => ( // Define la estructura estándar de las páginas (Na
 function App() {
     return (
         <BrowserRouter>
+
+        {/* 2. AGREGA EL TOASTCONTAINER AQUÍ (puede ir antes o después de Routes) */}
+                    <ToastContainer 
+                        position="bottom-right" 
+                        autoClose={3000} 
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="light"
+                    />
+        
+
             <Routes>
                 
                 {/* Rutas SIN LAYOUT. Estas rutas son renderizadas sin NavBar y sin Footer */}

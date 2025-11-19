@@ -1,12 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { toast } from 'react-toastify';
 
 const CartContext = createContext();
 
-export const useCart = () => { // Hook personalizado para usar el contexto del carrito
+export const useCart = () => { 
     return useContext(CartContext);
 };
 
-export const CartProvider = ({ children }) => { // Proveedor de contexto del carrito. Maneja agregar, eliminar y actualizar productos en el carrito.
+export const CartProvider = ({ children }) => { 
     const [cartItems, setCartItems] = useState(() => {
         try {
             const localData = localStorage.getItem('cartItems');
@@ -14,66 +15,84 @@ export const CartProvider = ({ children }) => { // Proveedor de contexto del car
         } catch (error) { return []; }
     });
 
-    useEffect(() => { // Cada vez que 'cartItems' cambie, actualizamos el localStorage
+    useEffect(() => { 
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
     }, [cartItems]);
 
-    const addToCart = (productToAdd) => { // Agrega un producto al carrito, respetando el stock disponible
-        setCartItems(prevItems => {
-            const itemExists = prevItems.find(item => item.id === productToAdd.id);
+    const addToCart = (productToAdd) => { 
+        // 1. Usamos 'cartItems' (estado actual) para las validaciones y los Toasts
+        const itemExists = cartItems.find(item => item.id === productToAdd.id);
+        const stockDisponible = productToAdd.stock;
 
-            const stockDisponible = productToAdd.stock;
-
-            if (itemExists) { // Si el producto ya está en el carrito, actualizamos la cantidad
-                const newQuantity = itemExists.quantity + productToAdd.quantity;
-                if (newQuantity > stockDisponible) { // Verificamos el stock. Si se excede, no permitimos agregar más. Si no se excede, actualizamos la cantidad.
-                    alert(`No puedes agregar más unidades de "${productToAdd.name}". Stock máximo: ${stockDisponible}.`);
-                    return prevItems; // Devolvemos el carrito sin cambios
-                }
-
-                return prevItems.map(item =>
-                    item.id === productToAdd.id
-                        ? { ...item, quantity: item.quantity + productToAdd.quantity }
-                        : item
-                );
-            } else { // Si el producto no está en el carrito, lo agregamos
-                if (productToAdd.quantity > stockDisponible) { // Verificamos el stock al agregar un nuevo producto. Si se excede, no permitimos agregarlo.
-                    alert(`No puedes agregar ${productToAdd.quantity} unidades de "${productToAdd.name}". Stock disponible: ${stockDisponible}.`);
-                    return prevItems;
-                }
-                return [...prevItems, { ...productToAdd }];
+        if (itemExists) { 
+            const newQuantity = itemExists.quantity + productToAdd.quantity;
+            
+            // Validación
+            if (newQuantity > stockDisponible) { 
+                toast.error(`Stock máximo alcanzado (${stockDisponible}) para "${productToAdd.name}".`);
+                return; // Cortamos acá, no actualizamos el estado
             }
-        });
+
+            // Éxito
+            toast.success(`Agregaste más unidades de ${productToAdd.name}`);
+
+            // 2. Actualizamos el estado SIN efectos secundarios dentro
+            setCartItems(prevItems => 
+                prevItems.map(item =>
+                    item.id === productToAdd.id
+                        ? { ...item, quantity: newQuantity }
+                        : item
+                )
+            );
+
+        } else { 
+            // Validación
+            if (productToAdd.quantity > stockDisponible) { 
+                toast.error(`No hay suficiente stock de "${productToAdd.name}".`);
+                return;
+            }
+
+            // Éxito
+            toast.success(`Agregado al carrito: ${productToAdd.name}`);
+
+            // Actualización
+            setCartItems(prevItems => [...prevItems, { ...productToAdd }]);
+        }
     };
 
-    const removeFromCart = (productId) => { // Elimina un producto del carrito
+    const removeFromCart = (productId) => { 
         setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
     };
     
-    const clearCart = () => { // Limpia todo el carrito
+    const clearCart = () => { 
         setCartItems([]);
     };
 
-    const updateQuantity = (productId, amount) => { // Actualiza la cantidad de un producto en el carrito, respetando el stock disponible
+    const updateQuantity = (productId, amount) => { 
+        // Buscamos el item en el estado actual para validar
+        const item = cartItems.find(i => i.id === productId);
+        if (!item) return;
+
+        const newQuantity = item.quantity + amount;
+
+        // Validación de stock
+        if (item.stock !== undefined && newQuantity > item.stock) { 
+            toast.warning(`¡Stock insuficiente! Solo quedan ${item.stock} unidades.`);
+            return; 
+        }
+
+        // Si la validación pasa, actualizamos el estado
         setCartItems(prevItems =>
-            prevItems.map(item => {
-                if (item.id === productId) { // Encontramos el producto a actualizar
-                    const newQuantity = item.quantity + amount;
-
-                    if (item.stock !== undefined && newQuantity > item.stock) { // Verificamos el stock antes de actualizar. Si se excede, no permitimos el cambio.
-                        alert(`¡Stock insuficiente! Solo quedan ${item.stock} unidades de "${item.name}".`);
-                        return item; // No cambiamos la cantidad
-                    }
-
-                    return { ...item, quantity: Math.max(1, newQuantity) };
+            prevItems.map(prod => {
+                if (prod.id === productId) { 
+                    return { ...prod, quantity: Math.max(1, newQuantity) };
                 }
-                
-                return item;
-            }).filter(item => item.quantity > 0)
+                return prod;
+            }).filter(prod => prod.quantity > 0)
         );
     };
 
-    const value = { cartItems, addToCart, removeFromCart, clearCart, updateQuantity }; // Valores que estarán disponibles en el contexto
+    const value = { cartItems, addToCart, removeFromCart, clearCart, updateQuantity }; 
 
     return (
         <CartContext.Provider value={value}>

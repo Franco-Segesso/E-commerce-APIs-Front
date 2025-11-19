@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ProductForm from '../components/ProductForm.jsx';
+import { toast } from 'react-toastify';
+// 1. Importamos componentes de Bootstrap para el modal de confirmación
+import { Modal, Button } from 'react-bootstrap';
 
 const AdminProductsPage = () => {
     const [products, setProducts] = useState([]);
@@ -8,12 +11,17 @@ const AdminProductsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const [showModal, setShowModal] = useState(false);
+    // Estado para el formulario de productos
+    const [showFormModal, setShowFormModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+
+    // 2. Estado para el MODAL DE CONFIRMACIÓN (Reemplazo de window.confirm)
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingAction, setPendingAction] = useState(null); 
+    // pendingAction guardará: { type: 'delete' | 'reactivate', data: producto_a_modificar }
 
     const { authToken } = useAuth();
 
-    // Función para obtener los datos iniciales (productos y categorías)
     const fetchData = () => {
         setLoading(true);
         setError('');
@@ -33,26 +41,22 @@ const AdminProductsPage = () => {
         })
         .catch(err => {
             setError(err.message);
+            toast.error(err.message);
         })
         .finally(() => {
             setLoading(false);
         });
     };
 
-    // Llama a fetchData solo una vez cuando el componente se monta
     useEffect(() => {
         fetchData();
     }, []);
 
-
-    // Separamos los productos en activos e inactivos
     const activeProducts = products.filter(p => p.active);
     const inactiveProducts = products.filter(p => !p.active);
-
-    // Se crea un "diccionario" para buscar nombres de categoría por ID
     const categoryMap = new Map(categories.map(cat => [cat.id, cat.description]));
 
-    // Función para guardar (crear o actualizar) un producto
+    // Guardar (Crear/Editar) - Esto no requiere confirmación, usa el formulario
     const handleSave = (formData, productId) => {
         setError('');
         const isUpdating = productId !== null;
@@ -66,7 +70,6 @@ const AdminProductsPage = () => {
         })
         .then(response => {
             if (!response.ok) {
-                // Si hay un error, intentamos leer el mensaje del backend
                 return response.json().then(errData => {
                     throw new Error(errData.message || `Error al ${isUpdating ? 'actualizar' : 'crear'} el producto.`);
                 });
@@ -74,102 +77,111 @@ const AdminProductsPage = () => {
             return response.json();
         })
         .then(() => {
-            alert(`Producto ${isUpdating ? 'actualizado' : 'creado'} con éxito.`);
-            setShowModal(false);
-            fetchData(); // Recargamos los datos para ver los cambios
+            toast.success(`Producto ${isUpdating ? 'actualizado' : 'creado'} con éxito.`);
+            setShowFormModal(false);
+            fetchData();
         })
         .catch(err => {
             setError(err.message);
+            toast.error(err.message);
         });
     };
     
-    // Función para eliminar un producto
-    const handleDelete = (productId) => {
-        if (!window.confirm("¿Estás seguro de que quieres eliminar este producto?")) return;
-        setError('');
-
-        fetch(`http://localhost:4002/products/${productId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Error al eliminar el producto.");
-            }
-            // DELETE no devuelve contenido, así que no es necesario un .json()
-        })
-        .then(() => {
-            alert("Producto eliminado con éxito.");
-            fetchData(); // Recargamos los datos
-        })
-        .catch(err => {
-            setError(err.message);
-        });
+    // 3. Nuevas funciones para abrir el modal en lugar de window.confirm
+    const requestDelete = (product) => {
+        setPendingAction({ type: 'delete', data: product });
+        setShowConfirmModal(true);
     };
 
-    const handleReactivate = (product) => {
-        if (!window.confirm(`¿Seguro que quieres reactivar el producto "${product.name}"?`)) return;
-        setError('');
+    const requestReactivate = (product) => {
+        setPendingAction({ type: 'reactivate', data: product });
+        setShowConfirmModal(true);
+    };
 
-        // Preparamos los datos para la actualización. 
-        // NO necesitamos enviar imagen si solo queremos reactivar.
-        // Creamos un objeto simple con los datos necesarios para el backend.
-        const productData = {
-            name: product.name,
-            description: product.description,
-            categoryId: product.categoryId,
-            price: product.price,
-            stock: product.stock,
-            discount: product.discount,
-            active: true
-        };
-        const formData = new FormData();
-        formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
+    // 4. Función que ejecuta la acción real (se llama desde el botón "Confirmar" del modal)
+    const executeConfirmedAction = () => {
+        if (!pendingAction) return;
+
+        const { type, data } = pendingAction;
+        setShowConfirmModal(false); // Cerramos el modal inmediatamente
+
+        if (type === 'delete') {
+            // Lógica de eliminar
+            fetch(`http://localhost:4002/products/${data.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error al eliminar el producto.");
+            })
+            .then(() => {
+                toast.success("Producto eliminado con éxito.");
+                fetchData();
+            })
+            .catch(err => {
+                setError(err.message);
+                toast.error("No se pudo eliminar el producto");
+            });
+
+        } else if (type === 'reactivate') {
+            // Lógica de reactivar
+            const productData = {
+                name: data.name,
+                description: data.description,
+                categoryId: data.categoryId,
+                price: data.price,
+                stock: data.stock,
+                discount: data.discount,
+                active: true
+            };
+            const formData = new FormData();
+            formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
+            
+            fetch(`http://localhost:4002/products/${data.id}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${authToken}` },
+                body: formData
+            })
+            .then (response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error((`Error al reactivar.`));
+                    });
+                }
+                return response.json();
+            })
+            .then((responseData) => {
+                toast.success(responseData.message || "Producto reactivado con éxito.");
+                fetchData(); 
+            })
+            .catch(err => {
+                setError(err.message);
+                toast.error("Error al reactivar el producto");
+            })
+            .finally(() => {
+                setLoading(false); 
+            });
+        }
         
-        fetch(`http://localhost:4002/products/${product.id}`, {
-            method: 'PUT',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-            body: formData
-        })
-        .then (response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error((errData.message || errData.error || errData.reason || `Error al reactivar el producto.`));
-                });
-            }
-            return response.json();
-        })
-        .then((responseData) => {
-            alert(responseData.message || "Producto reactivado con éxito.");
-            fetchData(); // Recargamos la lista de productos
-        })
-        .catch(err => {
-            setError("Error al reactivar el producto: " + err.message);
-        })
-        .finally(() => {
-            setLoading(false); // Aseguramos que el estado de carga se actualice
-        });
-    };        
+        setPendingAction(null); // Limpiamos la acción
+    };
 
-
-    // Función para abrir el modal (para crear o editar)
-    const openModal = (product = null) => {
+    const openFormModal = (product = null) => {
         setEditingProduct(product);
-        setShowModal(true);
+        setShowFormModal(true);
     };
 
     return (
         <div className="container my-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Gestión de Productos</h2>
-                <button className="btn btn-primary" onClick={() => openModal()}>Crear Nuevo Producto</button>
+                <button className="btn btn-primary" onClick={() => openFormModal()}>Crear Nuevo Producto</button>
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
 
-
             {/* Tabla de Productos Activos */}
-            <h4 classname="mt-4">Productos Activos ({activeProducts.length})</h4>
+            <h4 className="mt-4">Productos Activos ({activeProducts.length})</h4>
             <table className="table table-striped">
                 <thead>
                     <tr>
@@ -189,18 +201,18 @@ const AdminProductsPage = () => {
                             <tr key={p.id}>
                                 <td>{p.id}</td>
                                 <td>{p.name}</td>
-                                {/* Usamos el map para encontrar el nombre de la categoría por su ID */}
                                 <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
                                 <td>${p.price.toFixed(2)}</td>
                                 <td>{p.stock}</td>
                                 <td>
-                                    <button className="btn btn-outline-primary btn-sm me-2" onClick={() => openModal(p)}>Editar</button>
-                                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(p.id)}>Eliminar</button>
+                                    <button className="btn btn-outline-primary btn-sm me-2" onClick={() => openFormModal(p)}>Editar</button>
+                                    {/* Pasamos el objeto completo 'p' a requestDelete */}
+                                    <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(p)}>Eliminar</button>
                                 </td>
                             </tr>
                         ))
                     )}
-                    { !loading && activeProducts.length === 0 && !error && (
+                    {!loading && activeProducts.length === 0 && !error && (
                         <tr><td colSpan="6" className="text-center">No hay productos activos.</td></tr>
                     )}
                 </tbody>
@@ -234,7 +246,8 @@ const AdminProductsPage = () => {
                                                     <td>{p.name}</td>
                                                     <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
                                                     <td>
-                                                        <button className="btn btn-outline-success btn-sm" onClick={() => handleReactivate(p)} disabled={loading}>
+                                                        {/* Usamos requestReactivate */}
+                                                        <button className="btn btn-outline-success btn-sm" onClick={() => requestReactivate(p)} disabled={loading}>
                                                             Reactivar
                                                         </button>
                                                     </td>
@@ -250,7 +263,36 @@ const AdminProductsPage = () => {
                     </div>
                 </div>
             </div>
-            {showModal && <ProductForm product={editingProduct} onSave={handleSave} onHide={() => setShowModal(false)} />}
+            
+            {/* Modal del Formulario (Crear/Editar) */}
+            {showFormModal && <ProductForm product={editingProduct} onSave={handleSave} onHide={() => setShowFormModal(false)} />}
+            
+            {/* 5. Modal de Confirmación (Generado con React Bootstrap) */}
+            <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirmar Acción</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {pendingAction && pendingAction.type === 'delete' && (
+                        <p>¿Estás seguro de que quieres eliminar el producto <strong>{pendingAction.data.name}</strong>?</p>
+                    )}
+                    {pendingAction && pendingAction.type === 'reactivate' && (
+                        <p>¿Seguro que quieres reactivar el producto <strong>{pendingAction.data.name}</strong>?</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        variant={pendingAction?.type === 'delete' ? 'danger' : 'success'} 
+                        onClick={executeConfirmedAction}
+                    >
+                        Confirmar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
         </div>
     );
 };

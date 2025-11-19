@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import './ProfilePage.css'; // 
+import './ProfilePage.css'; 
 import OrderDetailModal from '../components/OrderDetailModal.jsx';
-
+import { toast } from 'react-toastify'; // <-- IMPORTAR
 
 const ProfilePage = () => {
     const [userData, setUserData] = useState(null);
@@ -32,7 +32,7 @@ const ProfilePage = () => {
         })
         .catch(err => setError(err.message))
         .finally(() => setLoadingProfile(false));
-    }, [authToken, isEditing]); // Agregamos isEditing para recargar los datos cuando cancelamos
+    }, [authToken, isEditing]); 
 
     useEffect(() => {
         if (!authToken) return;
@@ -65,14 +65,17 @@ const ProfilePage = () => {
         .then(updatedUser => {
             setUserData(updatedUser);
             setIsEditing(false);
-            alert("Perfil actualizado con éxito.");
+            toast.success("Perfil actualizado con éxito."); // <-- TOAST
         })
-        .catch(err => setError(err.message || 'Error al actualizar el perfil.'));
+        .catch(err => {
+            setError(err.message || 'Error al actualizar el perfil.');
+            toast.error(err.message || 'Error al actualizar el perfil.');
+        });
     };
 
     const handleViewDetails = (order) => {
-        setSelectedOrder(order); // Guarda la orden seleccionada
-        setShowModal(true);      // Muestra el modal
+        setSelectedOrder(order); 
+        setShowModal(true);      
     };
 
     return (
@@ -170,12 +173,9 @@ const ProfilePage = () => {
 
             <OrderDetailModal
                 show={showModal}
-                onHide={() => setShowModal(false)} // Función para cerrar el modal
-                order={selectedOrder}              // Le pasamos la orden seleccionada
+                onHide={() => setShowModal(false)} 
+                order={selectedOrder}             
             />
-
-
-
         </div>
     );
 };

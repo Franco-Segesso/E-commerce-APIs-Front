@@ -1,35 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { toast } from 'react-toastify';
+import { Modal, Button } from 'react-bootstrap';
 
 const AdminCategoriesPage = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     
     // Estados para el formulario
     const [newCategoryName, setNewCategoryName] = useState('');
-    const [editingCategory, setEditingCategory] = useState(null); // Guardamos la categoría que estamos editando
+    const [editingCategory, setEditingCategory] = useState(null); 
+
+    // Estados para el Modal de Confirmación
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingAction, setPendingAction] = useState(null);
 
     const { authToken } = useAuth();
 
-    // Función para recargar las categorías desde el backend
+    // Helper para peticiones seguras
+    const safeFetch = async (url, options) => {
+        const response = await fetch(url, options);
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+
+        if (!response.ok) {
+            throw new Error(data.message || data.error || `Error en la petición (${response.status})`);
+        }
+        return data;
+    };
+
     const fetchCategories = () => {
         setLoading(true);
-        fetch('http://localhost:4002/categories/all')
-            .then(response => response.json())
+        safeFetch('http://localhost:4002/categories/all')
             .then(data => {
                 setCategories(data.content || []);
             })
             .catch(err => {
                 console.error("Error al cargar categorías:", err);
-                setError('No se pudieron cargar las categorías.');
+                toast.error(err.message);
             })
             .finally(() => {
                 setLoading(false);
             });
     };
 
-    // Cargar las categorías al montar el componente
     useEffect(() => {
         fetchCategories();
     }, []);
@@ -39,7 +53,6 @@ const AdminCategoriesPage = () => {
 
     const handleCreateOrUpdate = (e) => {
         e.preventDefault();
-        setError(''); // para limpiar errores anteriores
         
         const isUpdating = editingCategory !== null;
         const url = isUpdating 
@@ -48,7 +61,7 @@ const AdminCategoriesPage = () => {
         
         const method = isUpdating ? 'PUT' : 'POST';
         
-        fetch(url, {
+        safeFetch(url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
@@ -56,89 +69,73 @@ const AdminCategoriesPage = () => {
             },
             body: JSON.stringify({ description: newCategoryName })
         })
-        .then(response => {
-            if (!response.ok) {
-                // Si la respuesta no es exitosa, lanzamos un error para que lo capture el .catch
-                throw new Error(`Error al ${isUpdating ? 'actualizar' : 'crear'} la categoría.`);
-            }
-            // No necesitamos el JSON de respuesta, solo saber que funcionó
-            return response;
-        })
         .then(() => {
-            alert(`Categoría ${isUpdating ? 'actualizada' : 'creada'} con éxito.`);
-            // Limpiar formulario y recargar la lista de categorías
+            toast.success(`Categoría ${isUpdating ? 'actualizada' : 'creada'} con éxito.`);
             setNewCategoryName('');
             setEditingCategory(null);
             fetchCategories();
         })
         .catch(err => {
             console.error(err);
-            setError(err.message);
+            toast.error(err.message);
         });
     };
 
+    // Funciones para abrir el modal de confirmación
+    const requestDelete = (categoryId) => {
+        setPendingAction({ type: 'delete', data: categoryId });
+        setShowConfirmModal(true);
+    };
 
-    const handleDelete = (categoryId) => {
-        if (!window.confirm("¿Estás seguro de que quieres eliminar esta categoría?")) {
-            return;
+    const requestReactivate = (category) => {
+        setPendingAction({ type: 'reactivate', data: category });
+        setShowConfirmModal(true);
+    };
+
+    // Ejecutar la acción confirmada
+    const executeConfirmedAction = () => {
+        if (!pendingAction) return;
+        const { type, data } = pendingAction;
+        setShowConfirmModal(false);
+
+        if (type === 'delete') {
+            fetch(`http://localhost:4002/categories/${data}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || "Error al eliminar la categoría.");
+                }
+            })
+            .then(() => {
+                toast.success("Categoría eliminada con éxito.");
+                fetchCategories(); 
+            })
+            .catch(err => {
+                toast.error(err.message);
+            });
+        } else if (type === 'reactivate') {
+             safeFetch(`http://localhost:4002/categories/${data.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ description: data.description}) 
+            })
+            .then(() => {
+                toast.success("Categoría reactivada con éxito.");
+                fetchCategories();
+            })
+            .catch(err => {
+                console.error(err);
+                toast.error(err.message);
+            }); 
         }
-        setError('');
-
-        fetch(`http://localhost:4002/categories/${categoryId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Error al eliminar la categoría.");
-            }
-            return response;
-        })
-        .then(() => {
-            alert("Categoría eliminada con éxito.");
-            fetchCategories(); // Recargamos la lista
-        })
-        .catch(err => {
-            console.error(err);
-            setError(err.message);
-        });
+        setPendingAction(null);
     };
-
-
-    const handleReactivate = (category) => {
-        if (!window.confirm(`¿Seguro que quieres reactivar la categoría "${category.description}"?`)) return;
-        setError('');
-        setLoading(true);
-
-        fetch(`http://localhost:4002/categories/${category.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ description: category.description}) // Enviamos la misma descripción para reactivar
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.message || "Error al reactivar la categoría.");
-                });
-            }
-            return response.json();
-        })
-        .then(() => {
-            alert("Categoría reactivada con éxito.");
-            fetchCategories(); // Recargamos la lista
-        })
-        .catch(err => {
-            console.error(err);
-            setError(err.message);
-        })
-        .finally(() => {
-            setLoading(false);
-        }); 
-
-    }
 
     const startEdit = (category) => {
         setEditingCategory(category);
@@ -149,7 +146,7 @@ const AdminCategoriesPage = () => {
         <div className="container my-5">
             <h2 className="mb-4">Gestión de Categorías</h2>
 
-            {/* Formulario para crear / editar categorías */}
+            {/* Formulario */}
             <div className="card mb-4">
                 <div className="card-body">
                     <h5 className="card-title">{editingCategory ? 'Editando Categoría' : 'Crear Nueva Categoría'}</h5>
@@ -176,9 +173,7 @@ const AdminCategoriesPage = () => {
                 </div>
             </div>
 
-            {error && <div className="alert alert-danger">{error}</div>}
-
-            {/* Tabla de categorias activas*/}
+            {/* Tabla de categorias activas */}
             <h4 className="mt-4">Categorías Activas ({activeCategories.length})</h4>
             <div className="card">
                 <div className="card-header">
@@ -191,12 +186,12 @@ const AdminCategoriesPage = () => {
                                 {cat.description}
                                 <div>
                                     <button className="btn btn-outline-primary btn-sm me-2" onClick={() => startEdit(cat)}>Editar</button>
-                                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(cat.id)}>Eliminar</button>
+                                    <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(cat.id)}>Eliminar</button>
                                 </div>
                             </li>
                         ))
                     )}
-                    { !loading && activeCategories.length === 0 && !error && (
+                    { !loading && activeCategories.length === 0 && (
                         <li className="list-group-item text-center">No hay categorías activas.</li>
                     )}
                 </ul>
@@ -218,7 +213,7 @@ const AdminCategoriesPage = () => {
                                         {inactiveCategories.map(cat => (
                                             <li key={cat.id} className="list-group-item d-flex justify-content-between align-items-center">
                                                 {cat.description}
-                                                <button className="btn btn-outline-success btn-sm" onClick={() => handleReactivate(cat)} disabled={loading}>
+                                                <button className="btn btn-outline-success btn-sm" onClick={() => requestReactivate(cat)} disabled={loading}>
                                                     Reactivar
                                                 </button>
                                             </li>
@@ -231,8 +226,34 @@ const AdminCategoriesPage = () => {
                         </div>
                     </div>
                 </div>
-                
             </div>
+
+            {/* Modal de Confirmación */}
+            <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirmar Acción</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {pendingAction && pendingAction.type === 'delete' && (
+                        <p>¿Estás seguro de que quieres eliminar esta categoría?</p>
+                    )}
+                    {pendingAction && pendingAction.type === 'reactivate' && (
+                        <p>¿Seguro que quieres reactivar la categoría "<strong>{pendingAction.data.description}</strong>"?</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        variant={pendingAction?.type === 'delete' ? 'danger' : 'success'} 
+                        onClick={executeConfirmedAction}
+                    >
+                        Confirmar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
         </div>
     );
 };

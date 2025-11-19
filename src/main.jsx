@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 

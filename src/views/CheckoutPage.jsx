@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useEffect } from 'react';
 import './CheckoutPage.css';
+import { toast } from 'react-toastify'; // <-- IMPORTAR
 
 const CheckoutPage = () => {
     const { cartItems, clearCart } = useCart();
     const { authToken } = useAuth();
     const navigate = useNavigate();
-    
     
     const [shippingAddress, setShippingAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState(''); 
@@ -49,32 +48,26 @@ const CheckoutPage = () => {
         }
     }, [authToken]);
 
-
-
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
         if (!shippingAddress) {
-            setError("Por favor, completa la dirección de envío.");
+            toast.error("Por favor, completa la dirección de envío.");
             return;
         }
         if (!paymentMethod) {
-            setError("Por favor, selecciona un método de pago.");
+            toast.error("Por favor, selecciona un método de pago.");
             return;
         }
         if (!userId) {
-            setError("ID de usuario no disponible. No se puede procesar la orden.");
+            toast.error("ID de usuario no disponible. No se puede procesar la orden.");
             return;
         }
         
         setLoading(true);
         setError('');
 
-       
-        
         const productsIdList = cartItems.flatMap(item => Array(item.quantity).fill(item.id));
     
-
-       
         const orderData = {
             productsId: productsIdList,
             userId: userId,
@@ -93,7 +86,6 @@ const CheckoutPage = () => {
             });
 
             if (!response.ok) {
-                
                 if (response.status === 403) {
                     throw new Error("Error de permisos (403): Tu usuario no tiene el rol necesario para crear órdenes.");
                 }
@@ -101,13 +93,14 @@ const CheckoutPage = () => {
             }
 
             const createdOrder = await response.json();
-            alert(`¡Orden creada con éxito! Número de orden: ${createdOrder.id}`);
+            toast.success(`¡Orden creada con éxito! Número de orden: ${createdOrder.id}`);
             
             clearCart();
             navigate('/');
 
         } catch (err) {
             setError(err.message);
+            toast.error(err.message);
         } finally {
             setLoading(false);
         }
@@ -159,7 +152,6 @@ const CheckoutPage = () => {
                                 required 
                             />
                         </div>
-                        
                         
                         {error && <div className="alert alert-danger mt-3">{error}</div>}
                     </form>

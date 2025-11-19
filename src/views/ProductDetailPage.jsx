@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import './ProductDetailPage.css';
-
+import { toast } from 'react-toastify'; // <-- IMPORTAR
 
 const ProductDetailPage = () => {
     
@@ -56,7 +56,7 @@ const ProductDetailPage = () => {
 
         // VALIDACIÓN DE STOCK 
         if (currentQuantityInCart + requestedQuantity > product.stock) {
-            alert(`¡Stock insuficiente! Solo quedan ${product.stock} unidades disponibles de "${product.name}".`);
+            toast.error(`¡Stock insuficiente! Solo quedan ${product.stock} unidades disponibles de "${product.name}".`);
             return; 
         }
         
@@ -66,7 +66,8 @@ const ProductDetailPage = () => {
             quantity: requestedQuantity
         };
         addToCart(productToAdd);
-        alert(`${product.name} (x${quantity}) agregado al carrito.`);
+        // No es necesario alert aquí si ya pusiste el toast en el context, pero si quieres reforzar:
+        // toast.success(`${product.name} (x${quantity}) agregado al carrito.`);
     };
     
     if (loading) return <div className="text-center p-5"><h4>Cargando...</h4></div>;
