@@ -1,19 +1,19 @@
 import React from 'react';
-import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Link, useNavigate, NavLink } from 'react-router-dom';
 import logo from '../assets/lunchy.webp';
 import profilePic from '../assets/profile-pic.png';
 import cartIcon from '../assets/carrito.png';
+import { useSelector, useDispatch } from 'react-redux';
 import './NavBar.css';
 
 
 const Navbar = () => {
-    const { cartItems } = useCart();
+    const { cartItems } = useSelector((state) => state.cart.items);
     const { user, logout, isAdmin} = useAuth();
     const navigate = useNavigate();
 
-    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = useSelector((state) => state.cart?.items || []);
 
     const handleLogout = () => { // Función para cerrar sesión
         logout();

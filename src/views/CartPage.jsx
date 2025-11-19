@@ -1,21 +1,35 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext.jsx';
+// 1. Imports de Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { removeFromCart, updateQuantity } from '../redux/slices/cartSlice';
+import { toast } from 'react-toastify'; // Si usas Toastify
 import './CartPage.css';
 
 const CartPage = () => {
-    
-    const { cartItems, removeFromCart, updateQuantity } = useCart();
+    // 2. Leer estado desde Redux
+    const cartItems = useSelector((state) => state.cart.items);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    // Cálculos locales (puedes dejarlos aquí por ahora)
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    //Pusimos para q simule un impuesto del 5% 
     const estimatedTaxes = subtotal * 0.05;
     const shipping = subtotal > 50000 ? 0.00 : 5000.00;
     const totalPrice = (subtotal + estimatedTaxes + shipping).toFixed(2);
 
     const handleCheckout = () => {
         navigate('/checkout');
+    };
+
+    // Helpers para despachar acciones
+    const handleRemove = (id) => {
+        dispatch(removeFromCart(id));
+        toast.info("Producto eliminado");
+    };
+
+    const handleUpdateQuantity = (id, amount) => {
+        dispatch(updateQuantity({ id, amount }));
     };
 
     if (cartItems.length === 0) {
@@ -41,39 +55,35 @@ const CartPage = () => {
                     {cartItems.map(item => (
                         <div key={item.id} className="card cart-item-card">
                             <div className="d-flex align-items-center p-3">
-                                {/* Imagen */}
                                 <div className="cart-item-image me-3">
                                     <img src={`data:image/jpeg;base64,${item.imageBase64}`} alt={item.name} />
                                 </div>
-                                {/* Detalles */}
                                 <div className="flex-grow-1 cart-item-details">
                                     <h5 className="cart-item-title">{item.name}</h5>
                                     <p className="cart-item-price-unit mb-2">${item.price.toFixed(2)} c/u</p>
-                                    {/* Selector de Cantidad */}
                                     <div className="cart-quantity-selector">
                                         <button
                                             className="btn btn-quantity"
-                                            onClick={() => updateQuantity(item.id, -1)}
+                                            onClick={() => handleUpdateQuantity(item.id, -1)}
                                             aria-label="Disminuir cantidad"
                                         >-</button>
                                         <input
                                             className="form-control quantity-input"
                                             type="number"
                                             value={item.quantity}
-                                            readOnly // para q solo se pueda cambiar con los botones
+                                            readOnly
                                             aria-label="Cantidad"
                                         />
                                         <button
                                             className="btn btn-quantity"
-                                            onClick={() => updateQuantity(item.id, 1)}
+                                            onClick={() => handleUpdateQuantity(item.id, 1)}
                                             aria-label="Aumentar cantidad"
                                         >+</button>
                                     </div>
                                 </div>
-                                {/* Precio Total y Eliminar */}
                                 <div className="text-end ms-3">
                                     <p className="cart-item-total-price mb-2">${(item.price * item.quantity).toFixed(2)}</p>
-                                    <button onClick={() => removeFromCart(item.id)} className="btn-remove-item" aria-label="Eliminar item">
+                                    <button onClick={() => handleRemove(item.id)} className="btn-remove-item" aria-label="Eliminar item">
                                         &times; 
                                     </button>
                                 </div>
@@ -82,7 +92,7 @@ const CartPage = () => {
                     ))}
                 </div>
 
-                {/* Columna Resumen del Pedido */}
+                {/* Columna Resumen */}
                 <div className="col-lg-4">
                     <div className="order-summary-card">
                         <h5 className="fw-bold mb-3">Resumen del Pedido</h5>
