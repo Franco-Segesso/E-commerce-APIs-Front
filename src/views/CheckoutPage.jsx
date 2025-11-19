@@ -17,6 +17,11 @@ const CheckoutPage = () => {
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
 
+    const [cardNumber, setCardNumber] = useState('');
+    const [cardExpiry, setCardExpiry] = useState('');
+    const [cardCvv, setCardCvv] = useState('');
+
+
     // Cálculos de precios
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const estimatedTaxes = subtotal * 0.05;
@@ -62,6 +67,24 @@ const CheckoutPage = () => {
             toast.error("ID de usuario no disponible. No se puede procesar la orden.");
             return;
         }
+        if (paymentMethod === 'Tarjeta de Credito') { // Validacion de fecha de vencimiento de la tarjeta
+            const regex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+            if (!regex.test(cardExpiry)) {
+                setError("La fecha de vencimiento debe ser MM/AA.");
+                return;
+            }
+
+            const [mm, yy] = cardExpiry.split('/').map(Number);
+
+            const currentYear = Number(new Date().getFullYear().toString().slice(-2));
+            const currentMonth = new Date().getMonth() + 1;
+
+            if (yy < currentYear || (yy === currentYear && mm < currentMonth)) {
+                setError("La tarjeta está vencida.");
+                return;
+            }
+        }
+
         
         setLoading(true);
         setError('');
@@ -152,6 +175,68 @@ const CheckoutPage = () => {
                                 required 
                             />
                         </div>
+                        
+
+                    {/*formulario de tarjeta de credito*/}
+                    {paymentMethod === 'Tarjeta de Credito' && (
+                    <div className="mt-3 card-fields">
+                    <h4 className="fw-bold mb-3">Datos de la tarjeta</h4>
+
+                        <div className="mb-3">
+                            <label className="form-label">Número de Tarjeta</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={cardNumber}
+                                onChange={(e) => setCardNumber(e.target.value)}
+                                placeholder="1234 5678 9012 3456"
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Vencimiento (MM/AA)</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={cardExpiry}
+                                onChange={(e) => {
+                                    let v = e.target.value;
+
+                                    v = v.replace(/[^\d]/g, "");
+                                    if (v.length > 4) v = v.slice(0, 4);
+
+                                    if (v.length === 1 && Number(v) > 1) {
+                                        v = "0" + v;
+                                    }
+
+                                    if (v.length >= 3) {
+                                        v = v.slice(0, 2) + "/" + v.slice(2);
+                                    }
+
+                                    setCardExpiry(v);
+                                }}
+                                placeholder="MM/AA"
+                                required
+                            />
+                        </div>
+
+
+                        <div className="mb-3">
+                            <label className="form-label">CVV</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={cardCvv}
+                                onChange={(e) => setCardCvv(e.target.value)}
+                                placeholder="123"
+                                required
+                            />
+                        </div>
+                    </div>
+                )} 
+                
+
                         
                         {error && <div className="alert alert-danger mt-3">{error}</div>}
                     </form>
