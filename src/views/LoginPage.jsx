@@ -1,40 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+// 1. Redux
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser, clearError } from '../redux/slices/AuthSlice'; // Ruta corregida
+
+import Input from '../components/Input'; 
+import Button from '../components/Button'; 
+import Alert from '../components/Alert'; 
 import lunchyLogo from "../assets/lunchy-logo.png";
 import './Login&RegisterPage.css';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const { login } = useAuth();
+    const [localError, setLocalError] = useState(''); // Error local por si falla validación antes de Redux
+    
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await fetch('http://localhost:4002/api/v1/auth/authenticate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            if (!response.ok) throw new Error('Credenciales inválidas.');
-            const data = await response.json();
-            login(data.access_token);
+    // 2. Leemos el estado global
+    const { loading, error, user } = useSelector((state) => state.auth);
+
+    // 3. Redirección si ya estás logueado
+    useEffect(() => {
+        if (user) {
             navigate('/');
-        } catch (err) {
-            setError(err.message);
         }
+        // Al salir de la pantalla, limpiamos el error rojo global
+        return () => {
+            dispatch(clearError());
+        }
+    }, [user, navigate, dispatch]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLocalError('');
+        
+        // 4. Despachamos la acción
+        // El thunk se encarga del fetch al backend
+        dispatch(loginUser({ email, password }));
     };
+
     return (
-        //Contenedor principal para centrar todo en la página
         <div className="login-page-wrapper">
-            
-            {/*Tarjeta principal dividida en dos */}
             <div className="login-card-split">
-                
-                {/* Panel Izquierdo: Branding y Visual */}
                 <div className="login-left-panel">
                     <div className="mb-4">
                         <img src={lunchyLogo} alt="Lunchy Logo" style={{ width: '150px' }} />
@@ -43,51 +52,44 @@ const LoginPage = () => {
                     <p className="lead text-dark-emphasis">
                         Ingresá para gestionar tus pedidos y disfrutar de nuestras ofertas.
                     </p>
-                    
                 </div>
 
-                {/* Panel Derecho: Formulario de Login */}
                 <div className="login-right-panel">
                     <h2 className="h4 mb-4 fw-bold">Iniciar Sesión</h2>
                     <p className="mb-4 text-muted">¡Bienvenido de nuevo! Ingresá tus datos.</p>
                     
                     <form onSubmit={handleSubmit}>
+                        {/* Mostramos error de Redux o local */}
+                        <Alert message={error || localError} type="danger" />
+                        
+                        <Input 
+                            label="Correo Electrónico" 
+                            type="email" 
+                            value={email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            required 
+                        />
                         <div className="mb-3">
-                            <label className="form-label">Correo Electrónico</label>
-                            <input 
-                                type="email" 
-                                className="form-control form-control-lg" 
-                                value={email} 
-                                onChange={(e) => setEmail(e.target.value)} 
-                                required 
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Contraseña</label>
-                            <input 
+                            <Input 
+                                label="Contraseña" 
                                 type="password" 
-                                className="form-control form-control-lg" 
                                 value={password} 
                                 onChange={(e) => setPassword(e.target.value)} 
                                 required 
                             />
-                            
                         </div>
-                        
-                        {error && <div className="alert alert-danger mt-3">{error}</div>}
                         
                         <div className="d-grid mt-4">
-                            <button type="submit" className="btn btn-success btn-lg">
+                            <Button type="submit" loading={loading} className="btn btn-success btn-lg">
                                 Ingresar
-                            </button>
+                            </Button>
                         </div>
                     </form>
-                    
                     
                     <div className="text-center mt-4">
                         <p className="mb-0">
                             <small className="text-muted">
-                                ¿No tienes una cuenta?  <Link to="/register" className="fw-bold">Registrate</Link>
+                                ¿No tienes una cuenta? <Link to="/register" className="fw-bold">Registrate</Link>
                             </small>
                         </p>
                     </div>
@@ -103,10 +105,6 @@ const LoginPage = () => {
             </div>
         </div>
     );
-
-
-
 };
 
 export default LoginPage;
-

@@ -1,182 +1,118 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// 1. IMPORTS DE REDUX (Reemplazan a useCart)
+// 1. REDUX
 import { useSelector, useDispatch } from 'react-redux';
 import { clearCart } from '../redux/slices/cartSlice';
+import { createOrder } from '../redux/slices/OrdersSlice';
+import { fetchProfile } from '../redux/slices/UserSlice';
 
-// 2. Mantenemos AuthContext y Toastify
-import { useAuth } from '../context/AuthContext.jsx';
 import { toast } from 'react-toastify'; 
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
-    // --- A. HOOKS DE REDUX ---
-    // Leemos los items del carrito desde el estado global
-    const cartItems = useSelector((state) => state.cart.items);
-    const dispatch = useDispatch(); // Para ejecutar acciones como clearCart
-
-    const { authToken } = useAuth();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    
-    // Estados del formulario
+
+    // 2. ESTADO GLOBAL
+    // Carrito
+    const cartItems = useSelector((state) => state.cart.items);
+    // Usuario (Necesitamos el ID para la orden)
+    const { profile: userProfile, loading: loadingUser } = useSelector((state) => state.user);
+    // Estado de la orden (para saber si se está enviando)
+    const { loading: loadingOrder } = useSelector((state) => state.orders);
+
+    // 3. ESTADOS LOCALES (Formulario)
     const [shippingAddress, setShippingAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState(''); 
     
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [userId, setUserId] = useState(null);
-
-    // Estados de la Tarjeta
+    // Datos de tarjeta (Solo UI local)
     const [cardNumber, setCardNumber] = useState('');
     const [cardExpiry, setCardExpiry] = useState('');
     const [cardCvv, setCardCvv] = useState('');
 
-
-    // --- B. CÁLCULOS (Usando cartItems de Redux) ---
+    // 4. CÁLCULOS
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const estimatedTaxes = subtotal * 0.05;
     const shipping = subtotal > 50000 ? 0.00 : 5000.00;
     const totalPrice = (subtotal + estimatedTaxes + shipping).toFixed(2);
 
-    // Fetch del Perfil (Igual que tu código)
+    // 5. EFECTOS
+    // Cargar el perfil del usuario al entrar para tener su ID disponible
     useEffect(() => {
-        if(authToken){
-            setLoading(true);
-            fetch('http://localhost:4002/users/profile', {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar el perfil.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                setUserId(data.id);
-            })
-            .catch(err => {
-                setError("Error al obtener el ID de usuario. Por favor, intenta de nuevo.");
-                console.error(err);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-        }
-    }, [authToken]);
+        dispatch(fetchProfile());
+    }, [dispatch]);
 
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
         
-        // --- VALIDACIONES GENERALES ---
-        if (!shippingAddress) {
-            toast.error("Por favor, completa la dirección de envío.");
-            return;
-        }
-        if (!paymentMethod) {
-            toast.error("Por favor, selecciona un método de pago.");
-            return;
-        }
-        if (!userId) {
-            toast.error("ID de usuario no disponible. No se puede procesar la orden.");
-            return;
+        // Validaciones
+        if (!shippingAddress) return toast.error("Por favor, completa la dirección de envío.");
+        if (!paymentMethod) return toast.error("Por favor, selecciona un método de pago.");
+        
+        // Verificamos si tenemos el ID del usuario cargado desde Redux
+        if (!userProfile?.id) {
+            return toast.error("Error: No se pudo identificar al usuario. Recarga la página.");
         }
 
-        // --- VALIDACIÓN DE TARJETA DE CRÉDITO ---
+        // Validación de Tarjeta
         if (paymentMethod === 'Tarjeta de Credito') { 
             const regex = /^(0[1-9]|1[0-2])\/\d{2}$/;
-            if (!regex.test(cardExpiry)) {
-                setError("La fecha de vencimiento debe ser MM/AA.");
-                return;
-            }
+            if (!regex.test(cardExpiry)) return toast.error("La fecha de vencimiento debe ser MM/AA.");
 
             const [mm, yy] = cardExpiry.split('/').map(Number);
-
             const currentYear = Number(new Date().getFullYear().toString().slice(-2));
             const currentMonth = new Date().getMonth() + 1;
 
             if (yy < currentYear || (yy === currentYear && mm < currentMonth)) {
-                setError("La tarjeta está vencida.");
-                return;
+                return toast.error("La tarjeta está vencida.");
             }
         }
 
-        setLoading(true);
-        setError('');
-
-        // Preparamos la lista plana de IDs para el backend
+        // Preparar datos para el backend
         const productsIdList = cartItems.flatMap(item => Array(item.quantity).fill(item.id));
     
         const orderData = {
             productsId: productsIdList,
-            userId: userId,
+            userId: userProfile.id, // ID obtenido de Redux UserSlice
             shippingAddress: shippingAddress,
             paymentMethod: paymentMethod
         };
         
-        try {
-            const response = await fetch('http://localhost:4002/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify(orderData)
+        // DESPACHAR LA ORDEN
+        // createOrder ya es "inteligente" y busca el token solo (gracias a tu OrdersSlice)
+        dispatch(createOrder(orderData))
+            .unwrap() // Nos permite manejar el éxito/error como promesa
+            .then((createdOrder) => {
+                toast.success(`¡Orden creada con éxito! ID: ${createdOrder.id}`);
+                dispatch(clearCart()); // Limpiamos el carrito en Redux
+                navigate('/');
+            })
+            .catch((err) => {
+                toast.error(err || "No se pudo procesar la orden.");
             });
-
-            if (!response.ok) {
-                if (response.status === 403) {
-                    throw new Error("Error de permisos (403): Tu usuario no tiene el rol necesario para crear órdenes.");
-                }
-                throw new Error("No se pudo procesar la orden.");
-            }
-
-            const createdOrder = await response.json();
-            
-            toast.success(`¡Orden creada con éxito! Número de orden: ${createdOrder.id}`);
-            
-            // --- C. LIMPIAR CARRITO CON REDUX ---
-            dispatch(clearCart()); // Ejecutamos la acción importada del slice
-            
-            navigate('/');
-
-        } catch (err) {
-            setError(err.message);
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
     };
+
+    const isLoading = loadingUser || loadingOrder;
 
     return (
         <div className="container-fluid checkout-page-container">
             <div className="checkout-layout"> 
                 
-                {/* Columna Izquierda: Formulario */}
+                {/* FORMULARIO (Columna Izquierda) */}
                 <div className="checkout-form-section">
                     <h4 className="mb-3 fw-bold">Método de pago</h4>
                     <div className="payment-methods">
-                        <button 
-                            type="button" 
-                            className={`btn ${paymentMethod === 'Tarjeta de Credito' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('Tarjeta de Credito')}
-                        >
-                            Tarjeta de Credito
-                        </button>
-                        <button 
-                            type="button" 
-                            className={`btn ${paymentMethod === 'Mercado Pago' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('Mercado Pago')}
-                        >
-                            Mercado Pago
-                        </button>
-                         <button 
-                            type="button" 
-                            className={`btn ${paymentMethod === 'Google Pay' ? 'active' : ''}`}
-                            onClick={() => setPaymentMethod('Google Pay')}
-                        >
-                            Google Pay
-                        </button>
+                        {['Tarjeta de Credito', 'Mercado Pago', 'Google Pay'].map(method => (
+                            <button 
+                                key={method}
+                                type="button" 
+                                className={`btn ${paymentMethod === method ? 'active' : ''}`}
+                                onClick={() => setPaymentMethod(method)}
+                            >
+                                {method}
+                            </button>
+                        ))}
                     </div>
 
                     <h4 className="mb-3 fw-bold">Dirección de envío</h4>
@@ -194,65 +130,39 @@ const CheckoutPage = () => {
                             />
                         </div>
                         
-                        {/* Formulario Condicional de Tarjeta */}
+                        {/* Campos de Tarjeta (Condicional) */}
                         {paymentMethod === 'Tarjeta de Credito' && (
                             <div className="mt-3 card-fields">
                                 <h4 className="fw-bold mb-3">Datos de la tarjeta</h4>
-
                                 <div className="mb-3">
                                     <label className="form-label">Número de Tarjeta</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={cardNumber}
-                                        onChange={(e) => setCardNumber(e.target.value)}
-                                        placeholder="1234 5678 9012 3456"
-                                        required
-                                    />
+                                    <input type="text" className="form-control" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} placeholder="0000 0000 0000 0000" required />
                                 </div>
-
-                                <div className="mb-3">
-                                    <label className="form-label">Vencimiento (MM/AA)</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={cardExpiry}
-                                        onChange={(e) => {
-                                            let v = e.target.value;
-                                            v = v.replace(/[^\d]/g, "");
-                                            if (v.length > 4) v = v.slice(0, 4);
-                                            if (v.length === 1 && Number(v) > 1) {
-                                                v = "0" + v;
-                                            }
-                                            if (v.length >= 3) {
-                                                v = v.slice(0, 2) + "/" + v.slice(2);
-                                            }
-                                            setCardExpiry(v);
-                                        }}
-                                        placeholder="MM/AA"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label className="form-label">CVV</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={cardCvv}
-                                        onChange={(e) => setCardCvv(e.target.value)}
-                                        placeholder="123"
-                                        required
-                                    />
+                                <div className="row">
+                                    <div className="col-6 mb-3">
+                                        <label className="form-label">Vencimiento (MM/AA)</label>
+                                        <input type="text" className="form-control" value={cardExpiry} 
+                                            onChange={(e) => {
+                                                // Tu lógica de formateo original
+                                                let v = e.target.value.replace(/[^\d]/g, "");
+                                                if (v.length > 4) v = v.slice(0, 4);
+                                                if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2);
+                                                setCardExpiry(v);
+                                            }} 
+                                            placeholder="MM/AA" required 
+                                        />
+                                    </div>
+                                    <div className="col-6 mb-3">
+                                        <label className="form-label">CVV</label>
+                                        <input type="text" className="form-control" value={cardCvv} onChange={(e) => setCardCvv(e.target.value)} placeholder="123" required />
+                                    </div>
                                 </div>
                             </div>
                         )} 
-
-                        {error && <div className="alert alert-danger mt-3">{error}</div>}
                     </form>
                 </div>
 
-                {/* Columna Derecha: Resumen del Pedido */}
+                {/* RESUMEN (Columna Derecha) */}
                 <div className="order-summary-section">
                     <h4 className="mb-4 fw-bold">Tu orden</h4>
                     
@@ -268,22 +178,12 @@ const CheckoutPage = () => {
                     ))}
 
                     <div className="summary-totals mt-3">
-                        <div>
-                            <span>Subtotal</span>
-                            <span>${subtotal.toFixed(2)}</span>
-                        </div>
-                        <div className="text-muted">
-                            <span>Envío</span>
-                            <span>${shipping.toFixed(2)}</span>
-                        </div>
-                        <div className="text-muted">
-                            <span>Impuestos</span>
-                            <span>${estimatedTaxes.toFixed(2)}</span>
-                        </div>
+                        <div><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+                        <div className="text-muted"><span>Envío</span><span>${shipping.toFixed(2)}</span></div>
+                        <div className="text-muted"><span>Impuestos</span><span>${estimatedTaxes.toFixed(2)}</span></div>
                         <hr/>
                         <div className="total-row">
-                            <span>Total</span>
-                            <span>${totalPrice}</span>
+                            <span>Total</span><span>${totalPrice}</span>
                         </div>
                     </div>
 
@@ -292,9 +192,9 @@ const CheckoutPage = () => {
                             type="submit" 
                             form="checkout-form" 
                             className="btn btn-confirm-checkout btn-lg" 
-                            disabled={loading || !userId}
+                            disabled={isLoading || cartItems.length === 0}
                         >
-                            {loading ? 'Procesando...' : 'Confirmar Orden'}
+                            {isLoading ? 'Procesando...' : 'Confirmar Orden'}
                         </button>
                     </div>
                 </div>

@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx'; 
+// 1. Redux
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser, clearError } from '../redux/slices/AuthSlice';
+
 import Input from '../components/Input'; 
 import Button from '../components/Button'; 
 import Alert from '../components/Alert'; 
@@ -15,35 +18,40 @@ const RegisterPage = () => {
         email: '',
         password: '',
     });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
-    const navigate = useNavigate();
     const [passwordStrength, setPasswordStrength] = useState('');
+    const [localError, setLocalError] = useState('');
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    
+    // 2. Estado Global
+    const { loading, error, user } = useSelector((state) => state.auth);
 
+    // 3. Redirección
+    useEffect(() => {
+        if (user) {
+            navigate('/');
+        }
+        return () => {
+            dispatch(clearError());
+        }
+    }, [user, navigate, dispatch]);
 
-    // Función para calcular que tan segura es la contraseña
+    // Lógica de UI para contraseña
     const calculateStrength = (password) => {
         const hasMinLength = password.length >= 6;
         const hasUpperCase = /[A-Z]/.test(password);
         const hasSymbol = /[!@#$%^&()_+.-]/.test(password); 
 
-        if (hasMinLength && hasUpperCase && hasSymbol) {
-            return 'strong';
-        } else if (hasMinLength && (hasUpperCase || hasSymbol)) {
-            return 'medium';
-        } else if (password.length > 0) {
-            return 'weak';
-        } else {
-            return ''; // Vacío si no hay contraseña
-        }
+        if (hasMinLength && hasUpperCase && hasSymbol) return 'strong';
+        if (hasMinLength && (hasUpperCase || hasSymbol)) return 'medium';
+        if (password.length > 0) return 'weak';
+        return '';
     };
 
     const handleChange = (e) => {
         const {name, value} = e.target;
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-
+        setFormData({ ...formData, [name]: value });
         if (name === 'password') {
             setPasswordStrength(calculateStrength(value));
         }
@@ -51,57 +59,26 @@ const RegisterPage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setError('');
+        setLocalError('');
 
-        // Validación de contraseña
+        // Validación Local antes de Redux
         if (passwordStrength !== 'strong') {
-            setError('La contraseña debe tener entre 6-20 caracteres, incluir al menos una mayúscula y un símbolo (!@#$%^&()_+.-).');
+            setLocalError('La contraseña debe tener entre 6-20 caracteres, incluir al menos una mayúscula y un símbolo (!@#$%^&()_+.-).');
             return;
         }
 
-        setLoading(true);
-
         const registrationData = {
                 ...formData,
-                role: 'ROLE_USER', // Rol por defecto
+                role: 'ROLE_USER',
         };
 
-        fetch('http://localhost:4002/api/v1/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(registrationData),
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Intentamos leer el mensaje de error del backend
-                return response.json().then(errData => {
-                    throw new Error(errData.message || 'No se pudo completar el registro.');
-                }).catch(() => {
-                     throw new Error('No se pudo completar el registro. El email ya podría estar en uso.');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            login(data.access_token); // Usamos la función login del AuthContext
-            navigate('/'); // Redirigimos al inicio después del registro
-        })
-        .catch(err => {
-            setError(err.message);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
+        // 4. Despachar Thunk
+        dispatch(registerUser(registrationData));
     };
 
     return (
-        // Contenedor principal que centra 
         <div className="login-page-wrapper">
-            
-            {/*Tarjeta principal dividida en dos */}
             <div className="login-card-split">
-                
-                {/*Panel Izquierdo: Branding y Visual  */}
                 <div className="login-left-panel">
                     <div className="mb-4">
                         <img src={lunchyLogo} alt="Lunchy Logo" style={{ width: '150px' }} />
@@ -112,15 +89,13 @@ const RegisterPage = () => {
                     </p>
                 </div>
 
-                {/* Panel Derecho: Formulario de Registro */}
                 <div className="login-right-panel">
                     <h2 className="h4 fw-bold text-center">Crear una Cuenta</h2>
                     
                     <form onSubmit={handleSubmit}>
+                        {/* Muestra error de Redux O error local de validación */}
+                        <Alert message={error || localError} type="danger" />
                         
-                        <Alert message={error} type="danger" />
-                        
-                        {/* Nombre y Apellido*/}
                         <div className="row">
                             <div className="col-md-6">
                                 <Input id="firstname" label="Nombre" name="firstname" value={formData.firstname} onChange={handleChange} required />
@@ -130,10 +105,8 @@ const RegisterPage = () => {
                             </div>
                         </div>
 
-                        {/* Correo Electrónico */}
                         <Input id="email" label="Correo Electrónico" type="email" name="email" value={formData.email} onChange={handleChange} required />
                         
-                        {/* Contraseña y medidor de fuerza */}
                         <Input
                             id="password"
                             label="Contraseña"
@@ -154,7 +127,6 @@ const RegisterPage = () => {
                         </div>
                     </form>
                     
-                    {/* Link a Iniciar Sesión */}
                     <div className="text-center mt-4">
                         <p className="mb-0">
                             <small className="text-muted">
