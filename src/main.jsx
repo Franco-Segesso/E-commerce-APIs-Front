@@ -7,7 +7,7 @@ import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { Provider } from 'react-redux'; // <-- AGREGAR
-import { store } from './redux/store.js'; // <-- AGREGAR
+import  store  from './redux/store.js'; // <-- AGREGAR
 
 
 
