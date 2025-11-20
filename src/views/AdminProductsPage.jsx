@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// 1. Imports de Redux
+// 1. REDUX
 import { useSelector, useDispatch } from 'react-redux';
 import { 
     fetchProducts, 
@@ -7,6 +7,8 @@ import {
     updateProduct, 
     deleteProduct 
 } from '../redux/slices/ProductSlice';
+// Importamos también las categorías para el dropdown
+import { fetchCategories } from '../redux/slices/CategorySlice';
 
 import ProductForm from '../components/ProductForm.jsx';
 import { toast } from 'react-toastify';
@@ -15,43 +17,40 @@ import { Modal, Button } from 'react-bootstrap';
 const AdminProductsPage = () => {
     const dispatch = useDispatch();
 
-    // 2. Estado Global (Reemplaza los useState locales de products/loading/error)
-    const { list: products, loading, error } = useSelector((state) => state.products);
+    // 2. ESTADO GLOBAL (Productos y Categorías)
+    const { list: products, loading: loadingProducts, error: errorProducts } = useSelector((state) => state.products);
+    const { list: categories } = useSelector((state) => state.categories);
 
-    // Estado local para categorías (Las mantenemos locales por ahora o podrías hacer un categorySlice)
-    const [categories, setCategories] = useState([]);
-
-    // Estados para Modales (UI local)
+    // Estados locales para la UI (Modales)
     const [showFormModal, setShowFormModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    
+    // Modal de confirmación
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState(null); 
 
-    // 3. Carga de Datos
+    // 3. CARGA INICIAL
     useEffect(() => {
-        // Cargar productos usando Redux
+        // Cargamos productos (el thunk ya maneja traer todos o activos según la lógica del slice)
         dispatch(fetchProducts());
-
-        // Cargar categorías (Fetch simple local para mapear nombres)
-        fetch('http://localhost:4002/categories')
-            .then(res => res.json())
-            .then(data => setCategories(data.content || []))
-            .catch(err => console.error("Error cargando categorías", err));
+        // Cargamos categorías para poder mostrar el nombre en la tabla
+        dispatch(fetchCategories());
     }, [dispatch]);
 
-    // Filtros visuales sobre la lista de Redux
+    // Filtros visuales
     const activeProducts = products.filter(p => p.active);
     const inactiveProducts = products.filter(p => !p.active);
+    
+    // Mapa para mostrar "Nombre Categoría" en vez de "ID"
     const categoryMap = new Map(categories.map(cat => [cat.id, cat.description]));
 
     // --- MANEJO DEL FORMULARIO (CREAR / EDITAR) ---
     const handleSave = (formData, productId) => {
-        // Redux se encarga de limpiar el error global automáticamente al iniciar el thunk
-        
+        // Nota: No pasamos token, el Thunk lo saca del state.auth
         if (productId) {
-            // Actualizar
+            // ACTUALIZAR
             dispatch(updateProduct({ id: productId, formData }))
-                .unwrap() // Permite manejar éxito/error como promesas
+                .unwrap()
                 .then(() => {
                     toast.success("Producto actualizado con éxito.");
                     setShowFormModal(false);
@@ -59,8 +58,8 @@ const AdminProductsPage = () => {
                 })
                 .catch((err) => toast.error(err || "Error al actualizar."));
         } else {
-            // Crear
-            dispatch(createProduct(formData))
+            // CREAR
+            dispatch(createProduct(formData)) // formData solo (el thunk lo espera así)
                 .unwrap()
                 .then(() => {
                     toast.success("Producto creado con éxito.");
@@ -71,7 +70,7 @@ const AdminProductsPage = () => {
         }
     };
     
-    // --- MANEJO DEL MODAL DE CONFIRMACIÓN ---
+    // --- MANEJO DE ACCIONES (BORRAR / REACTIVAR) ---
     
     const requestDelete = (product) => {
         setPendingAction({ type: 'delete', data: product });
@@ -83,26 +82,24 @@ const AdminProductsPage = () => {
         setShowConfirmModal(true);
     };
 
-    // Ejecución de la acción confirmada usando Redux
     const executeConfirmedAction = () => {
         if (!pendingAction) return;
 
         const { type, data } = pendingAction;
-        setShowConfirmModal(false); // Cerramos modal
+        setShowConfirmModal(false);
 
         if (type === 'delete') {
             dispatch(deleteProduct(data.id))
                 .unwrap()
                 .then(() => {
-                    toast.success("Producto eliminado con éxito.");
-                    // No hace falta recargar fetchProducts() aquí si el reducer actualiza la lista localmente,
-                    // pero si quieres estar seguro, puedes descomentar:
+                    toast.success("Producto eliminado correctamente.");
+                    // Si tu reducer hace update optimista, genial. Si no, recargamos:
                     // dispatch(fetchProducts());
                 })
-                .catch((err) => toast.error(err || "No se pudo eliminar el producto"));
+                .catch((err) => toast.error(err || "No se pudo eliminar."));
 
         } else if (type === 'reactivate') {
-            // Preparamos el FormData igual que antes
+            // Preparamos el objeto igual que antes
             const productData = {
                 name: data.name,
                 description: data.description,
@@ -116,14 +113,14 @@ const AdminProductsPage = () => {
             const formData = new FormData();
             formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
             
-            // Reutilizamos el thunk de update
+            // Reutilizamos updateProduct
             dispatch(updateProduct({ id: data.id, formData }))
                 .unwrap()
                 .then(() => {
-                    toast.success("Producto reactivado con éxito.");
-                    dispatch(fetchProducts()); // Recargamos para ver el cambio de lista
+                    toast.success("Producto reactivado.");
+                    dispatch(fetchProducts());
                 })
-                .catch((err) => toast.error(err || "Error al reactivar el producto"));
+                .catch((err) => toast.error(err || "Error al reactivar."));
         }
         
         setPendingAction(null);
@@ -141,59 +138,62 @@ const AdminProductsPage = () => {
                 <button className="btn btn-primary" onClick={() => openFormModal()}>Crear Nuevo Producto</button>
             </div>
 
-            {/* Error Global de Redux */}
-            {error && <div className="alert alert-danger">{error}</div>}
+            {errorProducts && <div className="alert alert-danger">{errorProducts}</div>}
 
-            {/* Tabla de Productos Activos */}
+            {/* TABLA ACTIVOS */}
             <h4 className="mt-4">Productos Activos ({activeProducts.length})</h4>
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {loading ? (
-                        <tr><td colSpan="6" className="text-center">Cargando...</td></tr>
-                    ) : (
-                        activeProducts.map(p => (
-                            <tr key={p.id}>
-                                <td>{p.id}</td>
-                                <td>{p.name}</td>
-                                <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
-                                <td>${p.price.toFixed(2)}</td>
-                                <td>{p.stock}</td>
-                                <td>
-                                    <button className="btn btn-outline-primary btn-sm me-2" onClick={() => openFormModal(p)}>Editar</button>
-                                    <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(p)}>Eliminar</button>
-                                </td>
-                            </tr>
-                        ))
-                    )}
-                    {!loading && activeProducts.length === 0 && !error && (
-                        <tr><td colSpan="6" className="text-center">No hay productos activos.</td></tr>
-                    )}
-                </tbody>
-            </table>
+            <div className="table-responsive">
+                <table className="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loadingProducts ? (
+                            <tr><td colSpan="6" className="text-center py-4">Cargando...</td></tr>
+                        ) : (
+                            activeProducts.map(p => (
+                                <tr key={p.id}>
+                                    <td>{p.id}</td>
+                                    <td className="fw-medium">{p.name}</td>
+                                    <td><span className="badge bg-light text-dark border">{categoryMap.get(p.categoryId) || 'N/A'}</span></td>
+                                    <td>${p.price.toFixed(2)}</td>
+                                    <td>
+                                        <span className={`badge ${p.stock < 5 ? 'bg-warning text-dark' : 'bg-success'}`}>{p.stock}</span>
+                                    </td>
+                                    <td>
+                                        <button className="btn btn-outline-primary btn-sm me-2" onClick={() => openFormModal(p)}>Editar</button>
+                                        <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(p)}>Eliminar</button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                        {!loadingProducts && activeProducts.length === 0 && !errorProducts && (
+                            <tr><td colSpan="6" className="text-center text-muted">No hay productos activos.</td></tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
             
-            {/* Acordeón para Productos Inactivos */}
+            {/* ACORDEÓN ELIMINADOS */}
             <div className="accordion mt-5" id="inactiveProductsAccordion">
                 <div className="accordion-item">
                     <h2 className="accordion-header" id="headingOne">
-                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                        Productos Eliminados ({inactiveProducts.length})
+                    <button className="accordion-button collapsed bg-light text-secondary fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                        Productos inactivos ({inactiveProducts.length})
                     </button>
                     </h2>
                     <div id="collapseOne" className="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#inactiveProductsAccordion">
                         <div className="accordion-body">
-                             {loading ? <p>Cargando...</p> : (
+                             {loadingProducts ? <p className="text-center">Cargando...</p> : (
                                 inactiveProducts.length > 0 ? (
-                                    <table className="table table-sm table-hover"> 
+                                    <table className="table table-sm table-hover mb-0"> 
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
@@ -205,12 +205,12 @@ const AdminProductsPage = () => {
                                         <tbody>
                                             {inactiveProducts.map(p => (
                                                 <tr key={p.id}>
-                                                    <td>{p.id}</td>
-                                                    <td>{p.name}</td>
+                                                    <td className="text-muted">#{p.id}</td>
+                                                    <td className="text-decoration-line-through">{p.name}</td>
                                                     <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
                                                     <td>
-                                                        <button className="btn btn-outline-success btn-sm" onClick={() => requestReactivate(p)} disabled={loading}>
-                                                            Reactivar
+                                                        <button className="btn btn-outline-success btn-sm" onClick={() => requestReactivate(p)}>
+                                                            Restaurar
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -218,7 +218,7 @@ const AdminProductsPage = () => {
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <p>No hay productos eliminados.</p>
+                                    <p className="text-center text-muted mb-0 py-3">No hay productos inactivos.</p>
                                 )
                              )}
                         </div>
@@ -226,26 +226,29 @@ const AdminProductsPage = () => {
                 </div>
             </div>
             
-            {/* Modal del Formulario (Crear/Editar) */}
-            {showFormModal && <ProductForm product={editingProduct} onSave={handleSave} onHide={() => setShowFormModal(false)} />}
+            {/* MODALES */}
+            {showFormModal && (
+                <ProductForm 
+                    product={editingProduct} 
+                    onSave={handleSave} 
+                    onHide={() => setShowFormModal(false)} 
+                />
+            )}
             
-            {/* Modal de Confirmación (Bootstrap) */}
             <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmar Acción</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {pendingAction && pendingAction.type === 'delete' && (
-                        <p>¿Estás seguro de que quieres eliminar el producto <strong>{pendingAction.data.name}</strong>?</p>
+                    {pendingAction?.type === 'delete' && (
+                        <p>¿Estás seguro de que quieres eliminar <strong>{pendingAction.data.name}</strong>?</p>
                     )}
-                    {pendingAction && pendingAction.type === 'reactivate' && (
-                        <p>¿Seguro que quieres reactivar el producto <strong>{pendingAction.data.name}</strong>?</p>
+                    {pendingAction?.type === 'reactivate' && (
+                        <p>¿Seguro que quieres restaurar <strong>{pendingAction.data.name}</strong>?</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
-                        Cancelar
-                    </Button>
+                    <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>Cancelar</Button>
                     <Button 
                         variant={pendingAction?.type === 'delete' ? 'danger' : 'success'} 
                         onClick={executeConfirmedAction}
@@ -254,7 +257,6 @@ const AdminProductsPage = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-
         </div>
     );
 };

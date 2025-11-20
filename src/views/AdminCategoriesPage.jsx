@@ -1,87 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 
+// 1. Importamos los Thunks
+import { 
+    fetchCategories, 
+    createCategory, 
+    updateCategory, 
+    deleteCategory, 
+    reactivateCategory 
+} from '../redux/slices/CategorySlice';
+
 const AdminCategoriesPage = () => {
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+
+    // 2. Leemos el estado global
+    // Asumimos que tu slice tiene: list, loading, error
+    const { list: categories, loading, error } = useSelector((state) => state.categories);
     
-    // Estados para el formulario
+    // Estados locales para UI (Formularios y Modales)
     const [newCategoryName, setNewCategoryName] = useState('');
     const [editingCategory, setEditingCategory] = useState(null); 
-
-    // Estados para el Modal de Confirmación
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState(null);
 
-    const { authToken } = useAuth();
-
-    // Helper para peticiones seguras
-    const safeFetch = async (url, options) => {
-        const response = await fetch(url, options);
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
-
-        if (!response.ok) {
-            throw new Error(data.message || data.error || `Error en la petición (${response.status})`);
-        }
-        return data;
-    };
-
-    const fetchCategories = () => {
-        setLoading(true);
-        safeFetch('http://localhost:4002/categories/all')
-            .then(data => {
-                setCategories(data.content || []);
-            })
-            .catch(err => {
-                console.error("Error al cargar categorías:", err);
-                toast.error(err.message);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    };
-
+    // 3. Carga inicial
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        dispatch(fetchCategories());
+    }, [dispatch]);
 
+    // Filtros visuales sobre la lista de Redux
     const activeCategories = categories.filter(cat => cat.active);
     const inactiveCategories = categories.filter(cat => !cat.active);
 
+    // --- MANEJO DEL FORMULARIO (Crear / Editar) ---
     const handleCreateOrUpdate = (e) => {
         e.preventDefault();
         
-        const isUpdating = editingCategory !== null;
-        const url = isUpdating 
-            ? `http://localhost:4002/categories/${editingCategory.id}` 
-            : 'http://localhost:4002/categories';
-        
-        const method = isUpdating ? 'PUT' : 'POST';
-        
-        safeFetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ description: newCategoryName })
-        })
-        .then(() => {
-            toast.success(`Categoría ${isUpdating ? 'actualizada' : 'creada'} con éxito.`);
-            setNewCategoryName('');
-            setEditingCategory(null);
-            fetchCategories();
-        })
-        .catch(err => {
-            console.error(err);
-            toast.error(err.message);
-        });
+        if (editingCategory) {
+            // ACTUALIZAR
+            dispatch(updateCategory({ id: editingCategory.id, description: newCategoryName }))
+                .unwrap()
+                .then(() => {
+                    toast.success("Categoría actualizada con éxito.");
+                    setNewCategoryName('');
+                    setEditingCategory(null);
+                    // No hace falta recargar si el reducer actualiza la lista, 
+                    // pero por seguridad podemos llamar a fetchCategories()
+                })
+                .catch((err) => toast.error(err || "Error al actualizar."));
+        } else {
+            // CREAR
+            dispatch(createCategory({ description: newCategoryName }))
+                .unwrap()
+                .then(() => {
+                    toast.success("Categoría creada con éxito.");
+                    setNewCategoryName('');
+                    dispatch(fetchCategories()); // Recargar lista para ver la nueva
+                })
+                .catch((err) => toast.error(err || "Error al crear."));
+        }
     };
 
-    // Funciones para abrir el modal de confirmación
+    // --- MANEJO DEL MODAL DE CONFIRMACIÓN ---
     const requestDelete = (categoryId) => {
         setPendingAction({ type: 'delete', data: categoryId });
         setShowConfirmModal(true);
@@ -92,48 +74,35 @@ const AdminCategoriesPage = () => {
         setShowConfirmModal(true);
     };
 
-    // Ejecutar la acción confirmada
     const executeConfirmedAction = () => {
         if (!pendingAction) return;
+        
         const { type, data } = pendingAction;
         setShowConfirmModal(false);
 
         if (type === 'delete') {
-            fetch(`http://localhost:4002/categories/${data}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            })
-            .then(async response => {
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text || "Error al eliminar la categoría.");
-                }
-            })
-            .then(() => {
-                toast.success("Categoría eliminada con éxito.");
-                fetchCategories(); 
-            })
-            .catch(err => {
-                toast.error(err.message);
-            });
+            // ELIMINAR
+            dispatch(deleteCategory(data))
+                .unwrap()
+                .then(() => {
+                    toast.success("Categoría eliminada con éxito.");
+                    // El slice debería actualizar el estado 'active' a false localmente
+                    // o podemos recargar: dispatch(fetchCategories());
+                })
+                .catch((err) => toast.error(err || "Error al eliminar la categoría."));
+
         } else if (type === 'reactivate') {
-             safeFetch(`http://localhost:4002/categories/${data.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ description: data.description}) 
-            })
-            .then(() => {
-                toast.success("Categoría reactivada con éxito.");
-                fetchCategories();
-            })
-            .catch(err => {
-                console.error(err);
-                toast.error(err.message);
-            }); 
+            // REACTIVAR
+            // Usamos el thunk específico o updateCategory si el backend lo maneja igual
+            dispatch(reactivateCategory(data))
+                .unwrap()
+                .then(() => {
+                    toast.success("Categoría reactivada con éxito.");
+                    dispatch(fetchCategories());
+                })
+                .catch((err) => toast.error(err || "Error al reactivar."));
         }
+        
         setPendingAction(null);
     };
 
@@ -142,14 +111,21 @@ const AdminCategoriesPage = () => {
         setNewCategoryName(category.description);
     };
 
+    const cancelEdit = () => {
+        setEditingCategory(null);
+        setNewCategoryName('');
+    };
+
     return (
         <div className="container my-5">
             <h2 className="mb-4">Gestión de Categorías</h2>
 
             {/* Formulario */}
-            <div className="card mb-4">
+            <div className="card mb-4 shadow-sm">
                 <div className="card-body">
-                    <h5 className="card-title">{editingCategory ? 'Editando Categoría' : 'Crear Nueva Categoría'}</h5>
+                    <h5 className="card-title mb-3">
+                        {editingCategory ? `Editando: ${editingCategory.description}` : 'Crear Nueva Categoría'}
+                    </h5>
                     <form onSubmit={handleCreateOrUpdate}>
                         <div className="input-group">
                             <input 
@@ -160,11 +136,11 @@ const AdminCategoriesPage = () => {
                                 onChange={(e) => setNewCategoryName(e.target.value)}
                                 required 
                             />
-                            <button className="btn btn-primary" type="submit">
+                            <button className="btn btn-primary" type="submit" disabled={loading}>
                                 {editingCategory ? 'Actualizar' : 'Crear'}
                             </button>
                             {editingCategory && (
-                                <button className="btn btn-secondary" type="button" onClick={() => { setEditingCategory(null); setNewCategoryName(''); }}>
+                                <button className="btn btn-secondary" type="button" onClick={cancelEdit}>
                                     Cancelar
                                 </button>
                             )}
@@ -173,54 +149,57 @@ const AdminCategoriesPage = () => {
                 </div>
             </div>
 
-            {/* Tabla de categorias activas */}
+            {/* Lista de Activas */}
             <h4 className="mt-4">Categorías Activas ({activeCategories.length})</h4>
-            <div className="card">
-                <div className="card-header">
-                    Categorías Existentes
-                </div>
+            <div className="card shadow-sm">
                 <ul className="list-group list-group-flush">
-                    {loading ? <li className="list-group-item">Cargando...</li> : (
+                    {loading && activeCategories.length === 0 ? (
+                        <li className="list-group-item text-center py-3">Cargando...</li>
+                    ) : (
                         activeCategories.map(cat => (
                             <li key={cat.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                {cat.description}
+                                <span className="fw-medium">{cat.description}</span>
                                 <div>
-                                    <button className="btn btn-outline-primary btn-sm me-2" onClick={() => startEdit(cat)}>Editar</button>
-                                    <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(cat.id)}>Eliminar</button>
+                                    <button className="btn btn-outline-primary btn-sm me-2" onClick={() => startEdit(cat)}>
+                                        Editar
+                                    </button>
+                                    <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(cat.id)}>
+                                        Eliminar
+                                    </button>
                                 </div>
                             </li>
                         ))
                     )}
-                    { !loading && activeCategories.length === 0 && (
-                        <li className="list-group-item text-center">No hay categorías activas.</li>
+                    {!loading && activeCategories.length === 0 && !error && (
+                        <li className="list-group-item text-center py-3 text-muted">No hay categorías activas.</li>
                     )}
                 </ul>
             </div>
 
-            {/* Desplegable para Categorías Eliminadas */}
+            {/* Lista de Eliminadas */}
             <div className="accordion mt-5" id="inactiveCategoriesAccordion">
-                <div className="accordion-item">
+                <div className="accordion-item border-0 shadow-sm">
                     <h2 className="accordion-header" id="headingInactive">
-                    <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInactive" aria-expanded="false" aria-controls="collapseInactive">
-                        Categorías Eliminadas ({inactiveCategories.length})
+                    <button className="accordion-button collapsed bg-light text-secondary fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInactive">
+                        Categorías inactivas ({inactiveCategories.length})
                     </button>
                     </h2>
-                    <div id="collapseInactive" className="accordion-collapse collapse" aria-labelledby="headingInactive" data-bs-parent="#inactiveCategoriesAccordion">
-                        <div className="accordion-body">
-                             {loading ? <p>Cargando...</p> : (
+                    <div id="collapseInactive" className="accordion-collapse collapse" data-bs-parent="#inactiveCategoriesAccordion">
+                        <div className="accordion-body p-0">
+                             {loading && inactiveCategories.length === 0 ? <p className="p-3 text-center">Cargando...</p> : (
                                 inactiveCategories.length > 0 ? (
-                                    <ul className="list-group">
+                                    <ul className="list-group list-group-flush">
                                         {inactiveCategories.map(cat => (
-                                            <li key={cat.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                                {cat.description}
-                                                <button className="btn btn-outline-success btn-sm" onClick={() => requestReactivate(cat)} disabled={loading}>
-                                                    Reactivar
+                                            <li key={cat.id} className="list-group-item d-flex justify-content-between align-items-center bg-light">
+                                                <span className="text-muted text-decoration-line-through">{cat.description}</span>
+                                                <button className="btn btn-success btn-sm" onClick={() => requestReactivate(cat)} disabled={loading}>
+                                                    Restaurar
                                                 </button>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p>No hay categorías eliminadas.</p>
+                                    <p className="p-3 text-center text-muted mb-0">No hay categorías inactivas.</p>
                                 )
                              )}
                         </div>
@@ -234,10 +213,10 @@ const AdminCategoriesPage = () => {
                     <Modal.Title>Confirmar Acción</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {pendingAction && pendingAction.type === 'delete' && (
-                        <p>¿Estás seguro de que quieres eliminar esta categoría?</p>
+                    {pendingAction?.type === 'delete' && (
+                        <p>¿Estás seguro de que quieres eliminar esta categoría? Los productos asociados podrían quedar ocultos.</p>
                     )}
-                    {pendingAction && pendingAction.type === 'reactivate' && (
+                    {pendingAction?.type === 'reactivate' && (
                         <p>¿Seguro que quieres reactivar la categoría "<strong>{pendingAction.data.description}</strong>"?</p>
                     )}
                 </Modal.Body>

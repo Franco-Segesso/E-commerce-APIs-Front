@@ -100,6 +100,24 @@ export const fetchOrders = createAsyncThunk(
     }
 );
 
+
+export const fetchAllUsers = createAsyncThunk(
+    'user/fetchAll',
+    async (_, thunkAPI) => {
+        try {
+            const token = getToken(); // Tu función helper
+            const res = await fetch(`${API}/users`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Error al cargar lista de usuarios');
+            const data = await res.json();
+            return data.content || data; 
+        } catch (err) {
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
+
 // Estado inicial del slice
 const initialState = {
     profile: null,
@@ -170,6 +188,10 @@ const userSlice = createSlice({
     .addCase(fetchOrders.rejected, (state, action) => {
         state.loadingOrders = false;
         state.errorOrders = action.payload || 'No fue posible cargar las órdenes';
+    });
+
+    builder.addCase(fetchAllUsers.fulfilled, (state, action) => {
+    state.list = action.payload; // Asegúrate de tener 'list: []' en initialState
     });
     },
     });

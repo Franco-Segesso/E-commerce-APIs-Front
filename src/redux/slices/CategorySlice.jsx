@@ -41,6 +41,29 @@ export const createCategory = createAsyncThunk(
     }
 );
 
+
+export const updateCategory = createAsyncThunk(
+    'categories/update',
+    async ({ id, description }, { getState, rejectWithValue }) => {
+        const { token } = getState().auth;
+        try {
+            const response = await fetch(`http://localhost:4002/categories/${id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ description })
+            });
+
+            if (!response.ok) throw new Error('Error al actualizar categoría');
+            return await response.json();
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 // 3. Eliminar Categoría (Admin - CON TOKEN)
 export const deleteCategory = createAsyncThunk(
     'categories/delete',
@@ -100,6 +123,13 @@ const categorySlice = createSlice({
             .addCase(fetchCategories.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            .addCase(updateCategory.fulfilled, (state, action) => {
+            // Actualizamos la categoría en la lista localmente
+            const index = state.list.findIndex(c => c.id === action.payload.id);
+            if (index !== -1) {
+                state.list[index] = action.payload;
+            }
             })
             // Puedes agregar los casos de create/delete para feedback visual si quieres
             .addCase(deleteCategory.fulfilled, (state, action) => {
