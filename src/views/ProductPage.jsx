@@ -24,22 +24,42 @@ const ProductsPage = () => {
 
     // 3. Efecto para cargar productos (MUCHO MÁS LIMPIO)
     useEffect(() => {
-        // Despachamos el Thunk con los filtros actuales
-        dispatch(fetchProducts(backendFilters));
-    }, [dispatch, backendFilters]);
+        // Si la lista está vacía, pedimos los productos iniciales.
+        // Si ya tiene productos (porque viniste de otra página y ya se habían cargado), 
+        // NO hacemos dispatch y mostramos lo que hay en memoria.
+        if (products.length === 0) {
+            dispatch(fetchProducts(backendFilters));
+        }
+        // IMPORTANTE: Quitamos 'backendFilters' de las dependencias aquí para que NO se ejecute 
+        // automáticamente al montar si ya hay datos.
+        // Solo queremos que reaccione a cambios de filtros manuales, no al montaje inicial si hay cache.
+        
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, products.length]); 
+
+    // Este efecto secundario maneja EXCLUSIVAMENTE los cambios de filtros POSTERIORES
+    // Usamos un ref o una técnica para saltar el primer render, 
+    // o simplemente confiamos en que el usuario disparará esto al tocar el sidebar.
+    const handleBackendFilterChange = (newFilters) => {
+        setSearchQuery('');
+        const updatedFilters = { ...backendFilters, ...newFilters };
+        setBackendFilters(updatedFilters);
+        
+        // Aquí forzamos el fetch porque el usuario pidió explícitamente cambiar los datos
+        dispatch(fetchProducts(updatedFilters));
+    };
 
     // ... (Lógica de filtrado local por nombre sigue igual) ...
     const displayedProducts = products.filter(product => {
+        // 1. FILTRO DE SEGURIDAD: Solo mostrar activos
+        if (!product.active) return false;
+
+        // 2. Filtro de búsqueda
         if (searchQuery) {
             return product.name.toLowerCase().includes(searchQuery.toLowerCase());
         }
-        return true; 
+        return true;
     });
-
-    const handleBackendFilterChange = (newFilters) => {
-        setSearchQuery('');
-        setBackendFilters(prev => ({ ...prev, ...newFilters }));
-    };
 
     const handleSearchChange = (query) => setSearchQuery(query);
 

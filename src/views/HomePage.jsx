@@ -26,11 +26,16 @@ const HomePage = () => {
 
   // 3. Disparamos las acciones al montar
   useEffect(() => {
-    // Como usamos createAsyncThunk, Redux maneja las promesas internamente.
-    // Simplemente las "lanzamos".
-    dispatch(fetchHotSale());
-    dispatch(fetchNewArrivals());
-  }, [dispatch]);
+    // Solo pedimos datos si la lista está vacía.
+    // Si ya entraste al Home antes, esto se salta y la carga es instantánea.
+    if (hotSaleList.length === 0) {
+        dispatch(fetchHotSale());
+    }
+    
+    if (newArrivalsList.length === 0) {
+        dispatch(fetchNewArrivals());
+    }
+  }, [dispatch, hotSaleList.length, newArrivalsList.length]);
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();

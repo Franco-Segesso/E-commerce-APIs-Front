@@ -244,7 +244,21 @@ const productSlice = createSlice({
             .addCase(createProduct.fulfilled, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'success';
-                state.list.push(action.payload);
+                const newProduct = action.payload;
+
+                // 1. Agregamos a la lista general (Admin y Productos)
+                state.list.push(newProduct);
+
+                // 2. Agregamos a Nuevos Ingresos (Al principio)
+                state.newArrivalsList.unshift(newProduct);
+                // Mantener solo los ultimos 4
+                if (state.newArrivalsList.length > 4) state.newArrivalsList.pop();
+
+                // 3. Si tiene descuento, agregar a Hot Sale
+                if (newProduct.discount && newProduct.discount > 0) {
+                    state.hotSaleList.unshift(newProduct);
+                    if (state.hotSaleList.length > 4) state.hotSaleList.pop();
+                }
             })
             .addCase(createProduct.rejected, (state, action) => {
                 state.loading = false;
@@ -257,11 +271,41 @@ const productSlice = createSlice({
                 state.loading = true;
                 state.operationStatus = 'pending';
             })
-            .addCase(updateProduct.fulfilled, (state) => {
+            .addCase(updateProduct.fulfilled, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'success';
-                // Aquí también, tras un update exitoso, solemos recargar la lista 
-                // o actualizar el ítem específico si tuviéramos el objeto completo.
+                const updated = action.payload; // El producto actualizado que devuelve el back
+
+                // 1. Actualizar en lista general
+                const index = state.list.findIndex(p => p.id === updated.id);
+                if (index !== -1) state.list[index] = updated;
+
+                // 2. Actualizar en Hot Sale (Si cambio precio/descuento o se reactivó)
+                const hotIndex = state.hotSaleList.findIndex(p => p.id === updated.id);
+                if (hotIndex !== -1) {
+                    // Si ya estaba, lo actualizamos o sacamos si ya no cumple (ej: active false o sin descuento)
+                    if (!updated.active || !updated.discount) state.hotSaleList.splice(hotIndex, 1);
+                    else state.hotSaleList[hotIndex] = updated;
+                } else if (updated.active && updated.discount > 0) {
+                    // Si no estaba y ahora cumple, lo metemos
+                    state.hotSaleList.unshift(updated);
+                }
+
+                // 3. Actualizar en Nuevos (Si se reactivó)
+                const newIndex = state.newArrivalsList.findIndex(p => p.id === updated.id);
+                if (newIndex !== -1) {
+                    if (!updated.active) state.newArrivalsList.splice(newIndex, 1);
+                    else state.newArrivalsList[newIndex] = updated;
+                } else if (updated.active) {
+                    // Si reactivamos un producto viejo, decidimos si mostrarlo en "nuevos". 
+                    // Por ahora, para que se vea el cambio, lo agregamos al principio.
+                    state.newArrivalsList.unshift(updated);
+                }
+                
+                // Si estabas viendo el detalle de este producto, actualízalo también
+                if (state.selectedProduct && state.selectedProduct.id === updated.id) {
+                    state.selectedProduct = updated;
+                }
             })
             .addCase(updateProduct.rejected, (state, action) => {
                 state.loading = false;
@@ -271,15 +315,16 @@ const productSlice = createSlice({
 
             // Delete
             .addCase(deleteProduct.fulfilled, (state, action) => {
-                // Actualización optimista/local: lo sacamos de la lista de "activos"
-                // o lo marcamos como inactivo si tu lista maneja esa propiedad.
-                // Dado que el backend hace soft delete (active=false), 
-                // lo correcto es buscarlo y cambiarle el estado active a false.
-                const product = state.list.find(p => p.id === action.payload);
-                if (product) {
-                    product.active = false;
-                }
-            });
+                const id = action.payload; // El ID eliminado
+
+                // 1. En lista general: Soft Delete (Admin lo ve como inactivo)
+                const product = state.list.find(p => p.id === id);
+                if (product) product.active = false;
+
+                // 2. En Home: Desaparecerlo completamente
+                state.hotSaleList = state.hotSaleList.filter(p => p.id !== id);
+                state.newArrivalsList = state.newArrivalsList.filter(p => p.id !== id);
+            })
     }
 });
 

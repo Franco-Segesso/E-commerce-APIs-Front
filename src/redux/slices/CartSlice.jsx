@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
+// 1. Importamos la acción de logout para "escucharla"
+import { logout } from './AuthSlice';
+import { toast } from 'react-toastify';
 
-// 1. Recuperar carrito del localStorage al iniciar
+// Recuperar carrito del localStorage
 const itemsInStorage = localStorage.getItem('cartItems') 
   ? JSON.parse(localStorage.getItem('cartItems')) 
   : [];
@@ -15,21 +18,15 @@ const cartSlice = createSlice({
       const productToAdd = action.payload;
       const existingItem = state.items.find(item => item.id === productToAdd.id);
 
-      // Si ya existe, sumamos cantidad
       if (existingItem) {
-        // OJO: La validación de stock visual (alerta) la haremos en el componente antes de llamar a esto.
-        // Aquí solo aseguramos la integridad de los datos.
         const newQuantity = existingItem.quantity + productToAdd.quantity;
-        // Solo actualizamos si no supera el stock (doble seguridad)
+        // Validamos stock antes de sumar
         if (newQuantity <= productToAdd.stock) {
             existingItem.quantity = newQuantity;
         }
       } else {
-        // Si no existe, lo agregamos
         state.items.push(productToAdd);
       }
-      
-      // Guardamos en localStorage automáticamente
       localStorage.setItem('cartItems', JSON.stringify(state.items));
     },
 
@@ -45,9 +42,11 @@ const cartSlice = createSlice({
       
       if (item) {
         const newQuantity = item.quantity + amount;
-        // Validamos límites (mínimo 1, máximo stock)
         if (newQuantity >= 1 && newQuantity <= item.stock) {
             item.quantity = newQuantity;
+        }
+        else{
+          toast.warning("No hay suficiente stock disponible.");
         }
       }
       localStorage.setItem('cartItems', JSON.stringify(state.items));
@@ -57,11 +56,17 @@ const cartSlice = createSlice({
       state.items = [];
       localStorage.removeItem('cartItems');
     }
+  },
+  // 2. AQUÍ LA MAGIA: Escuchamos acciones de otros slices
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      // Cuando ocurra un logout (venga de donde venga), vaciamos el carrito
+      state.items = [];
+      localStorage.removeItem('cartItems');
+    });
   }
 });
 
-// Exportamos las acciones para usarlas en los componentes
 export const { addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
 
-// Exportamos el reducer para el Store
 export default cartSlice.reducer;
