@@ -6,8 +6,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { Provider } from 'react-redux'; // <-- AGREGAR
-import  store  from './redux/store.js'; // <-- AGREGAR
+import { Provider } from 'react-redux';
+import  store  from './redux/store.js';
 
 
 
