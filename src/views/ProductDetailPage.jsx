@@ -1,41 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-// Imports Redux
 import { useSelector, useDispatch } from 'react-redux';
+// Acciones de Cart y Product
 import { addToCart } from '../redux/slices/cartSlice';
+import { fetchProductById, clearSelectedProduct } from '../redux/slices/ProductSlice';
 import { toast } from 'react-toastify';
 import './ProductDetailPage.css';
 
 const ProductDetailPage = () => {
     const { productId } = useParams();
     const dispatch = useDispatch();
-    
-    // Leemos el carrito para validar stock
+
+    // Estado Global
+    const { selectedProduct: product, loading, error } = useSelector((state) => state.products);
     const cartItems = useSelector((state) => state.cart.items);
 
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
-        const fetchProduct = async () => {
-            if (!productId) return;
-            setLoading(true);
-            try {
-                const response = await fetch(`http://localhost:4002/products/${productId}`);
-                if (response.status === 204) throw new Error("Producto no encontrado.");
-                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                const data = await response.json();
-                setProduct(data);
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProduct();
-    }, [productId]);
+        if (productId) {
+            dispatch(fetchProductById(productId));
+        }
+        // Limpiamos el producto anterior al salir de la página
+        return () => { dispatch(clearSelectedProduct()) };
+    }, [dispatch, productId]);
     
     const hasDiscount = product?.discount && product.discount > 0;
     const finalPricePerUnit = hasDiscount ? product.price * (1 - product.discount) : product?.price;
@@ -58,7 +46,7 @@ const ProductDetailPage = () => {
 
         if (currentQuantityInCart + requestedQuantity > product.stock) {
             toast.warning(`¡Stock insuficiente! Solo quedan ${product.stock} unidades.`);
-            return; 
+            return;
         }
         
         const productToAdd = { 

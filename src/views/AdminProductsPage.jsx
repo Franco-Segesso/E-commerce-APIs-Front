@@ -1,93 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext.jsx';
+// 1. Imports de Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { 
+    fetchProducts, 
+    createProduct, 
+    updateProduct, 
+    deleteProduct 
+} from '../redux/slices/ProductSlice';
+
 import ProductForm from '../components/ProductForm.jsx';
 import { toast } from 'react-toastify';
-// 1. Importamos componentes de Bootstrap para el modal de confirmación
 import { Modal, Button } from 'react-bootstrap';
 
 const AdminProductsPage = () => {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const dispatch = useDispatch();
 
-    // Estado para el formulario de productos
+    // 2. Estado Global (Reemplaza los useState locales de products/loading/error)
+    const { list: products, loading, error } = useSelector((state) => state.products);
+
+    // Estado local para categorías (Las mantenemos locales por ahora o podrías hacer un categorySlice)
+    const [categories, setCategories] = useState([]);
+
+    // Estados para Modales (UI local)
     const [showFormModal, setShowFormModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
-
-    // 2. Estado para el MODAL DE CONFIRMACIÓN (Reemplazo de window.confirm)
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState(null); 
-    // pendingAction guardará: { type: 'delete' | 'reactivate', data: producto_a_modificar }
 
-    const { authToken } = useAuth();
-
-    const fetchData = () => {
-        setLoading(true);
-        setError('');
-        Promise.all([
-            fetch('http://localhost:4002/products/all'),
-            fetch('http://localhost:4002/categories')
-        ])
-        .then(([productsRes, categoriesRes]) => {
-            if (!productsRes.ok || !categoriesRes.ok) {
-                throw new Error('No se pudieron cargar los datos del servidor.');
-            }
-            return Promise.all([productsRes.json(), categoriesRes.json()]);
-        })
-        .then(([productsData, categoriesData]) => {
-            setProducts(productsData.content || []);
-            setCategories(categoriesData.content || []);
-        })
-        .catch(err => {
-            setError(err.message);
-            toast.error(err.message);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
-    };
-
+    // 3. Carga de Datos
     useEffect(() => {
-        fetchData();
-    }, []);
+        // Cargar productos usando Redux
+        dispatch(fetchProducts());
 
+        // Cargar categorías (Fetch simple local para mapear nombres)
+        fetch('http://localhost:4002/categories')
+            .then(res => res.json())
+            .then(data => setCategories(data.content || []))
+            .catch(err => console.error("Error cargando categorías", err));
+    }, [dispatch]);
+
+    // Filtros visuales sobre la lista de Redux
     const activeProducts = products.filter(p => p.active);
     const inactiveProducts = products.filter(p => !p.active);
     const categoryMap = new Map(categories.map(cat => [cat.id, cat.description]));
 
-    // Guardar (Crear/Editar) - Esto no requiere confirmación, usa el formulario
+    // --- MANEJO DEL FORMULARIO (CREAR / EDITAR) ---
     const handleSave = (formData, productId) => {
-        setError('');
-        const isUpdating = productId !== null;
-        const url = isUpdating ? `http://localhost:4002/products/${productId}` : 'http://localhost:4002/products';
-        const method = isUpdating ? 'PUT' : 'POST';
-
-        fetch(url, {
-            method,
-            headers: { 'Authorization': `Bearer ${authToken}` },
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errData => {
-                    throw new Error(errData.message || `Error al ${isUpdating ? 'actualizar' : 'crear'} el producto.`);
-                });
-            }
-            return response.json();
-        })
-        .then(() => {
-            toast.success(`Producto ${isUpdating ? 'actualizado' : 'creado'} con éxito.`);
-            setShowFormModal(false);
-            fetchData();
-        })
-        .catch(err => {
-            setError(err.message);
-            toast.error(err.message);
-        });
+        // Redux se encarga de limpiar el error global automáticamente al iniciar el thunk
+        
+        if (productId) {
+            // Actualizar
+            dispatch(updateProduct({ id: productId, formData }))
+                .unwrap() // Permite manejar éxito/error como promesas
+                .then(() => {
+                    toast.success("Producto actualizado con éxito.");
+                    setShowFormModal(false);
+                    dispatch(fetchProducts()); // Recargar lista
+                })
+                .catch((err) => toast.error(err || "Error al actualizar."));
+        } else {
+            // Crear
+            dispatch(createProduct(formData))
+                .unwrap()
+                .then(() => {
+                    toast.success("Producto creado con éxito.");
+                    setShowFormModal(false);
+                    dispatch(fetchProducts());
+                })
+                .catch((err) => toast.error(err || "Error al crear."));
+        }
     };
     
-    // 3. Nuevas funciones para abrir el modal en lugar de window.confirm
+    // --- MANEJO DEL MODAL DE CONFIRMACIÓN ---
+    
     const requestDelete = (product) => {
         setPendingAction({ type: 'delete', data: product });
         setShowConfirmModal(true);
@@ -98,33 +83,26 @@ const AdminProductsPage = () => {
         setShowConfirmModal(true);
     };
 
-    // 4. Función que ejecuta la acción real (se llama desde el botón "Confirmar" del modal)
+    // Ejecución de la acción confirmada usando Redux
     const executeConfirmedAction = () => {
         if (!pendingAction) return;
 
         const { type, data } = pendingAction;
-        setShowConfirmModal(false); // Cerramos el modal inmediatamente
+        setShowConfirmModal(false); // Cerramos modal
 
         if (type === 'delete') {
-            // Lógica de eliminar
-            fetch(`http://localhost:4002/products/${data.id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Error al eliminar el producto.");
-            })
-            .then(() => {
-                toast.success("Producto eliminado con éxito.");
-                fetchData();
-            })
-            .catch(err => {
-                setError(err.message);
-                toast.error("No se pudo eliminar el producto");
-            });
+            dispatch(deleteProduct(data.id))
+                .unwrap()
+                .then(() => {
+                    toast.success("Producto eliminado con éxito.");
+                    // No hace falta recargar fetchProducts() aquí si el reducer actualiza la lista localmente,
+                    // pero si quieres estar seguro, puedes descomentar:
+                    // dispatch(fetchProducts());
+                })
+                .catch((err) => toast.error(err || "No se pudo eliminar el producto"));
 
         } else if (type === 'reactivate') {
-            // Lógica de reactivar
+            // Preparamos el FormData igual que antes
             const productData = {
                 name: data.name,
                 description: data.description,
@@ -134,36 +112,21 @@ const AdminProductsPage = () => {
                 discount: data.discount,
                 active: true
             };
+            
             const formData = new FormData();
             formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
             
-            fetch(`http://localhost:4002/products/${data.id}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${authToken}` },
-                body: formData
-            })
-            .then (response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error((`Error al reactivar.`));
-                    });
-                }
-                return response.json();
-            })
-            .then((responseData) => {
-                toast.success(responseData.message || "Producto reactivado con éxito.");
-                fetchData(); 
-            })
-            .catch(err => {
-                setError(err.message);
-                toast.error("Error al reactivar el producto");
-            })
-            .finally(() => {
-                setLoading(false); 
-            });
+            // Reutilizamos el thunk de update
+            dispatch(updateProduct({ id: data.id, formData }))
+                .unwrap()
+                .then(() => {
+                    toast.success("Producto reactivado con éxito.");
+                    dispatch(fetchProducts()); // Recargamos para ver el cambio de lista
+                })
+                .catch((err) => toast.error(err || "Error al reactivar el producto"));
         }
         
-        setPendingAction(null); // Limpiamos la acción
+        setPendingAction(null);
     };
 
     const openFormModal = (product = null) => {
@@ -178,6 +141,7 @@ const AdminProductsPage = () => {
                 <button className="btn btn-primary" onClick={() => openFormModal()}>Crear Nuevo Producto</button>
             </div>
 
+            {/* Error Global de Redux */}
             {error && <div className="alert alert-danger">{error}</div>}
 
             {/* Tabla de Productos Activos */}
@@ -206,7 +170,6 @@ const AdminProductsPage = () => {
                                 <td>{p.stock}</td>
                                 <td>
                                     <button className="btn btn-outline-primary btn-sm me-2" onClick={() => openFormModal(p)}>Editar</button>
-                                    {/* Pasamos el objeto completo 'p' a requestDelete */}
                                     <button className="btn btn-outline-danger btn-sm" onClick={() => requestDelete(p)}>Eliminar</button>
                                 </td>
                             </tr>
@@ -218,7 +181,7 @@ const AdminProductsPage = () => {
                 </tbody>
             </table>
             
-            {/* Acordeon para Productos Inactivos */}
+            {/* Acordeón para Productos Inactivos */}
             <div className="accordion mt-5" id="inactiveProductsAccordion">
                 <div className="accordion-item">
                     <h2 className="accordion-header" id="headingOne">
@@ -246,7 +209,6 @@ const AdminProductsPage = () => {
                                                     <td>{p.name}</td>
                                                     <td>{categoryMap.get(p.categoryId) || 'N/A'}</td>
                                                     <td>
-                                                        {/* Usamos requestReactivate */}
                                                         <button className="btn btn-outline-success btn-sm" onClick={() => requestReactivate(p)} disabled={loading}>
                                                             Reactivar
                                                         </button>
@@ -267,7 +229,7 @@ const AdminProductsPage = () => {
             {/* Modal del Formulario (Crear/Editar) */}
             {showFormModal && <ProductForm product={editingProduct} onSave={handleSave} onHide={() => setShowFormModal(false)} />}
             
-            {/* 5. Modal de Confirmación (Generado con React Bootstrap) */}
+            {/* Modal de Confirmación (Bootstrap) */}
             <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Confirmar Acción</Modal.Title>

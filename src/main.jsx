@@ -13,11 +13,11 @@ import { store } from './redux/store.js'; // <-- AGREGAR
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+//  <React.StrictMode>
     <Provider store={store}>
       <AuthProvider> 
           <App />
       </AuthProvider>
     </Provider>
-  </React.StrictMode>
+//  </React.StrictMode>
 );

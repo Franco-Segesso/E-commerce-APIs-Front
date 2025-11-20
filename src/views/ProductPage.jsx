@@ -1,81 +1,47 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+// Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProducts } from '../redux/slices/ProductSlice';
+
 import ProductCard from '../components/ProductCard.jsx';
 import FilterSidebar from '../components/FilterSidebar.jsx';
 import SearchBar from '../components/SearchBar.jsx';
 import './ProductPage.css'; 
 
 const ProductsPage = () => {
-    const [products, setProducts] = useState([]); // Productos recibidos del backend (filtrados por categoría/precio)
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    // 1. Estado Global
+    const dispatch = useDispatch();
+    const { list: products, loading, error } = useSelector((state) => state.products);
 
-    // Estado SOLO para los filtros que SÍ van al backend
+    // 2. Estado Local para filtros (igual que antes)
     const [backendFilters, setBackendFilters] = useState({
         category: null,
         price_min: null,
         price_max: null,
         sort: 'asc',
     });
-
-    //  ESTADO SEPARADO PARA LA BÚSQUEDA 
     const [searchQuery, setSearchQuery] = useState('');
 
-    // useCallback para la función de fetch, depende SOLO de los filtros del backend
-    const fetchProducts = useCallback(async () => {
-        setLoading(true); // Mostramos carga SOLO al pedir datos al back
-        setError(null);
-
-        let url;
-        if (backendFilters.category) {
-            url = new URL(`http://localhost:4002/categories/${backendFilters.category}/products`);
-        } else if (backendFilters.price_min && backendFilters.price_max) {
-            url = new URL('http://localhost:4002/products/by-price');
-            url.searchParams.append('minPrice', backendFilters.price_min);
-            url.searchParams.append('maxPrice', backendFilters.price_max);
-        } else {
-             url = new URL('http://localhost:4002/products/sorted-by-price');
-             url.searchParams.append('order', backendFilters.sort);
-        }
-
-        try {
-            const response = await fetch(url.toString());
-            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            const data = await response.json();
-            setProducts(data.content || []); // Guardamos los productos recibidos
-        } catch (error) {
-            setError(error.message);
-            setProducts([]);
-        } finally {
-            setLoading(false); // Ocultamos carga
-        }
-    }, [backendFilters]); // SOLO depende de los filtros del backend
-
-    // useEffect que llama a fetchProducts cuando cambian los filtros del backend
+    // 3. Efecto para cargar productos (MUCHO MÁS LIMPIO)
     useEffect(() => {
-        fetchProducts();
-    }, [fetchProducts]);
+        // Despachamos el Thunk con los filtros actuales
+        dispatch(fetchProducts(backendFilters));
+    }, [dispatch, backendFilters]);
 
-    // Busqueda de productos segun el nombre
-    // Filtramos la lista 'products' actual basándonos en 'searchQuery'
+    // ... (Lógica de filtrado local por nombre sigue igual) ...
     const displayedProducts = products.filter(product => {
         if (searchQuery) {
             return product.name.toLowerCase().includes(searchQuery.toLowerCase());
         }
-        return true; // Si no hay búsqueda, muestra todos los productos de la lista actual
+        return true; 
     });
 
-    // Función que actualiza los filtros del BACKEND
     const handleBackendFilterChange = (newFilters) => {
-        // Al aplicar un filtro de categoría/precio/orden, limpiamos la búsqueda
         setSearchQuery('');
-        setBackendFilters(prevFilters => ({ ...prevFilters, ...newFilters }));
+        setBackendFilters(prev => ({ ...prev, ...newFilters }));
     };
 
-    // Función que actualiza SOLO el estado de búsqueda
-    const handleSearchChange = (query) => {
-        setSearchQuery(query);
-        // NO llamamos a handleBackendFilterChange aca
-    };
+    const handleSearchChange = (query) => setSearchQuery(query);
 
     return (
         
@@ -121,12 +87,9 @@ const ProductsPage = () => {
 
             {/* CONTENIDO PRINCIPAL DE LA PÁGINA */}
             <div className="container-fluid product-page-container px-lg-5">
-            
                 <div className="row gx-lg-5">
-                    {/* Columna de Filtros */}
                     <div className="col-lg-3">
                         <div className="filter-sidebar">
-                            {/* Pasamos handleBackendFilterChange al sidebar */}
                             <FilterSidebar onFilterChange={handleBackendFilterChange} />
                         </div>
                     </div>
@@ -152,21 +115,18 @@ const ProductsPage = () => {
                             </div>
                         </div>
 
-                        {/* Catalogo de Productos */}
-                        {loading && <div className="text-center py-5"><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Cargando...</span></div></div>}
+                        {/* ESTADOS DE CARGA desde Redux */}
+                        {loading && <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>}
                         {error && <div className="alert alert-danger">{error}</div>}
                         
                         {!loading && !error && (
-                            // Mostramos el displayproducts
-                            <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 d-flex align-items-start" style={{ minHeight: '300px' }}>
+                             <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 d-flex align-items-start">
                                 {displayedProducts.length > 0 ? (
                                     displayedProducts.map(product => (
                                         <ProductCard key={product.id} product={product} />
                                     ))
                                 ) : (
-                                    <p className="text-center text-muted col-12 mt-5">
-                                        No se encontraron productos que coincidan con tu búsqueda o filtros.
-                                    </p>
+                                    <p className="text-center text-muted col-12 mt-5">No hay productos.</p>
                                 )}
                             </div>
                         )}
