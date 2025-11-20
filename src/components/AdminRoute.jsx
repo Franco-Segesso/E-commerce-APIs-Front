@@ -1,12 +1,13 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { toast } from 'react-toastify';
 
 const AdminRoute = ({ children }) => {
-    const { authToken, isAdmin, loading } = useAuth();
+    // Desestructuramos user, token y status desde Redux
+    const { user, token, status } = useSelector((state) => state.auth);
 
-    if (loading) {
-        // Returnea un spinner indicando que está cargando
+    if (status === 'loading') {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
                 <div className="spinner-border text-primary" role="status">
@@ -16,18 +17,19 @@ const AdminRoute = ({ children }) => {
         );
     }
 
-    if (!authToken) {
-        // Si no está logueado, lo mandamos al login
+    if (!token || !user) {
         return <Navigate to="/login" replace />;
     }
 
+    // Verificamos si tiene el rol de admin
+    const isAdmin = user.roles && user.roles.includes('ROLE_ADMIN');
+
     if (!isAdmin) {
-        // Si está logueado pero NO es admin, aparece una alerta indicando que no tiene acceso y lo envía al home
-        alert("Acceso denegado. No tienes permisos de administrador.");
+        // Puedes usar un Toast aquí si prefieres, pero el alert es funcional para bloquear
+        toast.error("Acceso denegado. No tienes permisos de administrador.");
         return <Navigate to="/" replace />;
     }
 
-    // Si es admin, mostramos la página
     return children;
 };
 

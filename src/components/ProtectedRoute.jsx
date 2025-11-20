@@ -1,13 +1,14 @@
 import React from 'react';
+import { useSelector } from 'react-redux'; // Hook de Redux
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
-    const { authToken, loading } = useAuth();
+    // Leemos token y status desde el slice de auth
+    const { token, status } = useSelector((state) => state.auth);
     const location = useLocation();
 
-    if (loading) {
-        //returnea un spinner indicando que está cargando
+    // Si está cargando (ej: verificando sesión al inicio), mostramos spinner
+    if (status === 'loading') {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
                 <div className="spinner-border text-primary" role="status">
@@ -17,12 +18,11 @@ const ProtectedRoute = ({ children }) => {
         );
     }
 
-    if (!authToken) {
-        // Si no hay token, redirigimos al login, guardando la página que quería visitar
+    // Si no hay token, redirigimos al login
+    if (!token) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Si hay token, mostramos la página protegida (CheckoutPage)
     return children;
 };
 
