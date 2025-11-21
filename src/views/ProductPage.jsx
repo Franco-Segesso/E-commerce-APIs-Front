@@ -52,7 +52,7 @@ const ProductsPage = () => {
     // ... (Lógica de filtrado local por nombre sigue igual) ...
     const displayedProducts = products.filter(product => {
         // 1. FILTRO DE SEGURIDAD: Solo mostrar activos
-        if (!product.active) return false;
+        if (!product.active || !product.stock > 0) return false;
 
         // 2. Filtro de búsqueda
         if (searchQuery) {

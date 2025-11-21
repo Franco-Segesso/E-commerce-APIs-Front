@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // 1. Imports de Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromCart, updateQuantity } from '../redux/slices/cartSlice';
+import { removeFromCart, updateQuantity } from '../redux/slices/CartSlice';
 import { toast } from 'react-toastify'; // Si usas Toastify
 import './CartPage.css';
 

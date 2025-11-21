@@ -93,7 +93,9 @@ const HomePage = () => {
             {loadingHome && hotSaleList.length === 0 ? <Loader /> : (
                 <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                     {hotSaleList.length > 0 ? (
-                        hotSaleList.map(p => <ProductCard key={p.id} product={p} />)
+                      hotSaleList
+                      .filter(p => p.active && p.stock > 0)
+                        .map(p => <ProductCard key={p.id} product={p} />)
                     ) : (
                         <p className="text-center w-100 text-muted">No hay ofertas por el momento.</p>
                     )}
@@ -137,7 +139,9 @@ const HomePage = () => {
           {loadingHome && newArrivalsList.length === 0 ? <Loader /> : (
             <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 {newArrivalsList.length > 0 ? (
-                    newArrivalsList.map((p) => <ProductCard key={p.id} product={p} />)
+                    newArrivalsList
+                    .filter(p => p.active && p.stock > 0)
+                    .map((p) => <ProductCard key={p.id} product={p} />)
                 ) : (
                     <p className="text-center w-100 text-muted">Pronto tendremos novedades.</p>
                 )}

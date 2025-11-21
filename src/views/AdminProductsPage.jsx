@@ -5,7 +5,7 @@ import {
     fetchProducts, 
     createProduct, 
     updateProduct, 
-    deleteProduct 
+    deleteProduct
 } from '../redux/slices/ProductSlice';
 import { fetchCategories } from '../redux/slices/CategorySlice';
 

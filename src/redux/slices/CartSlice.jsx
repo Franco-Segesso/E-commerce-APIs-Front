@@ -49,7 +49,7 @@ const cartSlice = createSlice({
 
 
         if (newQuantity > item.stock) {
-            toast.warning("No hay suficiente stockj disponible.");
+            toast.warning("No hay suficiente stock disponible.");
             return ;
         }
         // Si pasa las validaciones, actualizamos

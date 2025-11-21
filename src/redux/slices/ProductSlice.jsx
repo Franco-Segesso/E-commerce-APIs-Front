@@ -193,6 +193,36 @@ const productSlice = createSlice({
         resetOperationStatus: (state) => {
             state.operationStatus = null;
             state.error = null;
+        },
+        decreaseStockLocally: (state, action) => {
+            const purchasedItems = action.payload; // Lista de items del carrito (con id y quantity)
+
+            purchasedItems.forEach(purchasedItem => {
+                const purchasedId = purchasedItem.id;
+                const purchasedQuantity = purchasedItem.quantity;
+
+                // Función auxiliar para actualizar una lista específica
+                const updateStock = (productList) => {
+                    // Usamos map para crear una nueva lista con el estado actualizado (inmutabilidad)
+                    return productList.map(item => {
+                        if (item.id === purchasedId) {
+                            // Calculamos el nuevo stock, asegurándonos que no sea negativo
+                            const newStock = item.stock - purchasedQuantity;
+
+                            return { 
+                                ...item, 
+                                stock: newStock
+                            };
+                        }
+                        return item;
+                    });
+                };
+
+                // Actualizar todas las listas que muestran productos
+                state.list = updateStock(state.list);
+                state.hotSaleList = updateStock(state.hotSaleList);
+                state.newArrivalsList = updateStock(state.newArrivalsList);
+            });
         }
     },
     extraReducers: (builder) => {
@@ -284,27 +314,20 @@ const productSlice = createSlice({
                 const hotIndex = state.hotSaleList.findIndex(p => p.id === updated.id);
                 if (hotIndex !== -1) {
                     // Si ya estaba, lo actualizamos o sacamos si ya no cumple (ej: active false o sin descuento)
-                    if (!updated.active || !updated.discount) state.hotSaleList.splice(hotIndex, 1);
-                    else state.hotSaleList[hotIndex] = updated;
-                } else if (updated.active && updated.discount > 0) {
+                    if (!updated.active || !updated.discount || !updated.stock > 0){
+                        state.hotSaleList.splice(hotIndex, 1);
+                    } 
+                    /*else{
+                        state.hotSaleList[hotIndex] = updated;
+                    } */
+                } 
+                else if (updated.active && updated.discount > 0 && updated.stock > 0) {
                     // Si no estaba y ahora cumple, lo metemos
                     state.hotSaleList.unshift(updated);
-                }
 
-                // 3. Actualizar en Nuevos (Si se reactivó)
-                const newIndex = state.newArrivalsList.findIndex(p => p.id === updated.id);
-                if (newIndex !== -1) {
-                    if (!updated.active) state.newArrivalsList.splice(newIndex, 1);
-                    else state.newArrivalsList[newIndex] = updated;
-                } else if (updated.active) {
-                    // Si reactivamos un producto viejo, decidimos si mostrarlo en "nuevos". 
-                    // Por ahora, para que se vea el cambio, lo agregamos al principio.
-                    state.newArrivalsList.unshift(updated);
-                }
-                
-                // Si estabas viendo el detalle de este producto, actualízalo también
-                if (state.selectedProduct && state.selectedProduct.id === updated.id) {
-                    state.selectedProduct = updated;
+                    if (state.hotSaleList.length > 4) {
+                        state.hotSaleList.pop();
+                    }
                 }
             })
             .addCase(updateProduct.rejected, (state, action) => {
@@ -328,5 +351,5 @@ const productSlice = createSlice({
     }
 });
 
-export const { clearSelectedProduct, resetOperationStatus } = productSlice.actions;
+export const { clearSelectedProduct, resetOperationStatus, decreaseStockLocally } = productSlice.actions;
 export default productSlice.reducer;

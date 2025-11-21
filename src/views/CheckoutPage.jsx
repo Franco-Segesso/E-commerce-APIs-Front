@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 
 // 1. REDUX
 import { useSelector, useDispatch } from 'react-redux';
-import { clearCart } from '../redux/slices/cartSlice';
+import { clearCart } from '../redux/slices/CartSlice';
 import { createOrder } from '../redux/slices/OrdersSlice';
 import { fetchProfile } from '../redux/slices/UserSlice';
+import { decreaseStockLocally } from '../redux/slices/ProductSlice';
+
 
 import { toast } from 'react-toastify'; 
 import './CheckoutPage.css';
@@ -85,6 +87,7 @@ const CheckoutPage = () => {
             .unwrap() // Nos permite manejar el éxito/error como promesa
             .then((createdOrder) => {
                 toast.success(`¡Orden creada con éxito! ID: ${createdOrder.id}`);
+                dispatch(decreaseStockLocally(cartItems)); // Actualizamos stocks localmente
                 dispatch(clearCart()); // Limpiamos el carrito en Redux
                 navigate('/');
             })
