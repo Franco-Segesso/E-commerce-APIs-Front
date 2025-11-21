@@ -42,12 +42,18 @@ const cartSlice = createSlice({
       
       if (item) {
         const newQuantity = item.quantity + amount;
-        if (newQuantity >= 1 && newQuantity <= item.stock) {
-            item.quantity = newQuantity;
+
+        if (newQuantity < 1) {
+          return ; // No permitimos cantidades menores a 1
         }
-        else{
-          toast.warning("No hay suficiente stock disponible.");
+
+
+        if (newQuantity > item.stock) {
+            toast.warning("No hay suficiente stockj disponible.");
+            return ;
         }
+        // Si pasa las validaciones, actualizamos
+        item.quantity = newQuantity;
       }
       localStorage.setItem('cartItems', JSON.stringify(state.items));
     },
