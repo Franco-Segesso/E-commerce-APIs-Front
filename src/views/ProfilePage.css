@@ -1,7 +1,7 @@
 
 
 .para-el-fondo {
-  background-color: #e9f7ef;
+  background-color: #4f9d60;
   padding: 2rem 1rem;
   border-radius: 1rem;
 }
@@ -48,7 +48,7 @@
 
 .btn-edit {
 background-color: var(--bs-primary) !important; 
-  color: white !important; 
+  color: #4f9d60 !important; 
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
@@ -76,7 +76,7 @@ background-color: var(--bs-primary) !important;
 }
 
 .info-field-display {
-  background-color: #f8f9fa;
+  background-color: #4f9d60;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid #dee2e6;

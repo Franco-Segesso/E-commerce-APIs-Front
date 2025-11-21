@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearCart } from '../redux/slices/CartSlice';
 import { createOrder } from '../redux/slices/OrdersSlice';
-import { fetchProfile } from '../redux/slices/UserSlice';
+import { fetchUserProfile, addOrderLocally } from '../redux/slices/UserSlice';
+// IMPORTACIÓN CLAVE
 import { decreaseStockLocally } from '../redux/slices/ProductSlice';
 
 
@@ -27,22 +28,21 @@ const CheckoutPage = () => {
     // 3. ESTADOS LOCALES (Formulario)
     const [shippingAddress, setShippingAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState(''); 
-    
+
     // Datos de tarjeta (Solo UI local)
     const [cardNumber, setCardNumber] = useState('');
     const [cardExpiry, setCardExpiry] = useState('');
-    const [cardCvv, setCardCvv] = useState('');
+    const [cardCvv, setCvv] = useState('');
 
     // 4. CÁLCULOS
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const estimatedTaxes = subtotal * 0.05;
     const shipping = subtotal > 50000 ? 0.00 : 5000.00;
     const totalPrice = (subtotal + estimatedTaxes + shipping).toFixed(2);
-
     // 5. EFECTOS
     // Cargar el perfil del usuario al entrar para tener su ID disponible
     useEffect(() => {
-        dispatch(fetchProfile());
+        dispatch(fetchUserProfile());
     }, [dispatch]);
 
     const handleConfirmOrder = async (e) => {
@@ -82,20 +82,26 @@ const CheckoutPage = () => {
         };
         
         // DESPACHAR LA ORDEN
-        // createOrder ya es "inteligente" y busca el token solo (gracias a tu OrdersSlice)
         dispatch(createOrder(orderData))
             .unwrap() // Nos permite manejar el éxito/error como promesa
             .then((createdOrder) => {
                 toast.success(`¡Orden creada con éxito! ID: ${createdOrder.id}`);
-                dispatch(decreaseStockLocally(cartItems)); // Actualizamos stocks localmente
-                dispatch(clearCart()); // Limpiamos el carrito en Redux
+                
+                // [SOLUCIÓN SIN FETCH] 
+                // 1. Actualizar stock localmente
+                dispatch(decreaseStockLocally(cartItems)); 
+                // 2. Agregar orden al estado del usuario localmente
+                dispatch(addOrderLocally(createdOrder));
+                // 3. Limpiar carrito
+                dispatch(clearCart()); 
+                
+                // 4. Redirigir al Home Page
                 navigate('/');
             })
             .catch((err) => {
                 toast.error(err || "No se pudo procesar la orden.");
             });
     };
-
     const isLoading = loadingUser || loadingOrder;
 
     return (
@@ -157,7 +163,7 @@ const CheckoutPage = () => {
                                     </div>
                                     <div className="col-6 mb-3">
                                         <label className="form-label">CVV</label>
-                                        <input type="text" className="form-control" value={cardCvv} onChange={(e) => setCardCvv(e.target.value)} placeholder="123" required />
+                                        <input type="text" className="form-control" value={cardCvv} onChange={(e) => setCvv(e.target.value)} placeholder="123" required />
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +202,7 @@ const CheckoutPage = () => {
                             form="checkout-form" 
                             className="btn btn-confirm-checkout btn-lg" 
                             disabled={isLoading || cartItems.length === 0}
-                        >
+                            >
                             {isLoading ? 'Procesando...' : 'Confirmar Orden'}
                         </button>
                     </div>

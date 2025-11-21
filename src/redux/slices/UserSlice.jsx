@@ -1,213 +1,177 @@
-// src/redux/slices/userSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-const API = 'http://localhost:4002';
+// --- THUNKS ---
 
-/** 
- * Devuelve el JWT guardado (lo toma de varias claves típicas).
- * Esto permite que los thunks hagan llamadas autenticadas sin depender del Context.
- */
-function getToken() {
-    return (
-    localStorage.getItem('token') ||
-    localStorage.getItem('access_token') ||
-    localStorage.getItem('authToken') ||
-    null
-    );
-}
-
-/** 
- * GET /users/profile
- * Trae los datos del perfil del usuario logueado.
- */
-export const fetchProfile = createAsyncThunk(
+// 1. Obtener Perfil (GET)
+export const fetchUserProfile = createAsyncThunk(
     'user/fetchProfile',
-    async (_, thunkAPI) => {
-    try {
-    const token = getToken();
-    const res = await fetch(`${API}/users/profile`, {
-        headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'No se pudo cargar el perfil');
-    }
-      return await res.json(); // { id, firstName, lastName, email, ... }
-    } catch (err) {
-    return thunkAPI.rejectWithValue(err.message || 'Error desconocido');
-    }
-}
-);
-
-/**
- * PUT /users/profile
- * Actualiza nombre y apellido del usuario.
- * payload: { firstName, lastName }
- */
-export const updateProfile = createAsyncThunk(
-'user/updateProfile',
-async (payload, thunkAPI) => {
-    try {
-    const token = getToken();
-    const res = await fetch(`${API}/users/profile`, {
-        method: 'PUT',
-        headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-        firstName: payload.firstName,
-        lastName:  payload.lastName,
-        }),
-});
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'No se pudo actualizar el perfil');
-}
-      return await res.json(); // perfil actualizado
-    } catch (err) {
-        return thunkAPI.rejectWithValue(err.message || 'Error desconocido');
-    }
-}
-);
-
-/**
- * GET /users/orders
- * Trae el historial de pedidos del usuario.
- */
-export const fetchOrders = createAsyncThunk(
-    'user/fetchOrders',
-    async (_, thunkAPI) => {
-    try {
-    const token = getToken();
-    const res = await fetch(`${API}/users/orders`, {
-        headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'No se pudieron cargar las órdenes');
-    }
-      return await res.json(); // array de órdenes
-    } catch (err) {
-        return thunkAPI.rejectWithValue(err.message || 'Error desconocido');
-    }
-    }
-);
-
-
-export const fetchAllUsers = createAsyncThunk(
-    'user/fetchAll',
-    async (_, thunkAPI) => {
+    async (_, { getState, rejectWithValue }) => {
+        // "Redux Way": Sacamos el token del estado global de Auth
+        const { token } = getState().auth;
+        
         try {
-            const token = getToken(); // Tu función helper
-            const res = await fetch(`${API}/users`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const response = await fetch('http://localhost:4002/users/profile', {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
-            if (!res.ok) throw new Error('Error al cargar lista de usuarios');
-            const data = await res.json();
-            return data.content || data; 
-        } catch (err) {
-            return thunkAPI.rejectWithValue(err.message);
+
+            if (!response.ok) throw new Error('No se pudo cargar el perfil');
+            return await response.json();
+        } catch (error) {
+            return rejectWithValue(error.message);
         }
     }
 );
 
-// Estado inicial del slice
-const initialState = {
-    profile: null,
-    loadingProfile: false,
-    errorProfile: null,
+// 2. Actualizar Perfil (PUT)
+export const updateUserProfile = createAsyncThunk(
+    'user/updateProfile',
+    async (userData, { getState, rejectWithValue }) => {
+        const { token } = getState().auth;
+        
+        try {
+            const response = await fetch('http://localhost:4002/users/profile', {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify(userData)
+            });
 
-    savingProfile: false,
-    saveError: null,
-    saveSuccess: false,
+            if (!response.ok) throw new Error('No se pudo actualizar el perfil');
+            return await response.json(); // Devuelve el usuario actualizado
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 
-    orders: [],
-    loadingOrders: false,
-    errorOrders: null,
-};
+// 3. Obtener Órdenes del Usuario (GET)
+export const fetchUserOrders = createAsyncThunk(
+    'user/fetchOrders',
+    async (_, { getState, rejectWithValue }) => {
+        const { token } = getState().auth;
 
+        try {
+            const response = await fetch('http://localhost:4002/users/orders', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Error al cargar órdenes');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// 4. Obtener TODOS los usuarios (Solo Admin) - Para AdminOrdersPage
+export const fetchAllUsers = createAsyncThunk(
+    'user/fetchAll',
+    async (_, { getState, rejectWithValue }) => {
+        const { token } = getState().auth;
+        try {
+            const response = await fetch('http://localhost:4002/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Error al cargar usuarios');
+            const data = await response.json();
+            return data.content || data;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+// --- SLICE ---
 const userSlice = createSlice({
     name: 'user',
-    initialState,
-    reducers: {
-    /** Resetea el flag de éxito del guardado (para ocultar el cartel) */
-    resetSaveSuccess(state) {
-        state.saveSuccess = false;
+    initialState: {
+        profile: null,      // Datos del usuario logueado (Nombre, Apellido, Email)
+        orders: [],         // Historial de compras del usuario
+        list: [],           // Lista de todos los usuarios (Para uso Admin)
+        loading: false,
+        error: null,
+        operationStatus: null // 'success' | 'error' | null (Para feedbacks de update)
     },
+    reducers: {
+        resetOperationStatus: (state) => {
+            state.operationStatus = null;
+            state.error = null;
+        },
+        clearUserState: (state) => {
+            state.profile = null;
+            state.orders = [];
+            state.list = [];
+        },
+        addOrderLocally: (state, action) => {
+            state.orders.push(action.payload);
+        }
     },
     extraReducers: (builder) => {
-    // fetchProfile
-    builder
-        .addCase(fetchProfile.pending, (state) => {
-        state.loadingProfile = true;
-        state.errorProfile = null;
-    })
-        .addCase(fetchProfile.fulfilled, (state, action) => {
-        state.loadingProfile = false;
-        state.profile = action.payload || null;
-    })
-        .addCase(fetchProfile.rejected, (state, action) => {
-        state.loadingProfile = false;
-        state.errorProfile = action.payload || 'No fue posible cargar el perfil';
-    });
+        builder
+            // --- Fetch Profile ---
+            .addCase(fetchUserProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchUserProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.profile = action.payload;
+            })
+            .addCase(fetchUserProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
 
-    // updateProfile
-    builder
-    .addCase(updateProfile.pending, (state) => {
-        state.savingProfile = true;
-        state.saveError = null;
-        state.saveSuccess = false;
-    })
-    .addCase(updateProfile.fulfilled, (state, action) => {
-        state.savingProfile = false;
-        state.saveSuccess = true;
-        state.profile = action.payload || state.profile; // reflejar cambios
-    })
-    .addCase(updateProfile.rejected, (state, action) => {
-        state.savingProfile = false;
-        state.saveError = action.payload || 'No fue posible actualizar el perfil';
-    });
+            // --- Update Profile ---
+            .addCase(updateUserProfile.pending, (state) => {
+                state.loading = true;
+                state.operationStatus = 'pending';
+            })
+            .addCase(updateUserProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.operationStatus = 'success';
+                state.profile = action.payload; // Actualizamos el perfil local con la respuesta
+            })
+            .addCase(updateUserProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.operationStatus = 'error';
+                state.error = action.payload;
+            })
 
-    // fetchOrders
-    builder
-    .addCase(fetchOrders.pending, (state) => {
-        state.loadingOrders = true;
-        state.errorOrders = null;
-    })
-    .addCase(fetchOrders.fulfilled, (state, action) => {
-        state.loadingOrders = false;
-        state.orders = Array.isArray(action.payload) ? action.payload : [];
-    })
-    .addCase(fetchOrders.rejected, (state, action) => {
-        state.loadingOrders = false;
-        state.errorOrders = action.payload || 'No fue posible cargar las órdenes';
-    });
+            // --- Fetch Orders ---
+            .addCase(fetchUserOrders.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(fetchUserOrders.fulfilled, (state, action) => {
+                state.loading = false;
+                state.orders = action.payload;
+            })
+            .addCase(fetchUserOrders.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
 
-    builder.addCase(fetchAllUsers.fulfilled, (state, action) => {
-    state.list = action.payload; // Asegúrate de tener 'list: []' en initialState
-    });
-    },
-    });
+             // --- Fetch All Users (Admin) ---
+             .addCase(fetchAllUsers.pending, (state) => { state.loading = true; })
+             .addCase(fetchAllUsers.fulfilled, (state, action) => {
+                 state.loading = false;
+                 state.list = action.payload;
+             });
+    }
+});
 
-export const { resetSaveSuccess } = userSlice.actions;
+export const { resetOperationStatus, clearUserState, addOrderLocally } = userSlice.actions;
+
+// Selectores exportados para facilitar el uso en componentes
+export const selectUserProfile = (state) => state.user.profile;
+export const selectUserOrders = (state) => state.user.orders;
+export const selectAllUsers = (state) => state.user.list;
+export const selectUserLoading = (state) => state.user.loading;
+
 export default userSlice.reducer;
-
-// Selectores
-export const selectUserProfile    = (state) => state.user.profile;
-export const selectLoadingProfile = (state) => state.user.loadingProfile;
-export const selectErrorProfile   = (state) => state.user.errorProfile;
-
-export const selectSavingProfile  = (state) => state.user.savingProfile;
-export const selectSaveError      = (state) => state.user.saveError;
-export const selectSaveSuccess    = (state) => state.user.saveSuccess;
-
-export const selectOrders         = (state) => state.user.orders;
-export const selectLoadingOrders  = (state) => state.user.loadingOrders;
-export const selectErrorOrders    = (state) => state.user.errorOrders;

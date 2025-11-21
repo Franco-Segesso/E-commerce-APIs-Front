@@ -1,41 +1,44 @@
 import React, { useEffect } from 'react';
+import { Accordion } from 'react-bootstrap';
+
 // 1. REDUX
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchAllOrders } from '../redux/slices/OrdersSlice';
-// Asegúrate de que en UserSlice exportas esta acción. Si no la tienes, avísame y la agregamos.
-import { fetchAllUsers } from '../redux/slices/UserSlice'; 
 
-import { Accordion } from 'react-bootstrap';
+// Orders: Importamos solo el Thunk (accederemos al estado manualmente)
+import { fetchAllOrders } from '../redux/slices/OrdersSlice';
+
+// Users: Importamos Thunk y Selector (porque este sí está completo)
+import { fetchAllUsers, selectAllUsers } from '../redux/slices/UserSlice';
 
 const AdminOrdersPage = () => {
     const dispatch = useDispatch();
 
     // 2. LEER ESTADO GLOBAL
-    // Órdenes (Admin list)
-    const { adminOrders, status: orderStatus, error: orderError } = useSelector((state) => state.orders);
     
-    // Usuarios (Para mapear ID -> Email). Asumimos que tienes una lista 'list' o 'users' en UserSlice
-    // Si tu UserSlice no tiene la lista de todos los usuarios, necesitaremos agregar ese Thunk.
-    // Por ahora usaré state.user.list basándome en la estructura estándar.
-    const { list: users, loading: userLoading } = useSelector((state) => state.user);
+    // A. Órdenes (Acceso manual porque no hay selectores en OrdersSlice)
+    // En tu OrdersSlice la lista global se llama 'adminOrders'
+    const { adminOrders, status, error } = useSelector((state) => state.orders);
 
-    // 3. EFECTO DE CARGA
+    // B. Usuarios (Usando el selector que sí existe en UserSlice)
+    const users = useSelector(selectAllUsers);
+
+    // 3. CARGA DE DATOS
     useEffect(() => {
-        // Cargamos todo al entrar
         dispatch(fetchAllOrders());
-        // Solo si tienes el thunk fetchAllUsers implementado en UserSlice:
-        if (fetchAllUsers) dispatch(fetchAllUsers());
+        dispatch(fetchAllUsers());
     }, [dispatch]);
 
-    // 4. MAPEO DE USUARIOS (ID -> Email)
-    // Creamos un mapa para acceso rápido O(1) en lugar de buscar en el array cada vez
+    // 4. LÓGICA DE UI
+    
+    // Mapa para buscar email por ID rápidamente: O(1)
+    // Si users es null/undefined, usamos array vacío para que no explote
     const userMap = new Map((users || []).map(u => [u.id, u.email]));
 
-    // Ordenamos órdenes por fecha/ID descendente
+    // Ordenamos por ID descendente (lo más nuevo arriba)
+    // Hacemos copia con [...] para no mutar el estado de Redux
     const sortedOrders = [...(adminOrders || [])].sort((a, b) => b.id - a.id);
 
-    const isLoading = orderStatus === 'loading' || userLoading;
-    const error = orderError;
+    const isLoading = status === 'loading';
 
     if (isLoading) {
         return <div className="text-center p-5"><h4>Cargando gestión de órdenes...</h4></div>;
@@ -57,39 +60,42 @@ const AdminOrdersPage = () => {
                         <Accordion.Item eventKey={String(index)} key={order.id}>
                             <Accordion.Header>
                                 <div className="d-flex w-100 justify-content-between align-items-center pe-3">
-                                    <span className="fw-bold">Orden #{order.id}</span>
-                                    <span>{order.date}</span>
-                                    {/* Mostramos el email si lo encontramos, sino el ID */}
-                                    <span className="text-muted small">
-                                        {userMap.get(order.userId) || `Usuario ID: ${order.userId}`}
-                                    </span>
-                                    <span className="badge bg-success">
-                                        ${(order.totalPrice || 0).toFixed(2)}
-                                    </span>
+                                    <div className="d-flex gap-3 align-items-center">
+                                        <span className="fw-bold">Orden #{order.id}</span>
+                                        <span className="text-muted small">{order.date}</span>
+                                    </div>
+                                    
+                                    <div className="d-flex align-items-center gap-3">
+                                        {/* Buscamos el email en el mapa que creamos con los datos de UserSlice */}
+                                        <span className="text-muted fst-italic d-none d-md-inline">
+                                            {userMap.get(order.userId) || `Usuario ID: ${order.userId}`}
+                                        </span>
+                                        <span className="badge bg-success rounded-pill">
+                                            ${(order.totalPrice || 0).toFixed(2)}
+                                        </span>
+                                    </div>
                                 </div>
                             </Accordion.Header>
                             <Accordion.Body>
-                                <div className="row mb-3">
+                                <div className="row mb-4">
                                     <div className="col-md-6">
-                                        <h6 className="fw-bold">Detalles de Envío</h6>
-                                        <p className="mb-1 text-muted">{order.shippingAddress}</p>
+                                        <h6 className="fw-bold text-secondary">Envío</h6>
+                                        <p className="mb-1">{order.shippingAddress}</p>
                                     </div>
                                     <div className="col-md-6">
-                                        <h6 className="fw-bold">Pago</h6>
-                                        <p className="mb-1 text-muted">{order.paymentMethod}</p>
+                                        <h6 className="fw-bold text-secondary">Pago</h6>
+                                        <p className="mb-1">{order.paymentMethod}</p>
                                     </div>
                                 </div>
                                 
-                                <hr />
-                                
-                                <h6 className="fw-bold mb-3">Productos Comprados:</h6>
-                                <div className="table-responsive">
-                                    <table className="table table-sm table-striped align-middle">
-                                        <thead>
+                                <h6 className="fw-bold mb-2">Productos:</h6>
+                                <div className="table-responsive border rounded">
+                                    <table className="table table-sm table-striped align-middle mb-0">
+                                        <thead className="table-light">
                                             <tr>
                                                 <th>Producto</th>
                                                 <th className="text-center">Cant.</th>
-                                                <th className="text-end">Precio Unit.</th>
+                                                <th className="text-end">Unitario</th>
                                                 <th className="text-end">Subtotal</th>
                                             </tr>
                                         </thead>
@@ -98,7 +104,9 @@ const AdminOrdersPage = () => {
                                                 const price = detail.product?.price || 0;
                                                 return (
                                                     <tr key={detail.id}>
-                                                        <td>{detail.product?.name || <span className="text-danger">Producto eliminado</span>}</td>
+                                                        <td>
+                                                            {detail.product ? detail.product.name : <span className="text-danger fst-italic">Producto eliminado</span>}
+                                                        </td>
                                                         <td className="text-center">{detail.quantity}</td>
                                                         <td className="text-end">${price.toFixed(2)}</td>
                                                         <td className="text-end fw-bold">${(price * detail.quantity).toFixed(2)}</td>
