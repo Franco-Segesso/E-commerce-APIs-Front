@@ -1,4 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+const BASE_URL = 'http://localhost:4002/categories';
 
 // --- THUNKS ---
 
@@ -7,12 +10,11 @@ export const fetchCategories = createAsyncThunk(
     'categories/fetchAll',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:4002/categories/all');
-            if (!response.ok) throw new Error('Error al cargar categorías');
-            const data = await response.json();
+            const response = await axios.get(`${BASE_URL}/all`);
+            const data = response.data;
             return data.content || data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -21,22 +23,14 @@ export const fetchCategories = createAsyncThunk(
 export const createCategory = createAsyncThunk(
     'categories/create',
     async (categoryData, { getState, rejectWithValue }) => {
-        // ACÁ ESTÁ LA CLAVE: Usamos getState()
         const { token } = getState().auth; 
         try {
-            const response = await fetch('http://localhost:4002/categories', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(categoryData)
+            const response = await axios.post(BASE_URL, categoryData, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!response.ok) throw new Error('Error al crear categoría');
-            // Retornamos nada o el mensaje, y luego recargamos la lista
-            return await response.json();
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'Error al crear categoría');
         }
     }
 );
@@ -47,19 +41,12 @@ export const updateCategory = createAsyncThunk(
     async ({ id, description }, { getState, rejectWithValue }) => {
         const { token } = getState().auth;
         try {
-            const response = await fetch(`http://localhost:4002/categories/${id}`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify({ description })
+            const response = await axios.put(`${BASE_URL}/${id}`, { description }, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            if (!response.ok) throw new Error('Error al actualizar categoría');
-            return await response.json();
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'Error al actualizar categoría');
         }
     }
 );
@@ -70,14 +57,12 @@ export const deleteCategory = createAsyncThunk(
     async (id, { getState, rejectWithValue }) => {
         const { token } = getState().auth;
         try {
-            const response = await fetch(`http://localhost:4002/categories/${id}`, {
-                method: 'DELETE',
+            await axios.delete(`${BASE_URL}/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!response.ok) throw new Error('Error al eliminar');
             return id;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'Error al eliminar');
         }
     }
 );
@@ -88,18 +73,13 @@ export const reactivateCategory = createAsyncThunk(
     async (category, { getState, rejectWithValue }) => {
         const { token } = getState().auth;
         try {
-            const response = await fetch(`http://localhost:4002/categories/${category.id}`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify({ description: category.description })
-            });
-            if (!response.ok) throw new Error('Error al reactivar');
+            await axios.put(`${BASE_URL}/${category.id}`, 
+                { description: category.description }, 
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
             return category.id;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'Error al reactivar');
         }
     }
 );
@@ -125,15 +105,12 @@ const categorySlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(updateCategory.fulfilled, (state, action) => {
-            // Actualizamos la categoría en la lista localmente
-            const index = state.list.findIndex(c => c.id === action.payload.id);
-            if (index !== -1) {
-                state.list[index] = action.payload;
-            }
+                const index = state.list.findIndex(c => c.id === action.payload.id);
+                if (index !== -1) {
+                    state.list[index] = action.payload;
+                }
             })
-            // Puedes agregar los casos de create/delete para feedback visual si quieres
             .addCase(deleteCategory.fulfilled, (state, action) => {
-                // Actualización local (Optimista/Pesimista)
                 const cat = state.list.find(c => c.id === action.payload);
                 if (cat) cat.active = false;
             });

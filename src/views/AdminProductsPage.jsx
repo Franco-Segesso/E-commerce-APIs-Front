@@ -192,7 +192,7 @@ const AdminProductsPage = () => {
                 <div className="accordion-item">
                     <h2 className="accordion-header" id="headingOne">
                     <button className="accordion-button collapsed bg-light text-secondary fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                        🗑️ Papelera de Reciclaje ({inactiveProducts.length})
+                         Productos Inactivos ({inactiveProducts.length})
                     </button>
                     </h2>
                     <div id="collapseOne" className="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#inactiveProductsAccordion">
@@ -224,7 +224,7 @@ const AdminProductsPage = () => {
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <p className="text-center text-muted mb-0 py-3">La papelera está vacía.</p>
+                                    <p className="text-center text-muted mb-0 py-3">No hay productos inactivos.</p>
                                 )
                              )}
                         </div>

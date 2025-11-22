@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
+
+const BASE_URL = 'http://localhost:4002/api/v1/auth';
+const USERS_URL = 'http://localhost:4002/users';
 
 // --- 1. THUNKS (Acciones Asíncronas) ---
 
@@ -8,16 +12,12 @@ export const loginUser = createAsyncThunk(
     'auth/loginUser',
     async ({ email, password }, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:4002/api/v1/auth/authenticate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            if (!response.ok) throw new Error('Credenciales inválidas');
-            const data = await response.json();
-            return data.access_token; 
+            const response = await axios.post(`${BASE_URL}/authenticate`, { email, password });
+            return response.data.access_token; 
         } catch (error) {
-            return rejectWithValue(error.message);
+            // Axios lanza error en 4xx/5xx. Capturamos el mensaje del backend si existe.
+            const message = error.response?.data?.message || 'Credenciales inválidas o error de conexión';
+            return rejectWithValue(message);
         }
     }
 );
@@ -27,19 +27,11 @@ export const registerUser = createAsyncThunk(
     'auth/registerUser',
     async (userData, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:4002/api/v1/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
-            });
-            if (!response.ok) {
-                 const errorData = await response.json().catch(() => null);
-                 throw new Error(errorData?.message || 'Error al registrar usuario');
-            }
-            const data = await response.json();
-            return data.access_token;
+            const response = await axios.post(`${BASE_URL}/register`, userData);
+            return response.data.access_token;
         } catch (error) {
-            return rejectWithValue(error.message);
+            const message = error.response?.data?.message || 'Error al registrar usuario';
+            return rejectWithValue(message);
         }
     }
 );
@@ -53,13 +45,11 @@ export const checkAuth = createAsyncThunk(
 
         try {
             // Consultamos perfil para validar que el token no expiró en el servidor
-            const response = await fetch('http://localhost:4002/users/profile', {
+            const response = await axios.get(`${USERS_URL}/profile`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) throw new Error('Token inválido');
-
-            const userData = await response.json();
+            const userData = response.data;
             const decoded = jwtDecode(token);
             
             // Retornamos token y usuario fresco
@@ -72,7 +62,8 @@ export const checkAuth = createAsyncThunk(
             };
         } catch (error) {
             localStorage.removeItem('token');
-            return rejectWithValue(error.message);
+            const message = error.response?.data?.message || error.message;
+            return rejectWithValue(message);
         }
     }
 );
@@ -80,7 +71,6 @@ export const checkAuth = createAsyncThunk(
 // --- 2. ESTADO INICIAL ---
 
 const tokenFromStorage = localStorage.getItem('token');
-// Intentamos decodificar lo básico solo para tener algo mientras carga
 let userFromStorage = null;
 if (tokenFromStorage) {
     try {
@@ -98,9 +88,6 @@ const authSlice = createSlice({
     initialState: {
         user: userFromStorage,
         token: tokenFromStorage,
-        // CORRECCIÓN DEL BUG:
-        // Si hay un token guardado, forzamos el estado a 'loading'.
-        // Esto evita que las rutas protegidas redirijan antes de tiempo.
         status: tokenFromStorage ? 'loading' : 'idle', 
         error: null,
     },

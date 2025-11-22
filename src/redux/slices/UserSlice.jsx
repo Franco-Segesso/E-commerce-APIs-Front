@@ -1,4 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { logout } from './AuthSlice'; // <--- IMPORTANTE: Importamos la acción logout
+
+const BASE_URL = 'http://localhost:4002/users';
 
 // --- THUNKS ---
 
@@ -6,21 +10,15 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchUserProfile = createAsyncThunk(
     'user/fetchProfile',
     async (_, { getState, rejectWithValue }) => {
-        // "Redux Way": Sacamos el token del estado global de Auth
         const { token } = getState().auth;
         
         try {
-            const response = await fetch('http://localhost:4002/users/profile', {
-                headers: { 
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            const response = await axios.get(`${BASE_URL}/profile`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            if (!response.ok) throw new Error('No se pudo cargar el perfil');
-            return await response.json();
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'No se pudo cargar el perfil');
         }
     }
 );
@@ -32,19 +30,12 @@ export const updateUserProfile = createAsyncThunk(
         const { token } = getState().auth;
         
         try {
-            const response = await fetch('http://localhost:4002/users/profile', {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(userData)
+            const response = await axios.put(`${BASE_URL}/profile`, userData, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            if (!response.ok) throw new Error('No se pudo actualizar el perfil');
-            return await response.json(); // Devuelve el usuario actualizado
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'No se pudo actualizar el perfil');
         }
     }
 );
@@ -56,33 +47,29 @@ export const fetchUserOrders = createAsyncThunk(
         const { token } = getState().auth;
 
         try {
-            const response = await fetch('http://localhost:4002/users/orders', {
+            const response = await axios.get(`${BASE_URL}/orders`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
-            if (!response.ok) throw new Error('Error al cargar órdenes');
-            const data = await response.json();
-            return data;
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'Error al cargar órdenes');
         }
     }
 );
 
-// 4. Obtener TODOS los usuarios (Solo Admin) - Para AdminOrdersPage
+// 4. Obtener TODOS los usuarios (Solo Admin)
 export const fetchAllUsers = createAsyncThunk(
     'user/fetchAll',
     async (_, { getState, rejectWithValue }) => {
         const { token } = getState().auth;
         try {
-            const response = await fetch('http://localhost:4002/users', {
+            const response = await axios.get(BASE_URL, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!response.ok) throw new Error('Error al cargar usuarios');
-            const data = await response.json();
+            const data = response.data;
             return data.content || data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.response?.data?.message || 'Error al cargar usuarios');
         }
     }
 );
@@ -91,12 +78,12 @@ export const fetchAllUsers = createAsyncThunk(
 const userSlice = createSlice({
     name: 'user',
     initialState: {
-        profile: null,      // Datos del usuario logueado (Nombre, Apellido, Email)
-        orders: [],         // Historial de compras del usuario
-        list: [],           // Lista de todos los usuarios (Para uso Admin)
+        profile: null,      
+        orders: [],         
+        list: [],           
         loading: false,
         error: null,
-        operationStatus: null // 'success' | 'error' | null (Para feedbacks de update)
+        operationStatus: null 
     },
     reducers: {
         resetOperationStatus: (state) => {
@@ -136,7 +123,7 @@ const userSlice = createSlice({
             .addCase(updateUserProfile.fulfilled, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'success';
-                state.profile = action.payload; // Actualizamos el perfil local con la respuesta
+                state.profile = action.payload; 
             })
             .addCase(updateUserProfile.rejected, (state, action) => {
                 state.loading = false;
@@ -162,13 +149,21 @@ const userSlice = createSlice({
              .addCase(fetchAllUsers.fulfilled, (state, action) => {
                  state.loading = false;
                  state.list = action.payload;
+             })
+             
+             // --- LOGOUT (Limpieza de estado) ---
+             .addCase(logout, (state) => {
+                 state.profile = null;
+                 state.orders = [];
+                 state.list = [];
+                 state.error = null;
+                 state.operationStatus = null;
              });
     }
 });
 
 export const { resetOperationStatus, clearUserState, addOrderLocally } = userSlice.actions;
 
-// Selectores exportados para facilitar el uso en componentes
 export const selectUserProfile = (state) => state.user.profile;
 export const selectUserOrders = (state) => state.user.orders;
 export const selectAllUsers = (state) => state.user.list;
