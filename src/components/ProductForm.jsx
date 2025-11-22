@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchCategories } from '../redux/slices/categorySlice';
 
 
 const ProductForm = ({ product, onSave, onHide }) => {
@@ -7,15 +9,17 @@ const ProductForm = ({ product, onSave, onHide }) => {
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
-    const [categories, setCategories] = useState([]);
 
+    const dispatch = useDispatch();
+    
+    const categories = useSelector(state => state.categories.list);
 
     // Carga las categorías para el dropdown y así poder seleccionar una al crear/editar producto
     useEffect(() => {
-        fetch('http://localhost:4002/categories')
-            .then(res => res.json())
-            .then(data => setCategories(data.content || []));
-    }, []);
+        if (categories.length === 0) {
+            dispatch(fetchCategories());
+        }
+    }, [dispatch, categories.length]);
 
     // Si estamos editando, el formulario se llena automáticametne con los datos del producto, luego estos podrán ser modificados
     useEffect(() => {

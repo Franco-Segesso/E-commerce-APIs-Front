@@ -1,27 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchCategories } from '../redux/slices/categorySlice';
 import './FilterSidebar.css';
 
 const FilterSidebar = ({ onFilterChange }) => {
-    const [categories, setCategories] = useState([]);
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const [error, setError] = useState('');
     const [activeCategory, setActiveCategory] = useState(null); // Para resaltar la categoría activa
 
+    const dispatch = useDispatch();
+
+    const categories = useSelector(state => state.categories.list);
+
     useEffect(() => {
-        const fetchCategories = async () => { // Carga categorías desde la API
-            try {
-                const response = await fetch('http://localhost:4002/categories');
-                if (response.ok) {
-                    const data = await response.json();
-                    setCategories(data.content || []);
-                }
-            } catch (error) {
-                console.error("Error al cargar categorías:", error);
-            }
-        };
-        fetchCategories();
-    }, []);
+        if (categories.length === 0) {
+            dispatch(fetchCategories());
+        }
+    }, [dispatch, categories.length]);
 
     const handleApplyPriceFilter = () => { // Valida y aplica el filtro de precio
         if (minPrice && maxPrice) {
