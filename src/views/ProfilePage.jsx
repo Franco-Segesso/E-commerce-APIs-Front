@@ -36,7 +36,7 @@ const ProfilePage = () => {
     if (!profile) dispatch(fetchUserProfile());
     // Si no hay órdenes cargadas, las pedimos
     if (!orders || orders.length === 0) dispatch(fetchUserOrders());
-  }, [dispatch, profile, orders]);
+  }, [dispatch, profile]);
 
   // Rellenar formulario al tener datos
   useEffect(() => {

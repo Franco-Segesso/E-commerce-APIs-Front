@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 // 1. Imports de Redux
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,7 +9,7 @@ import { fetchHotSale, fetchNewArrivals } from '../redux/slices/ProductSlice';
 
 // Componentes
 import ProductCard from "../components/ProductCard.jsx";
-import HomeCarousel from "../components/HomeCarousel";
+import HomeCarousel from "../components/HomeCarousel.jsx";
 import lunchyLogo from "../assets/lunchy-logo.png";
 
 const HomePage = () => {
@@ -21,13 +22,13 @@ const HomePage = () => {
     loadingHome 
   } = useSelector((state) => state.products);
 
-  // Estado local solo para el formulario de newsletter (no merece estar en Redux)
+  // Estado local para el input de email
   const [email, setEmail] = useState("");
+  // NUEVO: Estado para saber si se está enviando el mail
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 3. Disparamos las acciones al montar
   useEffect(() => {
-    // Solo pedimos datos si la lista está vacía.
-    // Si ya entraste al Home antes, esto se salta y la carga es instantánea.
     if (hotSaleList.length === 0) {
         dispatch(fetchHotSale());
     }
@@ -41,24 +42,25 @@ const HomePage = () => {
     e.preventDefault();
     if (!email) return toast.warning("Ingresa un email válido");
 
+    // Activamos el estado de carga
+    setIsSubmitting(true);
+
     try {
-      const res = await fetch("http://localhost:4002/api/mail/sendMessage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      await axios.post("http://localhost:4002/api/mail/sendMessage", {
             toUser: [email],
             subject: "¡Bienvenido a Lunchy!",
-            message: "Gracias por suscribirte."
-        }),
+            
+            message: "¡Hola! Te damos la bienvenida a Lunchy 🌱. Pronto recibirás nuestras mejores ofertas y descuentos exclusivos.\n\n\n\nLunchy Corp — Departamento de Atención al Cliente\nlunchycorp@gmail.com \n+54 11 1234-5678 \nAv. Callao 1240, CABA \nInstagram: @lunchycorp \n— \nGracias por confiar en nosotros."
       });
-      if (res.ok) {
-          toast.success("¡Suscripción exitosa! Revisa tu correo.");
-          setEmail("");
-      } else {
-          throw new Error();
-      }
-    } catch {
+      
+      toast.success("¡Suscripción exitosa! Revisa tu correo.");
+      setEmail("");
+      
+    } catch (error) {
       toast.error("Error al suscribirse. Intenta luego.");
+    } finally {
+      // Desactivamos el estado de carga, pase lo que pase
+      setIsSubmitting(false);
     }
   };
 
@@ -84,7 +86,7 @@ const HomePage = () => {
         <div className="wave-body">
             <div className="container-fluid px-4">
             <div className="position-relative mb-4 text-center">
-                <h2 className="h3 fw-bold text-dark">🔥 Aprovechá Nuestras Ofertas</h2>
+                <h2 className="h3 fw-bold text-dark"> Aprovechá Nuestras Ofertas</h2>
                 <div className="position-absolute end-0 top-50 translate-middle-y me-3 d-none d-md-block">
                     <Link to="/products" className="btn btn-verde btn-sm">Ver Todo</Link>
                 </div>
@@ -132,7 +134,7 @@ const HomePage = () => {
       <section className="py-5">
         <div className="container-fluid px-4">
           <div className="d-flex align-items-end justify-content-between mb-4">
-            <h2 className="h3 fw-bold m-0">🆕 Nuevos Ingresos</h2>
+            <h2 className="h3 fw-bold m-0"> Nuevos Ingresos</h2>
             <Link to="/products" className="link-success text-decoration-none fw-bold">Ver todo →</Link>
           </div>
 
@@ -170,8 +172,22 @@ const HomePage = () => {
                             placeholder="tu@email.com" 
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            disabled={isSubmitting} // Deshabilitamos el input también
                         />
-                        <button type="submit" className="btn btn-success btn-lg">Suscribirse</button>
+                        <button 
+                            type="submit" 
+                            className="btn btn-success btn-lg"
+                            disabled={isSubmitting} // Deshabilitamos el botón
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Enviando...
+                                </>
+                            ) : (
+                                'Suscribirse'
+                            )}
+                        </button>
                     </form>
                 </div>
             </div>
