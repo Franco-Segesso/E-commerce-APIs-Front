@@ -96,7 +96,7 @@ const AdminProductsPage = () => {
                     toast.success("Producto eliminado correctamente.");
                     //dispatch(fetchProducts()); // Recargamos para que desaparezca de la lista de activos
                 })
-                .catch((err) => toast.error(err || "No se pudo eliminar."));
+                .catch((err) => toast.error("No se pudo eliminar."));
 
         } else if (type === 'reactivate') {
             // REACTIVAR

@@ -13,54 +13,39 @@ export const fetchUserOrders = createAsyncThunk(
         
         if (!token) return rejectWithValue("No hay token de autenticación");
 
-        try {
-            const response = await axios.get(`${BASE_URL}/users/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+        const response = await axios.get(`${BASE_URL}/users/orders`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-            const data = response.data;
-            return Array.isArray(data) ? data : (data.content || []); 
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
+        const data = response.data;
+        return Array.isArray(data) ? data : (data.content || []); 
     }
 );
 
 // 2. Fetch de TODAS las órdenes (Para AdminOrdersPage)
 export const fetchAllOrders = createAsyncThunk(
     'orders/fetchAll',
-    async (_, { getState, rejectWithValue }) => {
+    async (_, { getState }) => {
         const token = getState().auth.token;
+        const response = await axios.get(`${BASE_URL}/orders`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-        try {
-            const response = await axios.get(`${BASE_URL}/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            const data = response.data;
-            return Array.isArray(data) ? data : (data.content || []);
-        } catch (error) {
-            if (error.response?.status === 403) return rejectWithValue("Acceso denegado.");
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
+        const data = response.data;
+        return Array.isArray(data) ? data : (data.content || []);
     }
 );
 
 // 3. Crear una nueva orden (Para CheckoutPage)
 export const createOrder = createAsyncThunk(
     'orders/create',
-    async (orderData, { getState, rejectWithValue }) => {
+    async (orderData, { getState }) => {
         const token = getState().auth.token;
 
-        try {
-            const response = await axios.post(`${BASE_URL}/orders`, orderData, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            if (error.response?.status === 403) return rejectWithValue("No tienes permisos para realizar compras.");
-            return rejectWithValue(error.response?.data?.message || "No se pudo procesar la orden.");
-        }
+        const response = await axios.post(`${BASE_URL}/orders`, orderData, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data;
     }
 );
 
@@ -95,7 +80,7 @@ const ordersSlice = createSlice({
             })
             .addCase(fetchUserOrders.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // --- Fetch All Orders (Admin) ---
@@ -108,7 +93,7 @@ const ordersSlice = createSlice({
             })
             .addCase(fetchAllOrders.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // --- Create Order ---
@@ -122,7 +107,7 @@ const ordersSlice = createSlice({
             })
             .addCase(createOrder.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
             });
     }
 });

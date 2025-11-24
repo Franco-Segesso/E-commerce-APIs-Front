@@ -7,32 +7,28 @@ const BASE_URL = 'http://localhost:4002';
 
 export const fetchProducts = createAsyncThunk(
     'products/fetchAll',
-    async (filters = {}, { rejectWithValue }) => {
-        try {
-            const { category, price_min, price_max, sort } = filters;
-            let url;
+    async (filters = {}) => {
+        const { category, price_min, price_max, sort } = filters;
+        let url;
 
-            if (category) {
-                url = new URL(`${BASE_URL}/categories/${category}/products`);
-            } else if (price_min && price_max) {
-                url = new URL(`${BASE_URL}/products/by-price`);
-                url.searchParams.append('minPrice', price_min);
-                url.searchParams.append('maxPrice', price_max);
-            } else if (sort) {
-                url = new URL(`${BASE_URL}/products/sorted-by-price`);
-                url.searchParams.append('order', sort);
-            } else {
-                url = new URL(`${BASE_URL}/products/all`); 
-            }
-
-            // Axios hace el get a la URL string construida
-            const response = await axios.get(url.toString());
-            const data = response.data;
-            return data.content || data; 
-
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
+        if (category) {
+            url = new URL(`${BASE_URL}/categories/${category}/products`);
+        } else if (price_min && price_max) {
+            url = new URL(`${BASE_URL}/products/by-price`);
+            url.searchParams.append('minPrice', price_min);
+            url.searchParams.append('maxPrice', price_max);
+        } else if (sort) {
+            url = new URL(`${BASE_URL}/products/sorted-by-price`);
+            url.searchParams.append('order', sort);
+        } else {
+            url = new URL(`${BASE_URL}/products/all`); 
         }
+
+        // Axios hace el get a la URL string construida
+        const response = await axios.get(url.toString());
+        const data = response.data;
+        return data.content || data; 
+
     }
 );
 
@@ -40,15 +36,11 @@ export const fetchProducts = createAsyncThunk(
 // Hot Sale (Exclusivo para Home)
 export const fetchHotSale = createAsyncThunk(
     'products/fetchHotSale',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`${BASE_URL}/products/discounted`);
-            const list = response.data.content || response.data;
-            // Retornamos solo los primeros 4 para el Home
-            return list.slice(0, 4);
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
+    async () => {
+        const response = await axios.get(`${BASE_URL}/products/discounted`);
+        const list = response.data.content || response.data;
+        // Retornamos solo los primeros 4 para el Home
+        return list.slice(0, 4);
     }
 );
 
@@ -56,30 +48,22 @@ export const fetchHotSale = createAsyncThunk(
 // Nuevos Ingresos (Exclusivo para Home)
 export const fetchNewArrivals = createAsyncThunk(
     'products/fetchNewArrivals',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`${BASE_URL}/products`);
-            const list = response.data.content || response.data;
-            // Ordenamos por ID descendente (simulando "lo último agregado")
-            const sorted = [...list].sort((a, b) => b.id - a.id);
-            return sorted.slice(0, 4);
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
+    async () => {
+        const response = await axios.get(`${BASE_URL}/products`);
+        const list = response.data.content || response.data;
+        // Ordenamos por ID descendente (simulando "lo último agregado")
+        const sorted = [...list].sort((a, b) => b.id - a.id);
+        return sorted.slice(0, 4);
     }
 );
 
 export const fetchProductById = createAsyncThunk(
     'products/fetchOne',
-    async (id, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`${BASE_URL}/products/${id}`);
-            // Axios maneja el status 204 como éxito pero sin data, validamos si llegó algo
-            if (response.status === 204) throw new Error("Producto no encontrado.");
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
+    async (id) => {
+        const response = await axios.get(`${BASE_URL}/products/${id}`);
+        // Axios maneja el status 204 como éxito pero sin data, validamos si llegó algo
+        if (response.status === 204) throw new Error("Producto no encontrado.");
+        return response.data;
     }
 );
 
@@ -88,54 +72,39 @@ export const fetchProductById = createAsyncThunk(
 // 1. CREAR PRODUCTO (Recibe FormData)
 export const createProduct = createAsyncThunk(
     'products/create',
-    async (formData, { getState, rejectWithValue }) => {
+    async (formData, { getState }) => {
         const { token } = getState().auth;
-        try {
-            // Axios detecta FormData y configura el Content-Type automáticamente
-            const response = await axios.post(`${BASE_URL}/products`, formData, {
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            return response.data; 
-
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al crear producto');
-        }
+        // Axios detecta FormData y configura el Content-Type automáticamente
+        const response = await axios.post(`${BASE_URL}/products`, formData, {
+            headers: { 
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data; 
     }
 );
 
 // 2. ACTUALIZAR / REACTIVAR (Recibe { id, formData })
 export const updateProduct = createAsyncThunk(
     'products/update',
-    async ({ id, formData }, { getState, rejectWithValue }) => {
+    async ({ id, formData }, { getState }) => {
         const { token } = getState().auth;
-        try {
-            const response = await axios.put(`${BASE_URL}/products/${id}`, formData, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data; 
-
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al actualizar producto');
-        }
+        const response = await axios.put(`${BASE_URL}/products/${id}`, formData, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data; 
     }
 );
 
 // 3. ELIMINAR PRODUCTO
 export const deleteProduct = createAsyncThunk(
     'products/delete',
-    async (id, { getState, rejectWithValue }) => {
+    async (id, { getState }) => {
         const { token } = getState().auth;
-        try {
-            await axios.delete(`${BASE_URL}/products/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return id;
-
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'No se pudo eliminar el producto');
-        }
+        await axios.delete(`${BASE_URL}/products/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return id;
     }
 );
 
@@ -206,7 +175,7 @@ const productSlice = createSlice({
             })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // Fetch Hot Sale
@@ -261,7 +230,7 @@ const productSlice = createSlice({
             .addCase(createProduct.rejected, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'error';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // Update / Reactivate
@@ -298,7 +267,7 @@ const productSlice = createSlice({
             .addCase(updateProduct.rejected, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'error';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // Delete

@@ -8,79 +8,58 @@ const BASE_URL = 'http://localhost:4002/categories';
 // 1. Fetch Categories (Público - No necesita token)
 export const fetchCategories = createAsyncThunk(
     'categories/fetchAll',
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`${BASE_URL}/all`);
-            const data = response.data;
-            return data.content || data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message);
-        }
+    async () => {
+        const response = await axios.get(`${BASE_URL}/all`);
+        return response.data.content;
     }
 );
 
 // 2. Crear Categoría (Admin - CON TOKEN desde getState)
 export const createCategory = createAsyncThunk(
     'categories/create',
-    async (categoryData, { getState, rejectWithValue }) => {
+    async (categoryData, { getState }) => {
         const { token } = getState().auth; 
-        try {
-            const response = await axios.post(BASE_URL, categoryData, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al crear categoría');
-        }
+        const response = await axios.post(BASE_URL, categoryData, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data;
     }
 );
 
 
 export const updateCategory = createAsyncThunk(
     'categories/update',
-    async ({ id, description }, { getState, rejectWithValue }) => {
+    async ({ id, description }, { getState }) => {
         const { token } = getState().auth;
-        try {
-            const response = await axios.put(`${BASE_URL}/${id}`, { description }, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al actualizar categoría');
-        }
+        const response = await axios.put(`${BASE_URL}/${id}`, { description }, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data;
     }
 );
 
 // 3. Eliminar Categoría (Admin - CON TOKEN)
 export const deleteCategory = createAsyncThunk(
     'categories/delete',
-    async (id, { getState, rejectWithValue }) => {
+    async (id, { getState }) => {
         const { token } = getState().auth;
-        try {
-            await axios.delete(`${BASE_URL}/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return id;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al eliminar');
-        }
+        await axios.delete(`${BASE_URL}/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return id;
     }
 );
 
 // 4. Reactivar Categoría (Admin - CON TOKEN)
 export const reactivateCategory = createAsyncThunk(
     'categories/reactivate',
-    async (category, { getState, rejectWithValue }) => {
+    async (category, { getState }) => {
         const { token } = getState().auth;
-        try {
-            await axios.put(`${BASE_URL}/${category.id}`, 
-                { description: category.description }, 
-                { headers: { 'Authorization': `Bearer ${token}` } }
-            );
-            return category.id;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al reactivar');
-        }
+        await axios.put(`${BASE_URL}/${category.id}`, 
+            { description: category.description }, 
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        return category.id;
     }
 );
 
@@ -102,7 +81,7 @@ const categorySlice = createSlice({
             })
             .addCase(fetchCategories.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.error.message;
             })
             .addCase(updateCategory.fulfilled, (state, action) => {
                 const index = state.list.findIndex(c => c.id === action.payload.id);

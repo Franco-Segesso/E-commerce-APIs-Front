@@ -10,29 +10,18 @@ const USERS_URL = 'http://localhost:4002/users';
 // Login
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
-    async ({ email, password }, { rejectWithValue }) => {
-        try {
-            const response = await axios.post(`${BASE_URL}/authenticate`, { email, password });
-            return response.data.access_token; 
-        } catch (error) {
-            // Axios lanza error en 4xx/5xx. Capturamos el mensaje del backend si existe.
-            const message = error.response?.data?.message || 'Credenciales inválidas o error de conexión';
-            return rejectWithValue(message);
-        }
+    async ({ email, password }) => {
+        const response = await axios.post(`${BASE_URL}/authenticate`, { email, password });
+        return response.data.access_token;
     }
 );
 
 // Register
 export const registerUser = createAsyncThunk(
     'auth/registerUser',
-    async (userData, { rejectWithValue }) => {
-        try {
-            const response = await axios.post(`${BASE_URL}/register`, userData);
-            return response.data.access_token;
-        } catch (error) {
-            const message = error.response?.data?.message || 'Error al registrar usuario';
-            return rejectWithValue(message);
-        }
+    async (userData) => {
+        const response = await axios.post(`${BASE_URL}/register`, userData);
+        return response.data.access_token;
     }
 );
 
@@ -43,27 +32,21 @@ export const checkAuth = createAsyncThunk(
         const token = localStorage.getItem('token');
         if (!token) return rejectWithValue('No token');
 
-        try {
-            // Consultamos perfil para validar que el token no expiró en el servidor
-            const response = await axios.get(`${USERS_URL}/profile`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+        // Consultamos perfil para validar que el token no expiró en el servidor
+        const response = await axios.get(`${USERS_URL}/profile`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-            const userData = response.data;
-            const decoded = jwtDecode(token);
+        const userData = response.data;
+        const decoded = jwtDecode(token);
             
-            // Retornamos token y usuario fresco
-            return { 
-                token, 
-                user: { 
-                    email: userData.email, 
-                    roles: decoded.authorities || [] 
-                } 
-            };
-        } catch (error) {
-            localStorage.removeItem('token');
-            const message = error.response?.data?.message || error.message;
-            return rejectWithValue(message);
+        // Retornamos token y usuario fresco
+        return { 
+            token, 
+            user: { 
+                email: userData.email, 
+                roles: decoded.authorities || [] 
+            } 
         }
     }
 );
@@ -118,7 +101,7 @@ const authSlice = createSlice({
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
             
             // Register
@@ -135,7 +118,7 @@ const authSlice = createSlice({
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // Check Auth
@@ -148,6 +131,7 @@ const authSlice = createSlice({
                 state.user = action.payload.user;
             })
             .addCase(checkAuth.rejected, (state) => {
+                localStorage.removeItem('token');
                 state.status = 'failed';
                 state.user = null;
                 state.token = null;

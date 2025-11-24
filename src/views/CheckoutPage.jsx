@@ -99,7 +99,7 @@ const CheckoutPage = () => {
                 navigate('/');
             })
             .catch((err) => {
-                toast.error(err || "No se pudo procesar la orden.");
+                toast.error("No se pudo procesar la orden.");
             });
     };
     const isLoading = loadingUser || loadingOrder;

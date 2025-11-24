@@ -9,68 +9,49 @@ const BASE_URL = 'http://localhost:4002/users';
 // 1. Obtener Perfil (GET)
 export const fetchUserProfile = createAsyncThunk(
     'user/fetchProfile',
-    async (_, { getState, rejectWithValue }) => {
+    async (_, { getState }) => {
         const { token } = getState().auth;
-        
-        try {
-            const response = await axios.get(`${BASE_URL}/profile`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'No se pudo cargar el perfil');
-        }
+        const response = await axios.get(`${BASE_URL}/profile`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data;
     }
 );
 
 // 2. Actualizar Perfil (PUT)
 export const updateUserProfile = createAsyncThunk(
     'user/updateProfile',
-    async (userData, { getState, rejectWithValue }) => {
+    async (userData, { getState }) => {
         const { token } = getState().auth;
-        
-        try {
-            const response = await axios.put(`${BASE_URL}/profile`, userData, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'No se pudo actualizar el perfil');
-        }
+        const response = await axios.put(`${BASE_URL}/profile`, userData, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data;
     }
 );
 
 // 3. Obtener Órdenes del Usuario (GET)
 export const fetchUserOrders = createAsyncThunk(
     'user/fetchOrders',
-    async (_, { getState, rejectWithValue }) => {
+    async (_, { getState }) => {
         const { token } = getState().auth;
-
-        try {
-            const response = await axios.get(`${BASE_URL}/orders`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al cargar órdenes');
-        }
+        const response = await axios.get(`${BASE_URL}/orders`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.data;
     }
 );
 
 // 4. Obtener TODOS los usuarios (Solo Admin)
 export const fetchAllUsers = createAsyncThunk(
     'user/fetchAll',
-    async (_, { getState, rejectWithValue }) => {
+    async (_, { getState }) => {
         const { token } = getState().auth;
-        try {
-            const response = await axios.get(BASE_URL, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = response.data;
-            return data.content || data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Error al cargar usuarios');
-        }
+        const response = await axios.get(BASE_URL, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = response.data;
+        return data.content || data;
     }
 );
 
@@ -112,7 +93,7 @@ const userSlice = createSlice({
             })
             .addCase(fetchUserProfile.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // --- Update Profile ---
@@ -128,7 +109,7 @@ const userSlice = createSlice({
             .addCase(updateUserProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'error';
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
             // --- Fetch Orders ---
@@ -141,7 +122,7 @@ const userSlice = createSlice({
             })
             .addCase(fetchUserOrders.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.error.message;
             })
 
              // --- Fetch All Users (Admin) ---

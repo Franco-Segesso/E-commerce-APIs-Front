@@ -49,7 +49,7 @@ const AdminCategoriesPage = () => {
                     // No hace falta recargar si el reducer actualiza la lista, 
                     // pero por seguridad podemos llamar a fetchCategories()
                 })
-                .catch((err) => toast.error(err || "Error al actualizar."));
+                .catch((err) => toast.error("Error al actualizar."));
         } else {
             // CREAR
             dispatch(createCategory({ description: newCategoryName }))
@@ -59,7 +59,7 @@ const AdminCategoriesPage = () => {
                     setNewCategoryName('');
                     dispatch(fetchCategories()); // Recargar lista para ver la nueva
                 })
-                .catch((err) => toast.error(err || "Error al crear."));
+                .catch((err) => toast.error("Error al crear."));
         }
     };
 
