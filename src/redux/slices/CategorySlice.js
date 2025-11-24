@@ -68,6 +68,7 @@ const categorySlice = createSlice({
     name: 'categories',
     initialState: {
         list: [],
+        activeList: [],
         loading: false,
         error: null
     },
@@ -78,6 +79,7 @@ const categorySlice = createSlice({
             .addCase(fetchCategories.fulfilled, (state, action) => {
                 state.loading = false;
                 state.list = action.payload;
+                state.activeList = action.payload.filter(cat => cat.active);
             })
             .addCase(fetchCategories.rejected, (state, action) => {
                 state.loading = false;
@@ -91,7 +93,11 @@ const categorySlice = createSlice({
             })
             .addCase(deleteCategory.fulfilled, (state, action) => {
                 const cat = state.list.find(c => c.id === action.payload);
-                if (cat) cat.active = false;
+                if (cat){
+                    cat.active = false;
+                    state.activeList = state.activeList.filter(c => c.id !== action.payload);
+                } 
+                
             });
     }
 });

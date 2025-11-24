@@ -11,7 +11,7 @@ const FilterSidebar = ({ onFilterChange }) => {
 
     const dispatch = useDispatch();
 
-    const categories = useSelector(state => state.categories.list);
+    const categories = useSelector(state => state.categories.activeList);
 
     useEffect(() => {
         if (categories.length === 0) {
