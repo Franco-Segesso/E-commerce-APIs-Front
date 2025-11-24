@@ -227,11 +227,13 @@ const productSlice = createSlice({
                     if (state.hotSaleList.length > 4) state.hotSaleList.pop();
                 }
             })
+            
             .addCase(createProduct.rejected, (state, action) => {
                 state.loading = false;
                 state.operationStatus = 'error';
-                state.error = action.error.message;
+                state.error = action.payload ;
             })
+                
 
             // Update / Reactivate
             .addCase(updateProduct.pending, (state) => {

@@ -28,15 +28,19 @@ const HomePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 3. Disparamos las acciones al montar
-  useEffect(() => {
-    if (hotSaleList.length === 0) {
-        dispatch(fetchHotSale());
-    }
-    
-    if (newArrivalsList.length === 0) {
-        dispatch(fetchNewArrivals());
-    }
-  }, [dispatch, hotSaleList.length, newArrivalsList.length]);
+// Efecto para Hot Sale
+useEffect(() => {
+  if (hotSaleList.length === 0) {
+      dispatch(fetchHotSale());
+  }
+}, [dispatch, hotSaleList.length]); // Solo vigila hotSaleList
+
+// Efecto para Nuevos Ingresos
+useEffect(() => {
+  if (newArrivalsList.length === 0) {
+      dispatch(fetchNewArrivals());
+  }
+}, [dispatch, newArrivalsList.length]); // Solo vigila newArrivalsList
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();

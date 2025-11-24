@@ -66,7 +66,7 @@ const AdminProductsPage = () => {
                     setShowFormModal(false);
                     dispatch(fetchProducts()); // Recargamos la lista
                 })
-                .catch((err) => toast.error(err || "Error al crear."));
+                .catch((err) => toast.error("Error al crear."));
         }
     };
     
@@ -122,7 +122,7 @@ const AdminProductsPage = () => {
                     toast.success("Producto reactivado.");
                     dispatch(fetchProducts()); // Recargamos para que aparezca en activos
                 })
-                .catch((err) => toast.error(err || "Error al reactivar."));
+                .catch((err) => toast.error("Error al reactivar."));
         }
         
         setPendingAction(null);

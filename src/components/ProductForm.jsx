@@ -12,7 +12,7 @@ const ProductForm = ({ product, onSave, onHide }) => {
 
     const dispatch = useDispatch();
     
-    const categories = useSelector(state => state.categories.list);
+    const categories = useSelector(state => state.categories.activeList);
 
     // Carga las categorías para el dropdown y así poder seleccionar una al crear/editar producto
     useEffect(() => {
