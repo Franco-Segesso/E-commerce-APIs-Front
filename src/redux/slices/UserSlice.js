@@ -4,7 +4,7 @@ import { logout } from './AuthSlice'; // <--- IMPORTANTE: Importamos la acción 
 
 const BASE_URL = 'http://localhost:4002/users';
 
-// --- THUNKS ---
+//THUNKS (Acciones Asíncronas)
 
 // 1. Obtener Perfil (GET)
 export const fetchUserProfile = createAsyncThunk(
@@ -67,6 +67,8 @@ const userSlice = createSlice({
         operationStatus: null,
         orderStatus: 'idle' // 'idle' | 'loading' | 'succeeded' | 'failed'
     },
+    
+    //REDUCERS (Acciones Sincrónicas)
     reducers: {
         resetOperationStatus: (state) => {
             state.operationStatus = null;

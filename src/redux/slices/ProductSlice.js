@@ -3,8 +3,9 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:4002';
 
-// --- THUNKS DE LECTURA (Públicos) ---
+//THUNKS (Acciones Asíncronas)
 
+// Fetch All Products (Con filtros opcionales)
 export const fetchProducts = createAsyncThunk(
     'products/fetchAll',
     async (filters = {}) => {
@@ -57,6 +58,7 @@ export const fetchNewArrivals = createAsyncThunk(
     }
 );
 
+//Fetch de un solo producto por ID (Para ProductDetailPage)
 export const fetchProductById = createAsyncThunk(
     'products/fetchOne',
     async (id) => {
@@ -67,7 +69,7 @@ export const fetchProductById = createAsyncThunk(
     }
 );
 
-// --- THUNKS DE ADMINISTRACIÓN (Requieren Token) ---
+//THUNKS DE ADMINISTRACIÓN DE PRODUCTOS
 
 // 1. CREAR PRODUCTO (Recibe FormData)
 export const createProduct = createAsyncThunk(
@@ -84,7 +86,7 @@ export const createProduct = createAsyncThunk(
     }
 );
 
-// 2. ACTUALIZAR / REACTIVAR (Recibe { id, formData })
+// 2. ACTUALIZAR / REACTIVAR PRODUCTO (Recibe ID y FormData)
 export const updateProduct = createAsyncThunk(
     'products/update',
     async ({ id, formData }, { getState }) => {
@@ -96,7 +98,7 @@ export const updateProduct = createAsyncThunk(
     }
 );
 
-// 3. ELIMINAR PRODUCTO
+// 3. ELIMINAR PRODUCTO (Soft Delete)
 export const deleteProduct = createAsyncThunk(
     'products/delete',
     async (id, { getState }) => {
@@ -123,14 +125,20 @@ const productSlice = createSlice({
         error: null,
         operationStatus: null, // Para saber si se creó/editó con éxito en los modales
     },
+    //REDUCERS (Acciones Sincrónicas)
     reducers: {
+        //Limpia el producto seleccionado (después de cerrar ProductDetailPage)
         clearSelectedProduct: (state) => {
             state.selectedProduct = null;
         },
+
+        //Resetea el estado de operación (creación/edición)
         resetOperationStatus: (state) => {
             state.operationStatus = null;
             state.error = null;
         },
+
+        //Disminuye el stock localmente después de una compra
         decreaseStockLocally: (state, action) => {
             const purchasedItems = action.payload; // Lista de items del carrito (con id y quantity)
 
@@ -234,7 +242,6 @@ const productSlice = createSlice({
                 state.error = action.payload ;
             })
                 
-
             // Update / Reactivate
             .addCase(updateProduct.pending, (state) => {
                 state.loading = true;

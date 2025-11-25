@@ -3,9 +3,9 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:4002';
 
-// --- THUNKS (Acciones Asíncronas) ---
+//THUNKS (Acciones Asíncronas)
 
-// 1. Fetch de órdenes del usuario logueado (Para ProfilePage)
+// Fetch de órdenes del usuario logueado (Para ProfilePage)
 export const fetchUserOrders = createAsyncThunk(
     'orders/fetchUserOrders',
     async (_, { getState, rejectWithValue }) => {
@@ -22,7 +22,7 @@ export const fetchUserOrders = createAsyncThunk(
     }
 );
 
-// 2. Fetch de TODAS las órdenes (Para AdminOrdersPage)
+// Fetch de TODAS las órdenes (Para AdminOrdersPage)
 export const fetchAllOrders = createAsyncThunk(
     'orders/fetchAll',
     async (_, { getState }) => {
@@ -36,7 +36,7 @@ export const fetchAllOrders = createAsyncThunk(
     }
 );
 
-// 3. Crear una nueva orden (Para CheckoutPage)
+// Crear una nueva orden (Para CheckoutPage)
 export const createOrder = createAsyncThunk(
     'orders/create',
     async (orderData, { getState }) => {
@@ -60,6 +60,7 @@ const ordersSlice = createSlice({
         status: 'idle',    
         error: null
     },
+    //REDUCERS (Acciones Sincrónicas)
     reducers: {
         resetOrderStatus: (state) => {
             state.status = 'idle';
