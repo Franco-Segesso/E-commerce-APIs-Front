@@ -90,6 +90,10 @@ const categorySlice = createSlice({
                 if (index !== -1) {
                     state.list[index] = action.payload;
                 }
+                const activeIndex = state.activeList.findIndex(c => c.id === action.payload.id);
+                if (activeIndex !== -1) {
+                    state.activeList[activeIndex] = action.payload;
+                }
             })
             .addCase(deleteCategory.fulfilled, (state, action) => {
                 const cat = state.list.find(c => c.id === action.payload);
