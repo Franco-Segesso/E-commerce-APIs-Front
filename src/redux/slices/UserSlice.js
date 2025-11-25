@@ -64,7 +64,8 @@ const userSlice = createSlice({
         list: [],           
         loading: false,
         error: null,
-        operationStatus: null 
+        operationStatus: null,
+        orderStatus: 'idle' // 'idle' | 'loading' | 'succeeded' | 'failed'
     },
     reducers: {
         resetOperationStatus: (state) => {
@@ -75,6 +76,7 @@ const userSlice = createSlice({
             state.profile = null;
             state.orders = [];
             state.list = [];
+            state.orderStatus = 'idle';
         },
         addOrderLocally: (state, action) => {
             state.orders.push(action.payload);
@@ -115,13 +117,16 @@ const userSlice = createSlice({
             // --- Fetch Orders ---
             .addCase(fetchUserOrders.pending, (state) => {
                 state.loading = true;
+                state.orderStatus = 'loading';
             })
             .addCase(fetchUserOrders.fulfilled, (state, action) => {
                 state.loading = false;
+                state.orderStatus = 'succeeded';
                 state.orders = action.payload;
             })
             .addCase(fetchUserOrders.rejected, (state, action) => {
                 state.loading = false;
+                state.orderStatus = 'failed';
                 state.error = action.error.message;
             })
 

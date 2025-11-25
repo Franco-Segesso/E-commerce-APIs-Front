@@ -27,7 +27,7 @@ const ProfilePage = () => {
   const orders = useSelector(selectUserOrders);
   const loading = useSelector(selectUserLoading);
   
-  const { operationStatus, error } = useSelector((state) => state.user);
+  const { operationStatus, error, orderStatus } = useSelector((state) => state.user);
 
   // Estado local
   const [isEditing, setIsEditing] = useState(false);
@@ -41,7 +41,9 @@ const ProfilePage = () => {
         dispatch(fetchUserProfile());
     }
     // Evitamos el loop del admin: solo carga órdenes si no se han cargado previamente (o al montar)
-    dispatch(fetchUserOrders());
+    if (orderStatus === 'idle') {
+      dispatch(fetchUserOrders());
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
