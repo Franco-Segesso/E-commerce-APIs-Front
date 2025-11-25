@@ -1,9 +1,13 @@
 
-
 .checkout-page-container {
   background-color: #f8f9fa; 
   padding: 3rem 0; 
   width: 100%;
+  /* AGREGÁ ESTO: */
+  min-height: 80vh; /* Ocupá al menos el 80% de la pantalla */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra verticalmente si hay poco contenido */
 }
 
 /* Contenedor principal*/
@@ -126,3 +130,31 @@
   color: white;
 }
 
+/* --- RESPONSIVE PARA MÓVILES --- */
+
+/* Cuando la pantalla sea menor a 768px (Tablets y Celulares) */
+@media (max-width: 768px) {
+  
+  /* 1. Cambiamos el Grid de 2 columnas a 1 sola columna */
+  .checkout-layout {
+    grid-template-columns: 1fr; /* Una sola columna que ocupa todo */
+    gap: 1.5rem;
+    padding: 0 1rem; /* Un poco de margen a los costados para que no se pegue al borde */
+  }
+
+  /* 2. Hacemos que el resumen deje de flotar (sticky) y se quede quieto */
+  .order-summary-section {
+    position: static; /* Ya no persigue al usuario al scrollear */
+    width: 100%;
+  }
+
+  /* 3. Ajustamos los botones de pago para que no se aplasten en celus muy chicos */
+  .payment-methods {
+    flex-direction: column; /* Botones uno abajo del otro */
+  }
+  
+  .payment-methods .btn {
+    width: 100%;
+    padding: 0.75rem; /* Un poco más "dedeables" */
+  }
+}
