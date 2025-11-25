@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:4002/categories';
 
-// --- THUNKS ---
+//THUNKS (Acciones Asincrónicas)
 
 // 1. Fetch Categories (Público - No necesita token)
 export const fetchCategories = createAsyncThunk(
@@ -26,7 +26,7 @@ export const createCategory = createAsyncThunk(
     }
 );
 
-
+// 3. Actualizar Categoría (Admin - CON TOKEN)
 export const updateCategory = createAsyncThunk(
     'categories/update',
     async ({ id, description }, { getState }) => {
@@ -38,7 +38,7 @@ export const updateCategory = createAsyncThunk(
     }
 );
 
-// 3. Eliminar Categoría (Admin - CON TOKEN)
+// 4. Eliminar Categoría (Admin - CON TOKEN)
 export const deleteCategory = createAsyncThunk(
     'categories/delete',
     async (id, { getState }) => {
@@ -50,7 +50,7 @@ export const deleteCategory = createAsyncThunk(
     }
 );
 
-// 4. Reactivar Categoría (Admin - CON TOKEN)
+// 5. Reactivar Categoría (Admin - CON TOKEN)
 export const reactivateCategory = createAsyncThunk(
     'categories/reactivate',
     async (category, { getState }) => {

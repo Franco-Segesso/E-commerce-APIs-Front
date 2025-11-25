@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-// 1. Importamos la acción de logout para "escucharla"
 import { logout } from './AuthSlice';
 import { toast } from 'react-toastify';
 
@@ -9,7 +8,10 @@ const cartSlice = createSlice({
   initialState: {
     items: [],
   },
+  //REDUCERS (Acciones Sincrónicas)
   reducers: {
+
+    //Acción de agregar producto al carrito
     addToCart: (state, action) => {
       const productToAdd = action.payload;
       const existingItem = state.items.find(item => item.id === productToAdd.id);
@@ -26,12 +28,14 @@ const cartSlice = createSlice({
       
     },
 
+    //Acción de remover producto del carrito
     removeFromCart: (state, action) => {
       const productId = action.payload;
       state.items = state.items.filter(item => item.id !== productId);
       
     },
 
+    //Acción de actualizar cantidad de un producto en el carrito
     updateQuantity: (state, action) => {
       const { id, amount } = action.payload;
       const item = state.items.find(i => i.id === id);
@@ -43,7 +47,6 @@ const cartSlice = createSlice({
           return ; // No permitimos cantidades menores a 1
         }
 
-
         if (newQuantity > item.stock) {
             toast.warning("No hay suficiente stock disponible.");
             return ;
@@ -54,12 +57,12 @@ const cartSlice = createSlice({
       
     },
 
+    //Acción de limpiar el carrito
     clearCart: (state) => {
       state.items = [];
       
     }
   },
-  // 2. AQUÍ LA MAGIA: Escuchamos acciones de otros slices
   extraReducers: (builder) => {
     builder.addCase(logout, (state) => {
       // Cuando ocurra un logout (venga de donde venga), vaciamos el carrito

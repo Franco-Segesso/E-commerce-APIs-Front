@@ -5,7 +5,7 @@ import axios from 'axios';
 const BASE_URL = 'http://localhost:4002/api/v1/auth';
 const USERS_URL = 'http://localhost:4002/users';
 
-// --- 1. THUNKS (Acciones Asíncronas) ---
+//THUNKS (Acciones Asíncronas)
 
 // Login
 export const loginUser = createAsyncThunk(
@@ -38,6 +38,7 @@ const authSlice = createSlice({
         status: 'idle', 
         error: null,
     },
+    //REDUCERS (Acciones Sincrónicas)
     reducers: {
         logout: (state) => {
             state.user = null;
@@ -45,6 +46,7 @@ const authSlice = createSlice({
             state.status = 'idle'; 
             
         },
+        // limpia el error de autenticación (login/register)
         clearError: (state) => {
             state.error = null;
         }
