@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-// Acciones de Cart y Product
+
 import { addToCart } from '../redux/slices/CartSlice';
 import { fetchProductById, clearSelectedProduct } from '../redux/slices/ProductSlice';
 import { toast } from 'react-toastify';

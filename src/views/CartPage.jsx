@@ -1,18 +1,18 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// 1. Imports de Redux
+
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, updateQuantity } from '../redux/slices/CartSlice';
 import { toast } from 'react-toastify'; // Si usas Toastify
 import './CartPage.css';
 
 const CartPage = () => {
-    // 2. Leer estado desde Redux
+    //Leer estado desde Redux
     const cartItems = useSelector((state) => state.cart.items);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // Cálculos locales (puedes dejarlos aquí por ahora)
+    // Cálculos locales
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const estimatedTaxes = subtotal * 0.05;
     const shipping = subtotal > 50000 ? 0.00 : 5000.00;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// 1. REDUX
+
 import { useSelector, useDispatch } from 'react-redux';
 import { clearCart } from '../redux/slices/CartSlice';
 import { createOrder } from '../redux/slices/OrdersSlice';
 import { fetchUserProfile, addOrderLocally } from '../redux/slices/UserSlice';
-// IMPORTACIÓN CLAVE
+
 import { decreaseStockLocally } from '../redux/slices/ProductSlice';
 
 
@@ -17,7 +17,6 @@ const CheckoutPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // 2. ESTADO GLOBAL
     // Carrito
     const cartItems = useSelector((state) => state.cart.items);
     // Usuario (Necesitamos el ID para la orden)
@@ -25,21 +24,20 @@ const CheckoutPage = () => {
     // Estado de la orden (para saber si se está enviando)
     const { loading: loadingOrder } = useSelector((state) => state.orders);
 
-    // 3. ESTADOS LOCALES (Formulario)
     const [shippingAddress, setShippingAddress] = useState('');
     const [paymentMethod, setPaymentMethod] = useState(''); 
 
-    // Datos de tarjeta (Solo UI local)
+    // Datos de tarjeta 
     const [cardNumber, setCardNumber] = useState('');
     const [cardExpiry, setCardExpiry] = useState('');
     const [cardCvv, setCvv] = useState('');
 
-    // 4. CÁLCULOS
+    // Calculo
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const estimatedTaxes = subtotal * 0.05;
     const shipping = subtotal > 50000 ? 0.00 : 5000.00;
     const totalPrice = (subtotal + estimatedTaxes + shipping).toFixed(2);
-    // 5. EFECTOS
+  
     // Cargar el perfil del usuario al entrar para tener su ID disponible
     useEffect(() => {
         dispatch(fetchUserProfile());
@@ -76,26 +74,24 @@ const CheckoutPage = () => {
     
         const orderData = {
             productsId: productsIdList,
-            userId: userProfile.id, // ID obtenido de Redux UserSlice
+            userId: userProfile.id, // ID obtenido del UserSlice
             shippingAddress: shippingAddress,
             paymentMethod: paymentMethod
         };
         
         // DESPACHAR LA ORDEN
         dispatch(createOrder(orderData))
-            .unwrap() // Nos permite manejar el éxito/error como promesa
+            .unwrap() 
             .then((createdOrder) => {
                 toast.success(`¡Orden creada con éxito! ID: ${createdOrder.id}`);
                 
-                // [SOLUCIÓN SIN FETCH] 
-                // 1. Actualizar stock localmente
+                //Actualizar stock localmente
                 dispatch(decreaseStockLocally(cartItems)); 
-                // 2. Agregar orden al estado del usuario localmente
+                //Agregar orden al estado del usuario localmente
                 dispatch(addOrderLocally(createdOrder));
-                // 3. Limpiar carrito
+                //Limpiar carrito
                 dispatch(clearCart()); 
-                
-                // 4. Redirigir al Home Page
+                //Redirigir al Home Page
                 navigate('/');
             })
             .catch((err) => {

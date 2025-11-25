@@ -42,7 +42,7 @@ function App() {
     return (
         <BrowserRouter>
 
-        {/* 2. AGREGA EL TOASTCONTAINER AQUÍ (puede ir antes o después de Routes) */}
+        {/* AGREGA EL TOASTCONTAINER(puede ir antes o después de Routes) */}
                     <ToastContainer 
                         position="bottom-right" 
                         autoClose={3000} 

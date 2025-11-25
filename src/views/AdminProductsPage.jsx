@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// 1. REDUX
+
 import { useSelector, useDispatch } from 'react-redux';
 import { 
     fetchProducts, 
@@ -16,27 +16,26 @@ import { Modal, Button } from 'react-bootstrap';
 const AdminProductsPage = () => {
     const dispatch = useDispatch();
 
-    // 2. ESTADO GLOBAL
     // Leemos productos y sus estados de carga desde productSlice
     const { list: products, loading: loadingProducts, error: errorProducts } = useSelector((state) => state.products);
-    // Leemos categorías desde categorySlice (para el dropdown y para mostrar el nombre en la tabla)
+    // Leemos categorías desde categorySlice
     const { list: categories } = useSelector((state) => state.categories);
 
-    // Estados locales (solo para la Interfaz de Usuario)
+    // Estados locales 
     const [showFormModal, setShowFormModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState(null); 
 
-    // 3. CARGA INICIAL DE DATOS
+
     useEffect(() => {
-        // Pedimos productos y categorías al montar el componente
+        // Pedimos productos y categorías para tener datos
         dispatch(fetchProducts());
         dispatch(fetchCategories());
     }, [dispatch]);
 
-    // Filtros visuales sobre la lista que ya tenemos en memoria
+    // Filtramos productos activos e inactivos
     const activeProducts = products.filter(p => p.active);
     const inactiveProducts = products.filter(p => !p.active);
     
@@ -45,7 +44,6 @@ const AdminProductsPage = () => {
 
     // --- MANEJO DEL FORMULARIO (CREAR / EDITAR) ---
     const handleSave = (formData, productId) => {
-        // Nota: Ya no pasamos 'token'. El Thunk lo saca del store (authSlice).
         
         if (productId) {
             // ACTUALIZAR
@@ -54,7 +52,7 @@ const AdminProductsPage = () => {
                 .then(() => {
                     toast.success("Producto actualizado con éxito.");
                     setShowFormModal(false);
-                    //dispatch(fetchProducts()); // Recargamos la lista para ver los cambios frescos
+                    
                 })
                 .catch((err) => toast.error(err || "Error al actualizar."));
         } else {
@@ -86,7 +84,7 @@ const AdminProductsPage = () => {
         if (!pendingAction) return;
 
         const { type, data } = pendingAction;
-        setShowConfirmModal(false); // Cerramos el modal inmediatamente
+        setShowConfirmModal(false); 
 
         if (type === 'delete') {
             // ELIMINAR
@@ -94,13 +92,11 @@ const AdminProductsPage = () => {
                 .unwrap()
                 .then(() => {
                     toast.success("Producto eliminado correctamente.");
-                    //dispatch(fetchProducts()); // Recargamos para que desaparezca de la lista de activos
                 })
                 .catch((err) => toast.error("No se pudo eliminar."));
 
         } else if (type === 'reactivate') {
-            // REACTIVAR
-            // Preparamos los datos para reactivar (active: true)
+            // Preparamos los datos para reactivar
             const productData = {
                 name: data.name,
                 description: data.description,
@@ -111,11 +107,10 @@ const AdminProductsPage = () => {
                 active: true
             };
             
-            // Como tu backend espera multipart, enviamos FormData
+            // Como el backend espera multipart, enviamos FormData
             const formData = new FormData();
             formData.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
             
-            // Reutilizamos el thunk de updateProduct
             dispatch(updateProduct({ id: data.id, formData }))
                 .unwrap()
                 .then(() => {
