@@ -22,7 +22,7 @@ import AdminOrdersPage from './views/AdminOrdersPage.jsx';
 import { ToastContainer } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { checkAuth } from './redux/slices/AuthSlice.js';
+
 
 
 const SiteLayout = () => ( // Define la estructura estándar de las páginas (Navbar + Footer)
@@ -38,9 +38,7 @@ const SiteLayout = () => ( // Define la estructura estándar de las páginas (Na
 function App() {
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        dispatch(checkAuth());
-    }, [dispatch]);
+    
     return (
         <BrowserRouter>
 

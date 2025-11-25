@@ -3,15 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 import { logout } from './AuthSlice';
 import { toast } from 'react-toastify';
 
-// Recuperar carrito del localStorage
-const itemsInStorage = localStorage.getItem('cartItems') 
-  ? JSON.parse(localStorage.getItem('cartItems')) 
-  : [];
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState: {
-    items: itemsInStorage,
+    items: [],
   },
   reducers: {
     addToCart: (state, action) => {
@@ -27,13 +23,13 @@ const cartSlice = createSlice({
       } else {
         state.items.push(productToAdd);
       }
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      
     },
 
     removeFromCart: (state, action) => {
       const productId = action.payload;
       state.items = state.items.filter(item => item.id !== productId);
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      
     },
 
     updateQuantity: (state, action) => {
@@ -55,12 +51,12 @@ const cartSlice = createSlice({
         // Si pasa las validaciones, actualizamos
         item.quantity = newQuantity;
       }
-      localStorage.setItem('cartItems', JSON.stringify(state.items));
+      
     },
 
     clearCart: (state) => {
       state.items = [];
-      localStorage.removeItem('cartItems');
+      
     }
   },
   // 2. AQUÍ LA MAGIA: Escuchamos acciones de otros slices
@@ -68,7 +64,7 @@ const cartSlice = createSlice({
     builder.addCase(logout, (state) => {
       // Cuando ocurra un logout (venga de donde venga), vaciamos el carrito
       state.items = [];
-      localStorage.removeItem('cartItems');
+      
     });
   }
 });

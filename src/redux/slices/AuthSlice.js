@@ -25,53 +25,17 @@ export const registerUser = createAsyncThunk(
     }
 );
 
-// Check Auth (Verificar Sesión)
-export const checkAuth = createAsyncThunk(
-    'auth/checkAuth',
-    async (_, { rejectWithValue }) => {
-        const token = localStorage.getItem('token');
-        if (!token) return rejectWithValue('No token');
 
-        // Consultamos perfil para validar que el token no expiró en el servidor
-        const response = await axios.get(`${USERS_URL}/profile`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
 
-        const userData = response.data;
-        const decoded = jwtDecode(token);
-            
-        // Retornamos token y usuario fresco
-        return { 
-            token, 
-            user: { 
-                email: userData.email, 
-                roles: decoded.authorities || [] 
-            } 
-        }
-    }
-);
-
-// --- 2. ESTADO INICIAL ---
-
-const tokenFromStorage = localStorage.getItem('token');
-let userFromStorage = null;
-if (tokenFromStorage) {
-    try {
-        const decoded = jwtDecode(tokenFromStorage);
-        userFromStorage = { email: decoded.sub, roles: decoded.authorities || [] };
-    } catch (e) {
-        localStorage.removeItem('token');
-    }
-}
 
 // --- 3. SLICE ---
 
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        user: userFromStorage,
-        token: tokenFromStorage,
-        status: tokenFromStorage ? 'loading' : 'idle', 
+        user: null,
+        token: null,
+        status: 'idle', 
         error: null,
     },
     reducers: {
@@ -79,7 +43,7 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
             state.status = 'idle'; 
-            localStorage.removeItem('token');
+            
         },
         clearError: (state) => {
             state.error = null;
@@ -97,7 +61,7 @@ const authSlice = createSlice({
                 state.token = action.payload;
                 const decoded = jwtDecode(action.payload);
                 state.user = { email: decoded.sub, roles: decoded.authorities || [] };
-                localStorage.setItem('token', action.payload);
+                
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.status = 'failed';
@@ -114,28 +78,14 @@ const authSlice = createSlice({
                 state.token = action.payload;
                 const decoded = jwtDecode(action.payload);
                 state.user = { email: decoded.sub, roles: decoded.authorities || [] };
-                localStorage.setItem('token', action.payload);
+                
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
 
-            // Check Auth
-            .addCase(checkAuth.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(checkAuth.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.token = action.payload.token;
-                state.user = action.payload.user;
-            })
-            .addCase(checkAuth.rejected, (state) => {
-                localStorage.removeItem('token');
-                state.status = 'failed';
-                state.user = null;
-                state.token = null;
-            });
+            ;
     },
 });
 
