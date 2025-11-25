@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-// 1. Redux
+
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, clearError } from '../redux/slices/AuthSlice'; // Ruta corregida
+import { loginUser, clearError } from '../redux/slices/AuthSlice';
 
 import Input from '../components/Input'; 
 import Button from '../components/Button'; 
@@ -18,15 +18,15 @@ const LoginPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // 2. Leemos el estado global
+    //Leemos el estado global
     const { loading, error, user } = useSelector((state) => state.auth);
 
-    // 3. Redirección si ya estás logueado
+    //Redirección si ya estás logueado
     useEffect(() => {
         if (user) {
             navigate('/');
         }
-        // Al salir de la pantalla, limpiamos el error rojo global
+        
         return () => {
             dispatch(clearError());
         }
@@ -36,8 +36,7 @@ const LoginPage = () => {
         e.preventDefault();
         setLocalError('');
         
-        // 4. Despachamos la acción
-        // El thunk se encarga del fetch al backend
+        // Despachamos la acción
         dispatch(loginUser({ email, password }));
     };
 

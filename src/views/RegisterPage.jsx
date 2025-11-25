@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// 1. Redux
+
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, clearError } from '../redux/slices/AuthSlice';
 
@@ -24,10 +24,10 @@ const RegisterPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     
-    // 2. Estado Global
+    // Estado Global
     const { loading, error, user } = useSelector((state) => state.auth);
 
-    // 3. Redirección
+    // Redirección
     useEffect(() => {
         if (user) {
             navigate('/');
@@ -37,7 +37,7 @@ const RegisterPage = () => {
         }
     }, [user, navigate, dispatch]);
 
-    // Lógica de UI para contraseña
+    // Lógica para contraseña
     const calculateStrength = (password) => {
         const hasMinLength = password.length >= 6;
         const hasUpperCase = /[A-Z]/.test(password);
@@ -72,7 +72,7 @@ const RegisterPage = () => {
                 role: 'ROLE_USER',
         };
 
-        // 4. Despachar Thunk
+        // Despachar Thunk
         dispatch(registerUser(registrationData));
     };
 

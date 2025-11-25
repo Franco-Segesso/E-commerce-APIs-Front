@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-// 1. Imports de Redux
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchHotSale, fetchNewArrivals } from '../redux/slices/ProductSlice';
 
@@ -15,7 +14,7 @@ import lunchyLogo from "../assets/lunchy-logo.png";
 const HomePage = () => {
   const dispatch = useDispatch();
 
-  // 2. Leemos los estados ESPECÍFICOS del Home
+  //Leemos los estados ESPECÍFICOS del Home
   const { 
     hotSaleList, 
     newArrivalsList, 
@@ -24,16 +23,15 @@ const HomePage = () => {
 
   // Estado local para el input de email
   const [email, setEmail] = useState("");
-  // NUEVO: Estado para saber si se está enviando el mail
+  // Para saber si se está enviando el mail
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 3. Disparamos las acciones al montar
-// Efecto para Hot Sale
+  //Disparamos las acciones al montar
 useEffect(() => {
   if (hotSaleList.length === 0) {
       dispatch(fetchHotSale());
   }
-}, [dispatch, hotSaleList.length]); // Solo vigila hotSaleList
+}, [dispatch, hotSaleList.length]); // Solo mira hotSaleList
 
 // Efecto para Nuevos Ingresos
 useEffect(() => {
@@ -63,7 +61,7 @@ useEffect(() => {
     } catch (error) {
       toast.error("Error al suscribirse. Intenta luego.");
     } finally {
-      // Desactivamos el estado de carga, pase lo que pase
+      // Desactivamos el estado de carga
       setIsSubmitting(false);
     }
   };

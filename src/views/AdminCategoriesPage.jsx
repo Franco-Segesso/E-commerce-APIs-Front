@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Modal, Button } from 'react-bootstrap';
 
-// 1. Importamos los Thunks
+//Importamos los Thunks
 import { 
     fetchCategories, 
     createCategory, 
@@ -15,17 +15,17 @@ import {
 const AdminCategoriesPage = () => {
     const dispatch = useDispatch();
 
-    // 2. Leemos el estado global
-    // Asumimos que tu slice tiene: list, loading, error
+    //Leemos el estado global
+    //Asumimos que tu slice tiene: list, loading, error
     const { list: categories, loading, error } = useSelector((state) => state.categories);
     
-    // Estados locales para UI (Formularios y Modales)
+    //Estados locales para UI (Formularios y Modales)
     const [newCategoryName, setNewCategoryName] = useState('');
     const [editingCategory, setEditingCategory] = useState(null); 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState(null);
 
-    // 3. Carga inicial
+    //Carga inicial
     useEffect(() => {
         dispatch(fetchCategories());
     }, [dispatch]);
@@ -46,8 +46,7 @@ const AdminCategoriesPage = () => {
                     toast.success("Categoría actualizada con éxito.");
                     setNewCategoryName('');
                     setEditingCategory(null);
-                    // No hace falta recargar si el reducer actualiza la lista, 
-                    // pero por seguridad podemos llamar a fetchCategories()
+  
                 })
                 .catch((err) => toast.error("Error al actualizar."));
         } else {
@@ -86,8 +85,7 @@ const AdminCategoriesPage = () => {
                 .unwrap()
                 .then(() => {
                     toast.success("Categoría eliminada con éxito.");
-                    // El slice debería actualizar el estado 'active' a false localmente
-                    // o podemos recargar: dispatch(fetchCategories());
+                    
                 })
                 .catch((err) => toast.error(err || "Error al eliminar la categoría."));
 

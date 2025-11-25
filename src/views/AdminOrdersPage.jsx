@@ -1,41 +1,33 @@
 import React, { useEffect } from 'react';
 import { Accordion } from 'react-bootstrap';
 
-// 1. REDUX
 import { useSelector, useDispatch } from 'react-redux';
 
-// Orders: Importamos solo el Thunk (accederemos al estado manualmente)
+//Importamos solo el Thunk
 import { fetchAllOrders } from '../redux/slices/OrdersSlice';
 
-// Users: Importamos Thunk y Selector (porque este sí está completo)
+//Importamos Thunk y Selector
 import { fetchAllUsers, selectAllUsers } from '../redux/slices/UserSlice';
 
 const AdminOrdersPage = () => {
     const dispatch = useDispatch();
-
-    // 2. LEER ESTADO GLOBAL
     
-    // A. Órdenes (Acceso manual porque no hay selectores en OrdersSlice)
     // En tu OrdersSlice la lista global se llama 'adminOrders'
     const { adminOrders, status, error } = useSelector((state) => state.orders);
 
-    // B. Usuarios (Usando el selector que sí existe en UserSlice)
+    //Usuarios (Usando el selector que sí existe en UserSlice)
     const users = useSelector(selectAllUsers);
 
-    // 3. CARGA DE DATOS
+    //Carga de datos
     useEffect(() => {
         dispatch(fetchAllOrders());
         dispatch(fetchAllUsers());
     }, [dispatch]);
-
-    // 4. LÓGICA DE UI
     
-    // Mapa para buscar email por ID rápidamente: O(1)
     // Si users es null/undefined, usamos array vacío para que no explote
     const userMap = new Map((users || []).map(u => [u.id, u.email]));
 
-    // Ordenamos por ID descendente (lo más nuevo arriba)
-    // Hacemos copia con [...] para no mutar el estado de Redux
+    // Ordenamos por ID descendente (más nuevo arriba)
     const sortedOrders = [...(adminOrders || [])].sort((a, b) => b.id - a.id);
 
     const isLoading = status === 'loading';

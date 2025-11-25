@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Redux
+
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProducts } from '../redux/slices/ProductSlice';
 
@@ -9,11 +9,11 @@ import SearchBar from '../components/SearchBar.jsx';
 import './ProductPage.css'; 
 
 const ProductsPage = () => {
-    // 1. Estado Global
+    //Estado Global
     const dispatch = useDispatch();
     const { list: products, loading, error } = useSelector((state) => state.products);
 
-    // 2. Estado Local para filtros (igual que antes)
+    //Estado Local para filtros
     const [backendFilters, setBackendFilters] = useState({
         category: null,
         price_min: null,
@@ -22,24 +22,18 @@ const ProductsPage = () => {
     });
     const [searchQuery, setSearchQuery] = useState('');
 
-    // 3. Efecto para cargar productos (MUCHO MÁS LIMPIO)
+    // Cargar productos
     useEffect(() => {
-        // Si la lista está vacía, pedimos los productos iniciales.
-        // Si ya tiene productos (porque viniste de otra página y ya se habían cargado), 
-        // NO hacemos dispatch y mostramos lo que hay en memoria.
+        // Si la lista está vacía, pedimos los productos, si ya tiene productos mostramos lo que hay en memoria.
         if (products.length === 0) {
             dispatch(fetchProducts(backendFilters));
         }
-        // IMPORTANTE: Quitamos 'backendFilters' de las dependencias aquí para que NO se ejecute 
-        // automáticamente al montar si ya hay datos.
-        // Solo queremos que reaccione a cambios de filtros manuales, no al montaje inicial si hay cache.
-        
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+       
     }, [dispatch, products.length]); 
 
     // Este efecto secundario maneja EXCLUSIVAMENTE los cambios de filtros POSTERIORES
-    // Usamos un ref o una técnica para saltar el primer render, 
-    // o simplemente confiamos en que el usuario disparará esto al tocar el sidebar.
+    
     const handleBackendFilterChange = (newFilters) => {
         setSearchQuery('');
         const updatedFilters = { ...backendFilters, ...newFilters };
@@ -49,12 +43,12 @@ const ProductsPage = () => {
         dispatch(fetchProducts(updatedFilters));
     };
 
-    // ... (Lógica de filtrado local por nombre sigue igual) ...
+    // Lógica de filtrado local por nombre
     const displayedProducts = products.filter(product => {
-        // 1. FILTRO DE SEGURIDAD: Solo mostrar activos
+        // Solo mostrar activos
         if (!product.active || !product.stock > 0) return false;
 
-        // 2. Filtro de búsqueda
+        // Filtro de búsqueda
         if (searchQuery) {
             return product.name.toLowerCase().includes(searchQuery.toLowerCase());
         }
@@ -126,7 +120,7 @@ const ProductsPage = () => {
                                 <select
                                     className="form-select"
                                     value={backendFilters.sort}
-                                    // El select de orden SÍ actualiza los filtros del backend
+                                    // El select de orden actualiza los filtros del backend
                                     onChange={(e) => handleBackendFilterChange({ sort: e.target.value })}
                                 >
                                     <option value="asc">Ordenar por Precio (Menor)</option>

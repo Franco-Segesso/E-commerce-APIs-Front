@@ -4,11 +4,11 @@ import { toast } from 'react-toastify';
 import OrderDetailModal from '../components/OrderDetailModal.jsx';
 import './ProfilePage.css';
 
-// Imágenes (Asegúrate de que existan en tu carpeta assets)
+// Imágenes 
 import profilePic from '../assets/profile-pic.png'; 
 import emptyCartIcon from '../assets/carrito.png'; 
 
-// 1. Importamos Thunks y Selectores del UserSlice
+// Importamos Thunks y Selectores del UserSlice
 import {
   fetchUserProfile,
   updateUserProfile,
@@ -22,7 +22,7 @@ import {
 const ProfilePage = () => {
   const dispatch = useDispatch();
 
-  // 2. Usamos los selectores
+  // Usamos los selectores
   const profile = useSelector(selectUserProfile);
   const orders = useSelector(selectUserOrders);
   const loading = useSelector(selectUserLoading);
@@ -35,16 +35,16 @@ const ProfilePage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // 3. Carga Inicial
+  // Carga Inicial
   useEffect(() => {
     if (!profile) {
         dispatch(fetchUserProfile());
     }
-    // Evitamos el loop del admin: solo carga órdenes si no se han cargado previamente (o al montar)
+    // Evitamos el loop del admin: solo carga órdenes si no se han cargado previamente o por primera vez
     if (orderStatus === 'idle') {
       dispatch(fetchUserOrders());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [dispatch]);
 
   // Rellenar formulario al tener datos
