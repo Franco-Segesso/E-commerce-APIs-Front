@@ -21,16 +21,20 @@ const LoginPage = () => {
     //Leemos el estado global
     const { loading, error, user } = useSelector((state) => state.auth);
 
-    //Redirección si ya estás logueado
+   // Solo se encarga de redirigir cuando el usuario cambia
     useEffect(() => {
         if (user) {
             navigate('/');
         }
-        
+    }, [user, navigate]); // Al no tener 'return', no dispara nada al cambiar
+
+    // Solo se encarga de limpiar al desmontar el componente
+    useEffect(() => {
+        // Esto se ejecuta SOLO cuando "muere" la pantalla (unmount)
         return () => {
             dispatch(clearError());
         }
-    }, [user, navigate, dispatch]);
+    }, [dispatch]); // Dependencias vacías (o solo dispatch) aseguran que el cleanup solo corra al final
 
     const handleSubmit = (e) => {
         e.preventDefault();

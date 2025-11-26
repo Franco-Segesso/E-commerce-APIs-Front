@@ -27,15 +27,21 @@ const RegisterPage = () => {
     // Estado Global
     const { loading, error, user } = useSelector((state) => state.auth);
 
-    // Redirección
+    // 3. Redirección y Limpieza (Separados para evitar doble disparo)
+
+    //Solo redirige si el usuario se registra/loguea exitosamente
     useEffect(() => {
         if (user) {
             navigate('/');
         }
+    }, [user, navigate]);
+
+    // Solo limpia los errores cuando sales de la página (Unmount)
+    useEffect(() => {
         return () => {
             dispatch(clearError());
         }
-    }, [user, navigate, dispatch]);
+    }, [dispatch]);
 
     // Lógica para contraseña
     const calculateStrength = (password) => {
