@@ -5,23 +5,6 @@ const BASE_URL = 'http://localhost:4002';
 
 //THUNKS (Acciones Asíncronas)
 
-// Fetch de órdenes del usuario logueado (Para ProfilePage)
-export const fetchUserOrders = createAsyncThunk(
-    'orders/fetchUserOrders',
-    async (_, { getState, rejectWithValue }) => {
-        const token = getState().auth.token;
-        
-        if (!token) return rejectWithValue("No hay token de autenticación");
-
-        const response = await axios.get(`${BASE_URL}/users/orders`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        const data = response.data;
-        return Array.isArray(data) ? data : (data.content || []); 
-    }
-);
-
 // Fetch de TODAS las órdenes (Para AdminOrdersPage)
 export const fetchAllOrders = createAsyncThunk(
     'orders/fetchAll',
@@ -54,8 +37,7 @@ export const createOrder = createAsyncThunk(
 const ordersSlice = createSlice({
     name: 'orders',
     initialState: {
-        myOrders: [],      
-        adminOrders: [],   
+        adminOrders: [],
         currentOrder: null,
         status: 'idle',    
         error: null
@@ -70,20 +52,6 @@ const ordersSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // --- Fetch User Orders ---
-            .addCase(fetchUserOrders.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchUserOrders.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.myOrders = action.payload;
-            })
-            .addCase(fetchUserOrders.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-
             // --- Fetch All Orders (Admin) ---
             .addCase(fetchAllOrders.pending, (state) => {
                 state.status = 'loading';
@@ -104,7 +72,6 @@ const ordersSlice = createSlice({
             .addCase(createOrder.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.currentOrder = action.payload;
-                state.myOrders.push(action.payload);
             })
             .addCase(createOrder.rejected, (state, action) => {
                 state.status = 'failed';

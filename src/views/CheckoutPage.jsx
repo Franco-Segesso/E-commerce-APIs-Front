@@ -40,8 +40,10 @@ const CheckoutPage = () => {
   
     // Cargar el perfil del usuario al entrar para tener su ID disponible
     useEffect(() => {
-        dispatch(fetchUserProfile());
-    }, [dispatch]);
+        if (!userProfile){
+            dispatch(fetchUserProfile());
+        }
+    }, [dispatch, userProfile]);
 
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
