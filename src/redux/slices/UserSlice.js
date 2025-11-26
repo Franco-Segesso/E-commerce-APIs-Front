@@ -146,6 +146,7 @@ const userSlice = createSlice({
                  state.list = [];
                  state.error = null;
                  state.operationStatus = null;
+                 state.orderStatus = 'idle';
              });
     }
 });
